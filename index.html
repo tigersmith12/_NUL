@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="NUL is a local, non-LLM artificial-life experiment in autonomous concept formation." />
+  <meta name="description" content="NUL is a local, non-LLM artificial-life experiment in autonomous world-definition and causal agency." />
   <title>NUL — A world before meaning</title>
   <link rel="stylesheet" href="src/styles.css" />
 </head>
@@ -16,9 +16,9 @@
           <circle cx="16" cy="16" r="3" fill="currentColor" />
           <path d="M16 0v7M16 25v7M0 16h7M25 16h7" stroke="currentColor" stroke-width=".8" />
         </svg>
-        <div><div class="brand-name">NUL</div><div class="brand-sub">Autonomous ontology lab · <span id="brand-version">v0.01.003</span></div></div>
+        <div><div class="brand-name">NUL</div><div class="brand-sub">Autonomous ontology lab · <span id="brand-version">v0.02.001</span></div></div>
       </div>
-      <div class="top-status"><span class="status-dot"></span>Symbolic system · 0 model calls · offline</div>
+      <div class="top-status"><span class="status-dot"></span>Symbolic &amp; causal system · 0 model calls · offline</div>
       <div class="top-actions">
         <button class="text-button" id="method-button">Method</button>
         <button class="text-button" id="save-button">Saves</button>
@@ -35,12 +35,12 @@
     <main>
       <section class="intro">
         <div>
-          <div class="eyebrow">Experiment 001 / Symbolic artificial life</div>
+          <div class="eyebrow">Experiment 002 / Agent-defined world &amp; causal bootstrapping</div>
           <h1>A world before <em>meaning.</em></h1>
-          <p class="intro-copy">One agent receives unnamed sensations. It must invent symbols, group recurring patterns, form preferences, and author a world of its own. You can observe its mind, but you cannot teach it what anything means.</p>
+          <p class="intro-copy">No pre-built objects, food pellets, or preset verbs exist here—only a continuous 4-channel numerical medium. One embodied agent segments boundaries, crystallizes its own motor operators, sculpts persistent structures on the canvas, and defines meaning with or without an ontology.</p>
         </div>
         <div class="constraints" aria-label="System constraints">
-          <span class="constraint">No LLM</span><span class="constraint">No training data</span><span class="constraint">No preset lexicon</span>
+          <span class="constraint">No LLM</span><span class="constraint">No preset objects</span><span class="constraint">Optional ontology</span>
         </div>
       </section>
 
@@ -48,24 +48,31 @@
         <div class="left-column">
           <section class="panel world-panel" aria-label="World simulation">
             <div class="companion-bar">
-              <span class="companion-pulse"></span><span class="companion-word" id="companion-version-title" title="NUL v0.01.003· BOOTSTRAP/0.1">NUL</span><span class="companion-agent" id="companion-agent-name">unnamed</span>
+              <span class="companion-pulse"></span><span class="companion-word" id="companion-version-title" title="NUL v0.02.001· SUBSTRATE/0.2">NUL</span><span class="companion-agent" id="companion-agent-name">unnamed</span>
               <span class="companion-spacer"></span>
               <button class="desktop-api-only" id="companion-pin" title="Toggle always-on-top">Pin</button>
               <button id="companion-expand" title="Return to the full lab">Lab</button>
               <button class="desktop-api-only" id="companion-hide" title="Hide to tray">×</button>
             </div>
             <div class="panel-header">
-              <div class="panel-title"><span class="index">01</span> Unlabelled world</div>
-              <div class="run-state" id="run-state"><span class="status-dot"></span><span id="run-label">Running</span></div>
+              <div class="panel-title"><span class="index">01</span> Continuous medium</div>
+              <div class="panel-right-controls">
+                <div class="lens-modes" aria-label="Canvas lens">
+                  <button class="lens-mode active" data-lens="combined" title="Faint raw medium + agent-authored contours &amp; structures">Combined</button>
+                  <button class="lens-mode" data-lens="agent" title="Pure dark void; only what the agent has sensed, segmented, or built">Agent</button>
+                  <button class="lens-mode" data-lens="medium" title="Observer view of the raw 4-channel numerical field">Medium</button>
+                </div>
+                <div class="run-state" id="run-state"><span class="status-dot"></span><span id="run-label">Running</span></div>
+              </div>
             </div>
             <div class="canvas-wrap" id="canvas-wrap">
-              <canvas id="world" aria-label="A dark world containing one autonomous agent and unlabelled perturbations"></canvas>
-              <div class="world-readout"><span>T+<b id="world-time">00000</b></span><span>EVENTS <b id="event-count">00</b></span><button type="button" class="seed-badge" id="seed-badge" title="Enter or copy world seed">SEED <b id="seed-readout">—</b></button></div>
-              <button class="perturb-button" id="perturb-button" title="Add an unlabelled sensory event (N)">+ Perturb world</button>
+              <canvas id="world" aria-label="Continuous 4-channel numerical medium shaped and segmented by one autonomous agent"></canvas>
+              <div class="world-readout"><span>T+<b id="world-time">00000</b></span><span>LOCI <b id="event-count">00</b></span><button type="button" class="seed-badge" id="seed-badge" title="Enter or copy world seed">SEED <b id="seed-readout">—</b></button></div>
+              <button class="perturb-button" id="perturb-button" title="Inject an unlabelled 4-channel wavepacket (N)">+ Perturb medium</button>
               <div class="empty-state" id="empty-state">
                 <div class="empty-orbit"></div>
-                <div class="empty-title">Nothing has a name. Yet.</div>
-                <div class="empty-copy">The first sensation will arrive without an explanation.</div>
+                <div class="empty-title">Nothing has a boundary. Yet.</div>
+                <div class="empty-copy">The agent must segment raw numbers into contours and actions of its own.</div>
               </div>
               <div class="entity-inspector" id="entity-inspector" hidden aria-live="polite">
                 <div class="inspector-head">
@@ -79,7 +86,7 @@
                 <div class="inspector-meta" id="inspector-meta"></div>
                 <div class="inspector-note">Observer view only · zero effect on agent state</div>
               </div>
-              <div class="canvas-foot">Observer rendering · click entity to inspect · click empty space or N to perturb</div>
+              <div class="canvas-foot">L: switch lens · click contour/structure to inspect · click empty medium or N to perturb</div>
             </div>
             <div class="controls">
               <button class="control-button primary" id="play-button">Pause</button>
@@ -91,7 +98,7 @@
                 <button class="speed-button" data-speed="8">8×</button>
               </div>
               <div class="control-spacer"></div>
-              <span class="seed-label">APP <b id="controls-version">v0.01.003</b> · RULESET <b>BOOTSTRAP/0.1</b></span>
+              <span class="seed-label">APP <b id="controls-version">v0.02.001</b> · RULESET <b>SUBSTRATE/0.2</b></span>
               <button class="control-button" id="reset-button">Reset</button>
             </div>
           </section>
@@ -117,7 +124,7 @@
             <div>
               <div class="identity-label">Persistent agent</div>
               <div class="identity-name" id="identity-name">unnamed</div>
-              <div class="identity-sub" id="identity-sub">No self-symbol has formed</div>
+              <div class="identity-sub" id="identity-sub">Pre-symbolic · gathering causal traces</div>
             </div>
           </div>
           <div class="stats">
@@ -125,6 +132,14 @@
             <div class="stat"><div class="stat-value" id="stat-memories">0</div><div class="stat-label">Memories</div></div>
             <div class="stat"><div class="stat-value" id="stat-laws">0</div><div class="stat-label">Beliefs</div></div>
             <div class="stat"><div class="stat-value" id="stat-artifacts">0</div><div class="stat-label">Creations</div></div>
+          </div>
+          <div class="ont-mode-bar" aria-label="Ontology mode">
+            <span class="ont-mode-label">Ontology</span>
+            <div class="ont-modes">
+              <button class="ont-mode active" data-ontmode="emergent" title="Starts ontology-free; coins symbols only when causal trace pressure builds">Emergent</button>
+              <button class="ont-mode" data-ontmode="none" title="Strictly ontology-free forever; operates purely via causal deltas, macros &amp; canvas marks">None</button>
+              <button class="ont-mode" data-ontmode="imported" title="Test &amp; falsify an imported ontology against this seed's medium">Imported</button>
+            </div>
           </div>
           <nav class="tabs" aria-label="Mind sections">
             <button class="tab active" data-tab="mind">Mind</button>
@@ -134,23 +149,34 @@
           <div class="tab-content">
             <div class="tab-pane" id="pane-mind">
               <div class="section-kicker">Current intent / self-selected</div>
-              <div class="intent-card"><div class="intent-raw" id="intent-raw">·</div><div class="intent-description" id="intent-description">No preference has formed. The agent is only capable of noticing.</div></div>
+              <div class="intent-card"><div class="intent-raw" id="intent-raw">·</div><div class="intent-description" id="intent-description">Sampling local 4-channel gradients before forming first purpose seed.</div></div>
+              <div class="section-kicker">Causal cycle / Purpose → Critic → Δ Evaluation</div>
+              <div class="causal-card" id="causal-cycle-card">
+                <div class="causal-head">
+                  <span id="causal-drive">drive: initializing</span>
+                  <span class="causal-badge" id="causal-acc">acc —</span>
+                </div>
+                <div class="causal-meta" id="causal-meta">Awaiting first 8-tick motor coupling episode.</div>
+                <div class="causal-deltas" id="causal-deltas">pred Δ [ · ]<br>real Δ [ · ]</div>
+              </div>
               <div class="section-kicker">Internal state / observer measurements</div>
-              <div class="drive"><div class="drive-head"><span>Energy</span><span id="energy-value">72%</span></div><div class="bar energy"><i id="energy-bar"></i></div></div>
-              <div class="drive"><div class="drive-head"><span>Novelty pull</span><span id="novelty-value">—</span></div><div class="bar"><i id="novelty-bar"></i></div></div>
-              <div class="drive"><div class="drive-head"><span>Model coherence</span><span id="coherence-value">0%</span></div><div class="bar"><i id="coherence-bar"></i></div></div>
-              <p class="observer-note">These labels belong to the observer, not the agent. They expose numerical state; they do not supply meanings or instructions.</p>
-              <div class="section-kicker" style="margin-top:20px">Recent episodic memory</div>
+              <div class="drive"><div class="drive-head"><span>Viability</span><span id="energy-value">72%</span></div><div class="bar energy"><i id="energy-bar"></i></div></div>
+              <div class="drive"><div class="drive-head"><span>Exploration pull</span><span id="novelty-value">—</span></div><div class="bar"><i id="novelty-bar"></i></div></div>
+              <div class="drive"><div class="drive-head"><span>Causal coherence</span><span id="coherence-value">0%</span></div><div class="bar"><i id="coherence-bar"></i></div></div>
+              <p class="observer-note">Observer labels expose numerical state; they supply zero meanings, categories, or instructions to the agent.</p>
+              <div class="section-kicker" style="margin-top:20px">Recent causal episodes</div>
               <div class="memory-list" id="memory-list"><div class="empty-panel">No episodes have been stored.</div></div>
             </div>
             <div class="tab-pane" id="pane-lexicon" hidden>
-              <div class="section-kicker">Self-generated symbol table</div>
+              <div class="section-kicker">Self-generated causal symbol table</div>
               <div class="concept-list" id="concept-list"></div>
             </div>
             <div class="tab-pane" id="pane-laws" hidden>
-              <div class="section-kicker">Inferred regularities</div>
+              <div class="section-kicker">Discovered motor operators (self-crystallized verbs)</div>
+              <div class="macro-list" id="macro-list"></div>
+              <div class="section-kicker">Inferred &amp; critic-tested causal regularities</div>
               <div class="law-list" id="law-list"></div>
-              <div class="section-kicker">Authored artifacts</div>
+              <div class="section-kicker">Sculpted canvas structures</div>
               <div class="artifact-list" id="artifact-list"></div>
             </div>
           </div>
@@ -159,7 +185,7 @@
             <div class="ontology-actions">
               <button class="export-button" id="import-ontology-button" title="Import an exported ontology into this world">Import ontology ↙</button>
               <span class="ontology-divider" aria-hidden="true">·</span>
-              <button class="export-button" id="export-button" title="Download the agent's concepts, beliefs, and symbols as JSON">Export ontology ↗</button>
+              <button class="export-button" id="export-button" title="Download the agent's concepts, operators, beliefs, and symbols as JSON">Export ontology ↗</button>
               <input type="file" id="import-ontology-file" accept="application/json,.json" hidden />
             </div>
           </div>
@@ -167,36 +193,30 @@
       </section>
 
       <section class="bootstrap" aria-label="Bootstrap boundary">
-        <div class="bootstrap-card"><div class="bootstrap-label">Given by design</div><div class="bootstrap-items"><span>time</span><span>a body</span><span>4-number sensations</span><span>memory</span><span>energy</span><span>move / attend / combine</span></div></div>
-        <div class="bootstrap-card"><div class="bootstrap-label">Not given</div><div class="bootstrap-items"><span>object names</span><span>categories</span><span>a dictionary</span><span>semantic values</span><span>world laws</span><span>a final objective</span></div></div>
+        <div class="bootstrap-card"><div class="bootstrap-label">Given by design</div><div class="bootstrap-items"><span>time</span><span>4D continuous medium</span><span>homeostasis</span><span>raw 6D motor coupling</span><span>causal delta traces</span><span>critic gate</span></div></div>
+        <div class="bootstrap-card"><div class="bootstrap-label">Not given</div><div class="bootstrap-items"><span>discrete objects</span><span>food pellets</span><span>action verbs</span><span>categories</span><span>a mandatory ontology</span><span>a final objective</span></div></div>
       </section>
-      <footer class="footer"><span>NUL <span id="footer-version">v0.01.003</span> / bootstrap 0.1 / deterministic seeded simulation</span><span>Space: pause · N: perturb · Ctrl/⌘+Shift+C: companion · Not a consciousness claim</span></footer>
+      <footer class="footer"><span>NUL <span id="footer-version">v0.02.001</span> / substrate 0.2 / deterministic seeded simulation</span><span>Space: pause · N: perturb · L: lens · Ctrl/⌘+Shift+C: companion · Not a consciousness claim</span></footer>
     </main>
   </div>
 
   <dialog id="method-dialog">
-    <div class="method-head"><h2>What is—and is not—emergent?</h2><button class="close-button" id="close-method" aria-label="Close method">×</button></div>
+    <div class="method-head"><h2>What is—and is not—emergent in SUBSTRATE/0.2?</h2><button class="close-button" id="close-method" aria-label="Close method">×</button></div>
     <div class="method-body">
       <h3>The honest boundary</h3>
-      <p>NUL is a <strong>non-LLM artificial-life simulation</strong>. It uses a seeded random generator, hand-written rules, vector similarity, episodic memory, and a symbolic grammar. It does not call an AI service, load a model, or use training data.</p>
-      <p>“Nothing” means <em>no predefined semantic ontology</em>: no object names, taxonomy, dictionary, labelled concepts, or final task. It cannot mean no implementation. A process without any mechanism would not run.</p>
-      <h3>The minimal bootstrap</h3>
+      <p>NUL is a <strong>non-LLM artificial-life simulation</strong>. It uses a seeded random generator, a continuous 4-channel reaction-diffusion/wave medium, causal delta traces, an internal critic gate, and optional symbolic compression. It does not call an AI service, load a model, or use training data.</p>
+      <h3>Zero pre-defined objects or verbs</h3>
       <ul>
-        <li>The world emits recurrent, unlabelled four-number patterns. Some patterns affect energy when contacted.</li>
-        <li>The agent groups similar sensations into prototypes and generates a unique glyph and phonetic symbol for each cluster.</li>
-        <li>Contact outcomes alter the valence attached to its own symbols. Those associations influence which pattern it attends to next.</li>
-        <li>Sequential memories become candidate regularities. Repeated transitions increase confidence; these are fallible beliefs, not necessarily true laws.</li>
-        <li>A built-in combine operator lets the agent join two of its concepts. It invents the artifact’s symbol and name; the engine merely executes the operator.</li>
+        <li><strong>No objects or food pellets:</strong> The world is solely a <code>32×20×4</code> numerical grid Φ(x,y,t) governed by a seed-derived conservative skew-symmetric coupling matrix and a sorted fast-to-plastic timescale spectrum.</li>
+        <li><strong>Agent-defined boundaries:</strong> Coherent contours on the canvas (<em>loci</em>) exist because the agent segmented local gradients into regions of interest.</li>
+        <li><strong>Self-crystallized operators:</strong> At the hardware level the agent only outputs continuous velocity and 4-channel field coupling. Repeatable gestures that produce reliable physical deltas crystallize into reusable motor operators (<code>μ01</code>, <code>μ02</code>, …).</li>
+        <li><strong>Habitat sculpting beyond energy:</strong> Slow plastic channels retain concentrated imprints, letting the agent carve calm shelters, waveguides, and persistent anchors that refract waves and sustain homeostatic viability without consuming disappearing items.</li>
       </ul>
-      <h3>Language</h3>
-      <p>The green transcript is the agent’s local symbol stream. The gray text is an <strong>observer translation supplied by the program</strong>. Roman-letter names are a display convenience; the underlying concepts are numerical prototypes. Generated glyphs are the agent’s more native notation.</p>
-      <h3>What drives it?</h3>
-      <p>Energy regulation, novelty-weighted attention, similarity clustering, and action selection are engineered. The particular concepts, names, preferences, inferred relationships, artifacts, and sequence of intents are produced during the run. There is no hidden list of objects waiting to be unlocked.</p>
-      <h3>Persistence &amp; ontology portability</h3>
-      <p>The complete world autosaves to browser-local storage every 120 ticks, on pause, and when the page closes. <strong>Saves</strong> provides manual restoration and portable JSON snapshots. Snapshots include the PRNG position and active world state, so imported runs continue deterministically. <strong>Export / Import ontology</strong> transfers the agent’s learned prototypes, symbols, beliefs, and operators into any world seed without overwriting the world’s physics or PRNG.</p>
-      <h3>A note on early AI</h3>
-      <p>Logic Theorist (1956), General Problem Solver (1959), and ELIZA (1966) demonstrated remarkable symbolic methods in constrained settings. They generally manipulated representations supplied by their authors; they did not autonomously define an open-ended world from raw experience. NUL borrows the transparent, local, symbolic spirit without claiming to reproduce those systems.</p>
-      <div class="method-callout">This is an experiment in representation and agency, not evidence of consciousness, understanding, or general intelligence. Export the ontology to inspect the actual state rather than trusting the narrative alone.</div>
+      <h3>Meaning with and without an ontology</h3>
+      <p>Every 8-tick cycle forms a self-selected <strong>PurposeSeed</strong>, deliberates across candidate traces/operators through an internal <strong>Critic</strong>, executes on the medium, and evaluates <code>predicted_delta</code> vs. <code>actual_delta</code>. Switch between <strong>Emergent</strong> (starts ontology-free and coins symbols only under trace compression pressure), <strong>None</strong> (strictly ontology-free forever), and <strong>Imported</strong> (tests transplanted beliefs against a new seed’s physics and falsifies broken ones).</p>
+      <h3>Canvas lenses</h3>
+      <p>Toggle <strong>Combined</strong>, <strong>Agent</strong> (pure black void except what the agent itself has sensed, segmented, or built), and <strong>Medium</strong> (raw observer 4-channel field) at any time without affecting the simulation.</p>
+      <div class="method-callout">This is an experiment in world-definition, causal agency, and representation—not evidence of consciousness or general intelligence. Export the ontology or snapshot to inspect exact numerical state.</div>
     </div>
   </dialog>
 
@@ -204,33 +224,33 @@
     <div class="method-head"><h2>Persistent world data</h2><button class="close-button" id="close-save" aria-label="Close saves">×</button></div>
     <div class="method-body">
       <h3>Browser autosave</h3>
-      <p>The current world is saved in this browser every 120 simulation ticks, whenever you pause, and when the page closes. Reloading resumes the latest saved state.</p>
+      <p>The current world—including the lossless 32-bit continuous medium—is saved in this browser every 120 ticks, whenever you pause, and when the page closes.</p>
       <div class="save-summary" id="save-summary">Checking browser storage…</div>
       <div class="data-actions">
         <button class="control-button primary" id="save-now-button">Save now</button>
         <button class="control-button" id="restore-button">Restore autosave</button>
       </div>
       <h3>Portable snapshot (complete world)</h3>
-      <p>Download a complete, resumable world—including its random-generator state—or import one later to resume deterministically.</p>
+      <p>Download a complete, resumable world—including lossless IEEE-754 field state and PRNG position—or import one later to resume deterministically.</p>
       <div class="data-actions">
         <button class="control-button" id="download-snapshot-button">Download world snapshot</button>
         <button class="control-button" id="import-snapshot-button">Import snapshot</button>
         <input type="file" id="import-file" accept="application/json,.json" hidden />
       </div>
-      <h3>Portable ontology (agent mind)</h3>
-      <p>Export or transplant the agent’s learned concepts, glyphs, valences, sequence beliefs, and operators into the current world without replacing its seed or PRNG.</p>
+      <h3>Portable ontology (agent mind &amp; operators)</h3>
+      <p>Export or transplant the agent’s learned causal concepts, motor operators, glyphs, and sequence beliefs into the current world seed (compatible with both <code>v0.01</code> and <code>v0.02</code> ontology JSON files).</p>
       <div class="data-actions">
         <button class="control-button" id="save-export-ontology-button">Export ontology</button>
         <button class="control-button" id="save-import-ontology-button">Import ontology</button>
       </div>
       <h3>Deterministic world seed</h3>
-      <p>Replay or share a specific initial world by entering an integer seed (<code>1</code>–<code>2147483647</code>).</p>
+      <p>Replay or share a specific initial medium and physics kernel by entering an integer seed (<code>1</code>–<code>2147483647</code>).</p>
       <div class="seed-row">
         <input type="number" class="seed-input" id="seed-input" min="1" max="2147483647" step="1" aria-label="World seed" />
         <button class="control-button" id="apply-seed-button">Load seed</button>
         <button class="control-button" id="copy-seed-button">Copy seed</button>
       </div>
-      <div class="method-callout">Browser storage is local to this browser and site. Clearing site data removes the autosave, and it does not synchronize across devices. Keep a downloaded snapshot for a durable backup. If storage is blocked by an embedded preview, use snapshots instead.</div>
+      <div class="method-callout">Browser storage is local to this browser and site. Keep a downloaded snapshot for a durable backup. If storage is blocked by an embedded preview, use snapshots instead.</div>
     </div>
   </dialog>
   <div class="toast" id="toast"></div>
