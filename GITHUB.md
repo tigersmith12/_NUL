@@ -48,9 +48,10 @@ NUL tracks three distinct version numbers, and maps the padded display version c
 
 | Identifier | Current Value | Where It Lives | Purpose |
 | --- | --- | --- | --- |
-| **App / PR version** | `v0.01.002` (`0.1.2` in `package.json`) | `index.html` (`APP_VERSION = '0.01.002'`, header, controls, footer), `package.json` (`"0.1.2"`), PR titles, Git tags | Tracks the `<M>.<MM>.<PPP>` release line and sequential PR number (`0.1.2` ↔ `v0.01.002` keeps `npm`/`electron-builder` SemVer valid without leading-zero errors) |
-| **Simulation ruleset** | `BOOTSTRAP/0.1` | `index.html` (`RULESET_VERSION`, controls bar, footer, ontology exports) | Changes **only** when deterministic world/agent simulation mechanics change |
-| **Snapshot schema** | `1` (`nul-resumable-world`) | `index.html` (`SAVE_VERSION = 1`, `STORAGE_KEY = 'nul.world.autosave.v1'`) | Changes **only** on breaking saved-world JSON schema updates |
+| **App / PR version** | `v0.01.003` (`0.1.3` in `package.json`) | `src/engine.js` (`APP_VERSION = '0.01.003'`), `index.html` (header, controls, footer), `package.json` (`"0.1.3"`), PR titles, Git tags | Tracks the `<M>.<MM>.<PPP>` release line and sequential PR number (`0.1.3` ↔ `v0.01.003` keeps `npm`/`electron-builder` SemVer valid without leading-zero errors) |
+| **Simulation ruleset** | `BOOTSTRAP/0.1` | `src/engine.js` (`RULESET_VERSION`), `index.html` (controls bar, footer), ontology exports | Changes **only** when deterministic world/agent simulation mechanics change |
+| **Snapshot schema** | `1` (`nul-resumable-world`) | `src/engine.js` (`SAVE_VERSION = 1`, `STORAGE_KEY = 'nul.world.autosave.v1'`) | Changes **only** on breaking saved-world JSON schema updates |
+| **Ontology schema** | `1` (`nul-ontology`) | `src/engine.js` (`ONTOLOGY_FORMAT = 'nul-ontology'`, `ONTOLOGY_VERSION = 1`) | Portable agent-mind JSON schema for `Export ontology` / `Import ontology` (backward-compatible with `v0.01.002` exports) |
 
 ---
 

@@ -34,22 +34,29 @@ This is an experiment in **semantic bootstrapping**, not a consciousness or AGI 
 
 | Path | Purpose |
 | --- | --- |
-| `index.html` | Complete browser app: UI, CSS, canvas renderer, simulation, persistence, companion layout, and browser fallbacks |
+| `index.html` | Semantic browser/desktop shell loading `src/styles.css`, `src/engine.js`, and `src/app.js` (works over `file://`, HTTP, and Electron) |
+| `src/engine.js` | Pure zero-dependency, DOM-free deterministic simulation, snapshot persistence, and `nul-ontology` export/validate/import core (`globalThis.NULCore` + CommonJS export) |
+| `src/app.js` | Browser & Electron UI controller, Canvas 2D renderer (with cached `monoFont`), sticky Lab/Companion modes (`?mode=companion` supported), autosave, and `window.__NUL_LAB__` hook |
+| `src/styles.css` | Stylesheet with sticky Lab `.topbar`, sticky `.mind-panel`, sticky `<dialog>` headers, `100dvh` iframe viewport rules, and Companion layout |
 | `desktop/main.cjs` | Electron lifecycle, single BrowserWindow, companion/lab switching, tray, pinning, window state, native JSON save dialogs, low-memory mode |
 | `desktop/preload.cjs` | Context-isolated IPC bridge exposed as `window.nulDesktop` |
 | `assets/icon.png` | Generated 512×512 application/tray icon |
-| `package.json` | Node engine, Electron scripts, electron-builder targets, app metadata |
+| `package.json` | Node engine, Electron scripts, `world:inspect` CLI, electron-builder targets (`src/**/*` included), app metadata |
 | `package-lock.json` | Locked development/build dependencies |
-| `scripts/check-naming.mjs` | Zero-dependency validator & version sync utility (`v<M>.<MM>.xxx` branches ↔ `v<M>.<MM>.<PPP>` PRs ↔ SemVer `package.json`) |
-| `scripts/headless-harness.mjs` | Zero-dependency Node `vm` harness executing `index.html`'s exact inline simulation engine |
+| `scripts/check-naming.mjs` | Zero-dependency validator & version sync utility (`v<M>.<MM>.xxx` branches ↔ `v<M>.<MM>.<PPP>` PRs ↔ SemVer `package.json` & `src/engine.js`) |
+| `scripts/headless-harness.mjs` | Zero-dependency Node `vm` UI/DOM harness executing `src/engine.js` + `src/app.js` |
 | `scripts/sandbox-server.mjs` | Zero-dependency `0.0.0.0` HTTP preview server (`npm run start:sandbox`) |
-| `scripts/companion-tui.mjs` | Single-process `< 65 MB` PSS terminal companion sharing `nul-resumable-world` `v1` saves (`npm run start:tui`) |
+| `scripts/companion-tui.mjs` | Single-process `< 50 MB` PSS terminal companion importing `src/engine.js` directly (`--save`, `--import-ontology`, `--export-ontology`) |
+| `scripts/inspect-world.mjs` | Fast CLI world runner & ontology inspector (`npm run world:inspect`) |
 | `scripts/measure-memory.mjs` | Live PSS/RSS & 100,000-tick soak budget profiler (`npm run bench:memory`) |
+| `scripts/binaries-mirror.mjs` | Syncs GitHub Release desktop binaries into a standalone binaries branch (`binaries/v0.01`) without bloating source history |
 | `scripts/generate-checksums.mjs` | Cross-platform `dist/SHA256SUMS.txt` generator for desktop builds |
 | `scripts/verify-dist.mjs` | Cross-platform built binary & checksum verifier (`win` / `mac` / `linux`) |
 | `tests/naming.test.mjs` | `node:test` suite for branch/PR/tag rules, version sync, and JS syntax integrity |
+| `tests/ontology.test.mjs` | `node:test` suite for `exportOntology` / `importOntology` cross-seed transplants, PRNG non-perturbation, legacy `v0.01.002` compatibility, and malformed/snapshot rejection |
 | `tests/simulation.test.mjs` | `node:test` suite for seed determinism, snapshot round-trips, viewport scaling, malformed import rejection, blocked storage, and canvas inspection |
 | `tests/soak.test.mjs` | `node:test` suite for reload deduplication and 100,000-tick entity/name/snapshot bounds |
+| `tests/ui-layout.test.mjs` | `node:test` suite for sticky `.topbar`/`.mind-panel`/dialog headers, `100dvh` iframe rules, `?mode=companion`, asset packaging parity, and `world:inspect` CLI |
 | `.github/workflows/desktop-builds.yml` | Native Windows/macOS/Linux build matrix with pre-build test gate, checksum generation, and artifact verification |
 | `.github/workflows/branch-naming.yml` | Fast CI check validating branch names, `[vX.Y.Z] <type>: ...` PR titles, tags, and version sync |
 | `.github/pull_request_template.md` | Pull request checklist & `[vX.Y.Z] <type>: <summary>` title guide |
@@ -93,10 +100,10 @@ Window state is stored as `window-state.json` under Electron’s `userData` dire
 
 ## 5. Persistence design
 
-There are two distinct exports:
+There are two distinct portable formats:
 
-1. **Resumable world snapshots** contain the full simulation and PRNG state.
-2. **Ontology exports** are readable summaries of the agent’s mind and are not resumable saves.
+1. **Resumable world snapshots (`nul-resumable-world` `v1`)** contain the full simulation, viewport, active entities, and PRNG state.
+2. **Portable ontologies (`nul-ontology` `v1`)** export and import the agent’s learned mind (`concepts`, `beliefs`, `relationCounts`, `generatedOperators`, `selfSymbol`, `selfGlyph`) into any world seed without overwriting the destination world’s seed or consuming PRNG state (also backward-compatible with `v0.01.002` ontology exports).
 
 Autosave details:
 
@@ -173,36 +180,36 @@ Measurements on Linux (`smaps_rollup` PSS + V8 heap):
 
 | Configuration | Companion baseline | Evolved world | 100,000-tick soak |
 | --- | ---: | ---: | ---: |
-| Single-process TUI / Node (`npm run start:tui` / `start:sandbox`) | ~36–48 MB PSS | ~52–60 MB PSS | ~63 MB PSS |
+| Single-process TUI / Pure Engine (`npm run start:tui` / `bench:memory`) | ~28.6 MB PSS | ~27.6 MB PSS | ~46.7 MB PSS |
+| Local HTTP Preview Server (`npm run start:sandbox`) | ~53.6 MB RSS | — | — |
 | Electron `--low-memory` | ~259 MB PSS | ~284 MB PSS | — |
 | Standard Electron | ~307 MB PSS | ~335 MB PSS | — |
 
-- Simulation data is strictly bounded (`<= 8` concepts, `<= 100` memories, `<= 24` active world artifacts, `<= 33` active symbols in `usedNames`, `<= 70` logs, ~5.6 MB JS heap, ~49 KB JSON snapshot at 100,000 ticks).
-- **Conclusion:** Electron's multi-process Chromium runtime dominates desktop package RAM and still exceeds a strict 256 MB total ceiling, while `npm run start:tui` (and opening `index.html` in an existing browser or via `npm run start:sandbox`) runs in ~36–63 MB PSS using the exact same `nul-resumable-world` `v1` saves.
+- Simulation data is strictly bounded (`<= 8` concepts, `<= 100` memories, `<= 24` active world artifacts, `<= 33` active symbols in `usedNames`, `<= 70` logs, ~4.5 MB JS heap, ~49 KB JSON snapshot at 100,000 ticks, executing 100k ticks in ~0.6s).
+- **Conclusion:** Electron's multi-process Chromium runtime dominates desktop package RAM and still exceeds a strict 256 MB total ceiling, while `npm run start:tui` (and opening `index.html` in an existing browser or via `npm run start:sandbox`) runs in ~28.6–46.7 MB PSS using the exact same `nul-resumable-world` `v1` saves and `nul-ontology` `v1` mind files.
 
 ## 8. Validation completed & committed (`npm test`)
 
-Committed automated regression suites (`tests/naming.test.mjs`, `tests/simulation.test.mjs`, `tests/soak.test.mjs` — 14 tests via `npm test`):
+Committed automated regression suites (`tests/naming.test.mjs`, `tests/ontology.test.mjs`, `tests/simulation.test.mjs`, `tests/soak.test.mjs`, `tests/ui-layout.test.mjs` — 22 tests via `npm test`):
 
 - Deterministic replay: identical seed (`424242`) reproduces bit-for-bit identical world state at T+01500
 - Exact snapshot round-trip: `createSnapshot` → `restoreSnapshot` + 1 tick and + 120 ticks reproduces exact PRNG and agent state
+- Cross-seed ontology round-trip: `exportOntology` → `importOntology` transplants concepts, glyphs, valences, sequence beliefs, and operators without altering destination PRNG, supports legacy `v0.01.002` exports, and rejects malformed payloads or full snapshots safely
+- Sticky Lab UI & iframe readiness: sticky `.topbar`, sticky `.mind-panel`, sticky `<dialog>` headers, `100dvh` sizing, `?mode=companion` query boot, and asset parity across `index.html`, `package.json`, and `sandbox-server.mjs`
 - Proportional coordinate scaling when restoring snapshots across different viewport dimensions
 - Malformed/corrupt snapshot rejection without mutating the active world
 - Blocked `localStorage` fallback without runtime errors
 - Non-perturbing canvas entity inspection (zero PRNG calls or world mutations) and custom numeric seed loading
 - Reload artifact deduplication across repeated save/restore cycles
 - 100,000-tick (~2.3h at 1×) soak test proving all collections, `usedNames`, and snapshot bytes stay bounded
-- Live memory budget check (`npm run bench:memory`) verifying single-process PSS stays well below 200 MB (< 256 MB ceiling)
+- Live memory budget check (`npm run bench:memory`) verifying single-process PSS (~28.6–46.7 MB) stays well below 200 MB (< 256 MB ceiling)
 
-## 9. Known limitations and risks
+## 9. Known limitations and next-generation roadmap (`v0.02.xxx`)
 
-- **The 256 MB RAM requirement is not met by Electron.**
-- No final signed installer has been attached for end users.
-- The cross-platform workflow is configured but has not been executed in this session.
-- No code-signing or notarization credentials are configured.
-- No committed automated regression or memory-budget test suite exists yet.
-- No long-duration soak test or strict artifact/entity memory cap has been established.
+- **The 256 MB RAM requirement is not met by Electron** (use `npm run start:tui`, browser `index.html`, or a future native WebView/Canvas shell when a hard `< 256 MB` standalone desktop binary is needed).
+- Cross-platform unsigned Windows (`.exe`), macOS (`.dmg` / `.zip`), and Linux (`.AppImage`) builds are published via GitHub Actions on `v*` tags; no commercial code-signing or Apple notarization certificates are configured yet.
 - Browser autosave is origin/profile specific and is not cloud backup.
+- In `BOOTSTRAP/0.1` (`v0.01.xxx`), world interactions are still constrained to consuming signals (`±energy`) and combining concept pairs into decorative artifacts on an observer-drawn grid. The planned **`v0.02.xxx` (`SUBSTRATE/0.2`)** line removes that ceiling: agent-authored canvas geometry/substrates, unconstrained physical operators beyond eating (`probe`, `modulate`, `carry`, `bind/catalyze`, `inscribe/anchor`), self-authored `PurposeSeed` + counterfactual `Evaluation` loops, and decoupled ontology modes (`OFF` / `EMERGENT` / `SYMBOLIC`).
 - The agent is a constrained symbolic/statistical simulation, not evidence of understanding, consciousness, or general intelligence.
 
 ## 10. Recommended next decisions

@@ -78,27 +78,29 @@ NUL supports two complementary formats:
 - **Browser autosave** — the complete resumable world is written to `localStorage` under `nul.world.autosave.v1` every 120 simulation ticks, when paused, after a manual perturbation, and when the page closes. Startup automatically restores it. This storage is specific to the current browser and site; clearing site data deletes it.
 - **Portable world snapshot** — open **Saves** and choose **Download world snapshot**. The JSON includes the world, agent, transcript, viewport dimensions, UI state, and current PRNG position. Choose **Import snapshot** to restore it in the same or another browser. Restoration and the next simulation tick are deterministic when the viewport and rule version match.
 
-**Export ontology** is different: it downloads a readable summary of the agent's mind, not a resumable world.
+**Export ontology** and **Import ontology** complement snapshots: **Export ontology** downloads the agent's learned prototypes, glyphs, names, valences, sequence beliefs, and operators (`nul-ontology` `v1`), and **Import ontology** transplants that mind into any world seed without overwriting the world's seed, physics, or PRNG state.
 
 No save data is transmitted anywhere. If an embedded preview blocks browser storage, use portable snapshots instead. Downloaded snapshots are the recommended durable backup.
 
 ## Memory budget
 
-The simulation's own data is small, but Electron's runtime dominates total RAM. A Linux/Xvfb measurement of the companion across all six Electron processes produced:
+The simulation's own data is small (`src/engine.js` runs DOM-free in ~4.5 MB V8 heap), while Electron's multi-process Chromium runtime dominates desktop package RAM. A Linux measurement across runtimes produced:
 
 | Configuration | Companion baseline | Evolved world | Extended soak (100k ticks) |
 | --- | ---: | ---: | ---: |
-| Single-process TUI / Sandbox (`npm run start:tui` / `start:sandbox`) | ~36–48 MB PSS | ~52–60 MB PSS | ~63 MB PSS |
+| Single-process TUI / Pure Engine (`npm run start:tui` / `bench:memory`) | ~28.6 MB PSS | ~27.6 MB PSS | ~46.7 MB PSS |
+| Local HTTP Preview Server (`npm run start:sandbox`) | ~53.6 MB RSS | — | — |
 | Electron `--low-memory` | ~259 MB PSS | ~284 MB PSS | — |
 | Standard Electron | ~307 MB PSS | ~335 MB PSS | — |
 
-The simulation's own data stays bounded indefinitely (`<= 8` concepts, `<= 100` memories, `<= 24` active world artifacts, `<= 33` active symbols in `usedNames`, ~5.6 MB JS heap, and ~49 KB JSON snapshot even at 100,000 ticks / ~2.3 hours at 1×). PSS (proportional set size) divides shared memory between processes; summing ordinary RSS/Task Manager working sets can report a substantially larger number.
+The simulation's own data stays bounded indefinitely (`<= 8` concepts, `<= 100` memories, `<= 24` active world artifacts, `<= 33` active symbols in `usedNames`, ~4.5 MB JS heap, and ~49 KB JSON snapshot even at 100,000 ticks / ~2.3 hours at 1×, executing 100k ticks in ~0.6s). PSS (proportional set size) divides shared memory between processes; summing ordinary RSS/Task Manager working sets can report a substantially larger number.
 
 Choose the runtime that matches your RAM budget:
 
 ```bash
-npm run start:tui          # Single-process terminal companion (~40-63 MB PSS; strictly < 256 MB)
-npm run start:sandbox      # Zero-dependency local HTTP preview server (~45 MB RSS)
+npm run start:tui          # Single-process terminal companion (~28-47 MB PSS; strictly < 256 MB)
+npm run start:sandbox      # Zero-dependency local HTTP preview server (~54 MB RSS; ?mode=companion supported)
+npm run world:inspect      # Fast CLI inspector & cross-seed ontology runner (--seed, --ticks, --import-ontology)
 npm run start:low-memory   # Electron with reduced V8/GPU/spellcheck overhead (~259-284 MB PSS)
 npm run bench:memory       # Run live PSS/RSS & 100,000-tick soak profiler
 ```
@@ -116,15 +118,16 @@ Electron's `--low-memory` mode disables hardware acceleration, spellcheck dictio
 - **1× / 2× / 4× / 8×** — simulation speed
 - **Reset** — replay the same seed
 - **New world** — generate a new seed
-- **Export ontology** — download the actual agent state as JSON
+- **Import / Export ontology** — transplant or download the agent's learned concepts, beliefs, and symbols as JSON
 
 ## Versioning & branch naming
 
-NUL separates three version identifiers so app releases, deterministic rules, and saved worlds stay clear:
+NUL separates four version identifiers so app releases, deterministic rules, saved worlds, and portable ontologies stay clear:
 
-- **App / PR version (`v0.01.002`, SemVer `0.1.2` in `package.json`)** — displayed in `index.html` (`APP_VERSION`, header, controls bar, and footer) and used across branches, PRs, and release tags.
+- **App / PR version (`v0.01.003`, SemVer `0.1.3` in `package.json`)** — defined in `src/engine.js` (`APP_VERSION`), displayed in `index.html`, and used across branches, PRs, and release tags.
 - **Simulation ruleset (`BOOTSTRAP/0.1`)** — identifies the deterministic symbolic simulation rules.
 - **Snapshot format (`nul-resumable-world` `v1`)** — identifies the resumable save schema.
+- **Ontology format (`nul-ontology` `v1`)** — identifies the portable agent-mind export/import schema.
 
 Naming conventions (enforced in CI via `.github/workflows/branch-naming.yml` and locally via `npm run check:naming` / `npm test`; full details in `GITHUB.md`):
 

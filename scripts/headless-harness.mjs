@@ -120,7 +120,8 @@ export function createHeadlessLab(options = {}) {
     height = 520,
     blockStorage = false,
     initialStorage = {},
-    confirmResult = true
+    confirmResult = true,
+    locationSearch = ''
   } = options;
 
   const elementsById = new Map();
@@ -200,6 +201,7 @@ export function createHeadlessLab(options = {}) {
   const windowObj = {
     __NUL_ENABLE_TEST_HOOK__: true,
     devicePixelRatio: 1,
+    location: { search: locationSearch },
     document,
     localStorage,
     crypto: crypto.webcrypto,
@@ -209,6 +211,7 @@ export function createHeadlessLab(options = {}) {
     Path2D: class { constructor() {} },
     Blob,
     URL: { createObjectURL: () => 'blob:nul', revokeObjectURL: () => {} },
+    URLSearchParams,
     getComputedStyle: () => ({ getPropertyValue: () => 'monospace' }),
     requestAnimationFrame: cb => { lastFrameCallback = cb; return 1; },
     setTimeout: () => 1,
@@ -221,19 +224,25 @@ export function createHeadlessLab(options = {}) {
   windowObj.window = windowObj;
   windowObj.globalThis = windowObj;
 
-  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-  const match = html.match(/<script>([\s\S]*?)<\/script>/);
-  if (!match) throw new Error('Inline <script> not found in index.html');
-
   const context = vm.createContext(windowObj);
-  const script = new vm.Script(match[1], { filename: 'index.html' });
-  script.runInContext(context);
+  const enginePath = path.join(ROOT, 'src', 'engine.js');
+  const appPath = path.join(ROOT, 'src', 'app.js');
+  if (fs.existsSync(enginePath) && fs.existsSync(appPath)) {
+    new vm.Script(fs.readFileSync(enginePath, 'utf8'), { filename: 'src/engine.js' }).runInContext(context);
+    new vm.Script(fs.readFileSync(appPath, 'utf8'), { filename: 'src/app.js' }).runInContext(context);
+  } else {
+    const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    const match = html.match(/<script>([\s\S]*?)<\/script>/);
+    if (!match) throw new Error('Simulation script not found in src/ or index.html');
+    new vm.Script(match[1], { filename: 'index.html' }).runInContext(context);
+  }
 
   const lab = windowObj.__NUL_LAB__;
   if (!lab) throw new Error('window.__NUL_LAB__ hook was not initialized');
 
   return {
     lab,
+    document,
     elementsById,
     getElement: id => getById(id),
     storageMap,

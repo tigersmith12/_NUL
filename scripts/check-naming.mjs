@@ -124,15 +124,18 @@ export function validateVersionSync(errors, rootDir = ROOT) {
     }
   }
 
+  const enginePath = path.join(rootDir, 'src', 'engine.js');
   const htmlPath = path.join(rootDir, 'index.html');
   const html = fs.readFileSync(htmlPath, 'utf8');
+  const versionSource = fs.existsSync(enginePath) ? fs.readFileSync(enginePath, 'utf8') : html;
+  const versionSourceLabel = fs.existsSync(enginePath) ? 'src/engine.js' : 'index.html';
 
-  const constMatch = html.match(/const\s+APP_VERSION\s*=\s*['"]([^'"]+)['"]/);
+  const constMatch = versionSource.match(/const\s+APP_VERSION\s*=\s*['"]([^'"]+)['"]/);
   if (!constMatch) {
-    errors.push('index.html is missing `const APP_VERSION = "..."`.');
+    errors.push(`${versionSourceLabel} is missing \`const APP_VERSION = "..."\`.`);
   } else if (constMatch[1] !== parsed.display) {
     errors.push(
-      `Version mismatch: package.json "${parsed.semver}" expects APP_VERSION="${parsed.display}" in index.html, found "${constMatch[1]}".`
+      `Version mismatch: package.json "${parsed.semver}" expects APP_VERSION="${parsed.display}" in ${versionSourceLabel}, found "${constMatch[1]}".`
     );
   }
 
@@ -372,6 +375,16 @@ export function writeRepoVersion(targetVersion, rootDir = ROOT) {
     lock.version = parsed.semver;
     if (lock.packages?.['']) lock.packages[''].version = parsed.semver;
     fs.writeFileSync(lockPath, JSON.stringify(lock, null, 2) + '\n');
+  }
+
+  const enginePath = path.join(rootDir, 'src', 'engine.js');
+  if (fs.existsSync(enginePath)) {
+    let engineCode = fs.readFileSync(enginePath, 'utf8');
+    engineCode = engineCode.replace(
+      /const\s+APP_VERSION\s*=\s*['"][^'"]+['"]/,
+      `const APP_VERSION = '${parsed.display}'`
+    );
+    fs.writeFileSync(enginePath, engineCode);
   }
 
   const htmlPath = path.join(rootDir, 'index.html');
