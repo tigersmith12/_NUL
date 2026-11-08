@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(ROOT, 'dist');
-const ARTIFACT_EXTS = new Set(['.exe', '.dmg', '.zip', '.appimage']);
+const ARTIFACT_EXTS = new Set(['.exe', '.dmg', '.zip', '.appimage', '.html']);
 
 if (!fs.existsSync(DIST)) {
   console.error('✗ dist/ directory does not exist.');

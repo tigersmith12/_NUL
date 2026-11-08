@@ -25,6 +25,7 @@
     "dist:mac": "electron-builder --mac --publish never && node scripts/generate-checksums.mjs && node scripts/verify-dist.mjs mac",
     "dist:linux": "electron-builder --linux --publish never && node scripts/generate-checksums.mjs && node scripts/verify-dist.mjs linux",
     "pack": "electron-builder --dir",
+    "build:html": "node scripts/sync-standalone-html.mjs",
     "test": "node --test tests/*.test.mjs",
     "world:inspect": "node scripts/inspect-world.mjs",
     "bench:memory": "node --expose-gc scripts/measure-memory.mjs",
@@ -89,6 +90,7 @@
     },
     "nsis": {
       "artifactName": "NUL-Companion-${version}-win-setup.${ext}",
+      "include": "desktop/installer.nsh",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "runAfterFinish": true
