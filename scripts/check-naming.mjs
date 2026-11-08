@@ -18,6 +18,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { syncStandaloneHtml } from './sync-standalone-html.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -404,6 +405,14 @@ export function writeRepoVersion(targetVersion, rootDir = ROOT) {
     `$1v${parsed.display}$2`
   );
   fs.writeFileSync(htmlPath, html);
+
+  if (
+    fs.existsSync(path.join(rootDir, 'src', 'styles.css')) &&
+    fs.existsSync(path.join(rootDir, 'src', 'engine.js')) &&
+    fs.existsSync(path.join(rootDir, 'src', 'app.js'))
+  ) {
+    syncStandaloneHtml(rootDir);
+  }
 
   return parsed;
 }

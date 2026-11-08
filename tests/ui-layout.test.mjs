@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import vm from 'node:vm';
+import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createHeadlessLab } from '../scripts/headless-harness.mjs';
@@ -34,24 +36,54 @@ test('sticky Lab top bar, sticky modal header, sticky Mind panel, and dvh iframe
   assert.doesNotMatch(css, /#companion-button\s*\{\s*display:\s*none/, 'Companion toggle should remain reachable on narrow iframes');
 });
 
-test('all assets linked in index.html exist on disk, in Electron build.files, and in sandbox-server.mjs', () => {
+test('index.html is 100% standalone (zero external CSS/JS links) and synced byte-for-byte with src/* and Electron packaging', () => {
   const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  const css = fs.readFileSync(path.join(ROOT, 'src', 'styles.css'), 'utf8').trim();
+  const engine = fs.readFileSync(path.join(ROOT, 'src', 'engine.js'), 'utf8').trim();
+  const app = fs.readFileSync(path.join(ROOT, 'src', 'app.js'), 'utf8').trim();
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
-  const serverCode = fs.readFileSync(path.join(ROOT, 'scripts', 'sandbox-server.mjs'), 'utf8');
 
-  const refs = [];
-  for (const m of html.matchAll(/(?:href|src)=["']([^"'#?]+)["']/g)) {
-    refs.push(m[1]);
-  }
-  assert.ok(refs.length >= 3, 'index.html should reference modular CSS/JS assets');
+  // Zero external href/src dependencies in HTML markup so a downloaded standalone index.html never renders unstyled fallback
+  const markupOnly = html
+    .replace(/<style\b[\s\S]*?<\/style>/gi, '')
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, (tag) => {
+      const openTag = tag.slice(0, tag.indexOf('>') + 1);
+      return /\bsrc=/.test(openTag) ? openTag : '';
+    });
+  const externalRefs = [...markupOnly.matchAll(/<(?:link|script)\b[^>]*\b(?:href|src)=["']([^"']+)["'][^>]*>/gi)];
+  assert.equal(externalRefs.length, 0, 'index.html must not rely on external <link href> or <script src> files');
 
-  for (const rel of refs) {
-    assert.equal(fs.existsSync(path.join(ROOT, rel)), true, `Missing referenced file: ${rel}`);
-    assert.equal(serverCode.includes(`'/${rel}'`), true, `sandbox-server.mjs should whitelist /${rel}`);
-    if (rel.startsWith('src/')) {
-      assert.equal(pkg.build.files.includes('src/**/*'), true, 'package.json build.files must include src/**/*');
-    }
-  }
+  const inlineStyle = html.match(/<style\s+id=["']nul-inline-styles["']>([\s\S]*?)<\/style>/);
+  const inlineEngine = html.match(/<script\s+id=["']nul-inline-engine["']>([\s\S]*?)<\/script>/);
+  const inlineApp = html.match(/<script\s+id=["']nul-inline-app["']>([\s\S]*?)<\/script>/);
+
+  assert.ok(inlineStyle, 'index.html must contain <style id="nul-inline-styles">');
+  assert.ok(inlineEngine, 'index.html must contain <script id="nul-inline-engine">');
+  assert.ok(inlineApp, 'index.html must contain <script id="nul-inline-app">');
+
+  assert.equal(inlineStyle[1].trim(), css, 'index.html inline CSS must match src/styles.css');
+  assert.equal(inlineEngine[1].trim(), engine, 'index.html inline engine must match src/engine.js');
+  assert.equal(inlineApp[1].trim(), app, 'index.html inline app must match src/app.js');
+
+  assert.equal(pkg.build.files.includes('index.html'), true);
+  assert.equal(pkg.build.files.includes('desktop/**/*'), true);
+  assert.equal(pkg.build.nsis.include, 'desktop/installer.nsh');
+  assert.equal(fs.existsSync(path.join(ROOT, 'desktop', 'installer.nsh')), true);
+});
+
+test('standalone index.html inline scripts execute cleanly in isolation without any src/ directory', () => {
+  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  const inlineEngine = html.match(/<script\s+id=["']nul-inline-engine["']>([\s\S]*?)<\/script>/)[1];
+  const win = { crypto: crypto.webcrypto };
+  win.window = win;
+  win.globalThis = win;
+  const ctx = vm.createContext(win);
+  new vm.Script(inlineEngine, { filename: 'index.html#engine' }).runInContext(ctx);
+  assert.ok(win.NULCore && typeof win.NULCore.createEngine === 'function');
+  const engine = win.NULCore.createEngine({ width: 800, height: 520 });
+  engine.resetWorld(true, 424242);
+  engine.steps(60);
+  assert.equal(engine.getState().tick, 60);
 });
 
 test('?mode=companion query parameter boots browser/iframe into companion layout and toggles back to lab', () => {
