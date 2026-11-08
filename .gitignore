@@ -1,0 +1,19 @@
+# Dependencies and generated desktop packages
+node_modules/
+dist/
+release/
+
+# Logs and operating-system metadata
+*.log
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local environment files and signing credentials
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.key
+*.pem

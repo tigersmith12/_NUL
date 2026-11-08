@@ -1,0 +1,59 @@
+{
+  "name": "nul-desktop-companion",
+  "version": "0.2.0",
+  "private": true,
+  "description": "An offline, non-LLM autonomous ontology lab and desktop companion.",
+  "main": "desktop/main.cjs",
+  "author": "NUL Experiment",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "start": "electron .",
+    "start:low-memory": "electron . --low-memory",
+    "dev": "electron . --lab",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win --publish never",
+    "dist:mac": "electron-builder --mac --publish never",
+    "dist:linux": "electron-builder --linux --publish never",
+    "pack": "electron-builder --dir"
+  },
+  "devDependencies": {
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "ai.nul.companion",
+    "productName": "NUL",
+    "asar": true,
+    "files": [
+      "index.html",
+      "desktop/**/*",
+      "assets/**/*",
+      "README.md"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "category": "Utility",
+      "icon": "assets/icon.png"
+    },
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "assets/icon.png"
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "category": "public.app-category.utilities",
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "runAfterFinish": true
+    }
+  }
+}

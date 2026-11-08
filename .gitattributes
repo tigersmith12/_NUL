@@ -1,0 +1,11 @@
+# Normalize source text across Windows, macOS, and Linux.
+* text=auto eol=lf
+
+# Keep binary assets and desktop packages unchanged.
+*.png binary
+*.ico binary
+*.icns binary
+*.zip binary
+*.exe binary
+*.dmg binary
+*.AppImage binary
