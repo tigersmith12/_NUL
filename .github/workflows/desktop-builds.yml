@@ -50,6 +50,7 @@ jobs:
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ELECTRON_MIRROR: "http://127.0.0.1:18765/electron/"
           ELECTRON_BUILDER_BINARIES_ALLOW_HTTP: "true"
           ELECTRON_BUILDER_BINARIES_MIRROR: "http://127.0.0.1:18765/"
         run: |
