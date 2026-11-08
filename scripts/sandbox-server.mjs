@@ -16,6 +16,8 @@ const PORT = Number.parseInt(process.env.PORT || '3000', 10);
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
   '.json': 'application/json; charset=utf-8',
@@ -27,6 +29,9 @@ const MIME_TYPES = {
 const ALLOWED_STATIC = new Map([
   ['/', 'index.html'],
   ['/index.html', 'index.html'],
+  ['/src/styles.css', 'src/styles.css'],
+  ['/src/engine.js', 'src/engine.js'],
+  ['/src/app.js', 'src/app.js'],
   ['/favicon.ico', 'assets/icon.png'],
   ['/assets/icon.png', 'assets/icon.png']
 ]);

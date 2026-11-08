@@ -138,12 +138,7 @@ test('repository files are version-synced and free of JS syntax errors', () => {
   assert.deepEqual(errors, []);
   assert.ok(parsed);
 
-  const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-  const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/);
-  assert.ok(scriptMatch, 'index.html should contain inline simulation script');
-  assert.doesNotThrow(() => new vm.Script(scriptMatch[1], { filename: 'index.html' }));
-
-  for (const rel of ['desktop/main.cjs', 'desktop/preload.cjs']) {
+  for (const rel of ['src/engine.js', 'src/app.js', 'desktop/main.cjs', 'desktop/preload.cjs']) {
     const code = fs.readFileSync(path.join(ROOT, rel), 'utf8');
     assert.doesNotThrow(() => new vm.Script(code, { filename: rel }));
   }

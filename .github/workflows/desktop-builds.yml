@@ -120,7 +120,7 @@ jobs:
           if [ "${{ github.event_name }}" = "push" ]; then
             TAG_NAME="${{ github.ref_name }}"
           else
-            APP_VER=$(node -e "const fs=require('fs');const m=fs.readFileSync('index.html','utf8').match(/const\\s+APP_VERSION\\s*=\\s*['\"]([^'\"]+)['\"]/);console.log(m[1]);")
+            APP_VER=$(node -e "const fs=require('fs');const src=fs.existsSync('src/engine.js')?fs.readFileSync('src/engine.js','utf8'):fs.readFileSync('index.html','utf8');const m=src.match(/const\\s+APP_VERSION\\s*=\\s*['\"]([^'\"]+)['\"]/);console.log(m[1]);")
             TAG_NAME="v${APP_VER}"
           fi
           if gh release view "$TAG_NAME" >/dev/null 2>&1; then

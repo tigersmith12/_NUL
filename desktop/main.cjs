@@ -12,9 +12,10 @@ if (lowMemory) {
   app.commandLine.appendSwitch('disable-background-networking');
   app.commandLine.appendSwitch('disable-component-update');
   app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
+  app.commandLine.appendSwitch('disk-cache-size', '1048576');
   app.commandLine.appendSwitch('renderer-process-limit', '1');
-  app.commandLine.appendSwitch('js-flags', '--max-old-space-size=64');
-  app.commandLine.appendSwitch('disable-features', 'MediaRouter,OptimizationHints,Translate,SpellcheckServiceInit');
+  app.commandLine.appendSwitch('js-flags', '--max-old-space-size=64 --optimize-for-size');
+  app.commandLine.appendSwitch('disable-features', 'MediaRouter,OptimizationHints,Translate,SpellcheckServiceInit,BackForwardCache');
 }
 
 const singleInstance = app.requestSingleInstanceLock();
