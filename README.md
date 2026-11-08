@@ -86,27 +86,32 @@ No save data is transmitted anywhere. If an embedded preview blocks browser stor
 
 The simulation's own data is small, but Electron's runtime dominates total RAM. A Linux/Xvfb measurement of the companion across all six Electron processes produced:
 
-| Configuration | Companion baseline | Evolved world |
-| --- | ---: | ---: |
-| Standard Electron | ~307 MB PSS | ~335 MB PSS |
-| `--low-memory` | ~259 MB PSS | ~284 MB PSS |
+| Configuration | Companion baseline | Evolved world | Extended soak (100k ticks) |
+| --- | ---: | ---: | ---: |
+| Single-process TUI / Sandbox (`npm run start:tui` / `start:sandbox`) | ~36–48 MB PSS | ~52–60 MB PSS | ~63 MB PSS |
+| Electron `--low-memory` | ~259 MB PSS | ~284 MB PSS | — |
+| Standard Electron | ~307 MB PSS | ~335 MB PSS | — |
 
-The evolved test contained 7–8 concepts, 25–32 retained memories, and 5–7 artifacts; its JSON snapshot was only about 20–28 KB. Main-process JavaScript heap use was about 4 MB. PSS (proportional set size) divides shared memory between processes; summing ordinary RSS/Task Manager working sets can report a substantially larger number.
+The simulation's own data stays bounded indefinitely (`<= 8` concepts, `<= 100` memories, `<= 24` active world artifacts, `<= 33` active symbols in `usedNames`, ~5.6 MB JS heap, and ~49 KB JSON snapshot even at 100,000 ticks / ~2.3 hours at 1×). PSS (proportional set size) divides shared memory between processes; summing ordinary RSS/Task Manager working sets can report a substantially larger number.
 
-Use the optional reduced-overhead mode with:
+Choose the runtime that matches your RAM budget:
 
 ```bash
-npm run start:low-memory
+npm run start:tui          # Single-process terminal companion (~40-63 MB PSS; strictly < 256 MB)
+npm run start:sandbox      # Zero-dependency local HTTP preview server (~45 MB RSS)
+npm run start:low-memory   # Electron with reduced V8/GPU/spellcheck overhead (~259-284 MB PSS)
+npm run bench:memory       # Run live PSS/RSS & 100,000-tick soak profiler
 ```
 
-This disables hardware acceleration and unneeded Chromium background services. It is **not a hard 256 MB cap**, and results vary by OS, Electron version, graphics stack, and shared-runtime accounting. A strict 256 MB total-RAM requirement should use a native single-process UI and a measured budget with headroom. Merely switching to Tauri/system WebView does not guarantee the limit.
+Electron's `--low-memory` mode disables hardware acceleration, spellcheck dictionaries, and unneeded Chromium background services, and bounds renderer old-space V8 heap—**but Electron itself is not a hard 256 MB cap**. Use `npm run start:tui` (which reads and writes the exact same `nul-resumable-world` `v1` JSON snapshots) or `index.html` in an already-running browser when a strict `< 256 MB` ceiling is required.
 
 ## Controls
 
 - **Space** — pause or resume
 - **Ctrl/⌘+Shift+C** — toggle lab / companion layout
-- **N** — add an unlabelled perturbation
-- **Click the world** — add a perturbation at that location
+- **Click an entity (agent, signal, artifact)** — inspect its observer readout & raw 4D vector without perturbing the world (`Esc` closes)
+- **Click empty space / Shift+Click / N** — add an unlabelled perturbation
+- **Click `SEED` (or open Saves)** — copy the current seed or load any integer seed (`1`–`2147483647`)
 - **Step** — advance one tick while suspended
 - **1× / 2× / 4× / 8×** — simulation speed
 - **Reset** — replay the same seed
@@ -117,16 +122,16 @@ This disables hardware acceleration and unneeded Chromium background services. I
 
 NUL separates three version identifiers so app releases, deterministic rules, and saved worlds stay clear:
 
-- **App / PR version (`v0.01.001`, SemVer `0.1.1` in `package.json`)** — displayed in `index.html` (`APP_VERSION`, header, controls bar, and footer) and used across branches, PRs, and release tags.
+- **App / PR version (`v0.01.002`, SemVer `0.1.2` in `package.json`)** — displayed in `index.html` (`APP_VERSION`, header, controls bar, and footer) and used across branches, PRs, and release tags.
 - **Simulation ruleset (`BOOTSTRAP/0.1`)** — identifies the deterministic symbolic simulation rules.
 - **Snapshot format (`nul-resumable-world` `v1`)** — identifies the resumable save schema.
 
 Naming conventions (enforced in CI via `.github/workflows/branch-naming.yml` and locally via `npm run check:naming` / `npm test`; full details in `GITHUB.md`):
 
-- **Version-line branches:** `v0.01`, `v0.02`, …
+- **Version-line branches:** `v1`, `v0.01`, `v0.02`, …
 - **Working branches (`.xxx` placeholder):** `<type>/v0.01.xxx-<short-name>` (e.g., `feat/v0.01.xxx-artifact-cap`, `fix/v0.01.xxx-tray-restore`, `exp/v0.02.xxx-native-shell`)
-- **Pull requests (resolves `.xxx` → `.001`, `.002`, …):** `[v0.01.001] <type>: <short summary>` (or `<type>/v0.01.001-<short-name>`)
-- **Quick helpers:** `npm run branch:suggest -- feat short-name` · `npm run version:next` · `npm run version:set -- v0.02.001`
+- **Pull requests (resolves `.xxx` → `.001`, `.002`, …):** `[v0.01.002] <type>: <short summary>` (or `<type>/v0.01.002-<short-name>`)
+- **Quick helpers:** `npm test` · `npm run branch:suggest -- feat short-name` · `npm run version:next` · `npm run version:set -- v0.02.001`
 
 ## Implementation
 

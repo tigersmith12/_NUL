@@ -89,8 +89,35 @@
 
     .canvas-wrap { position: relative; height: clamp(420px, 50vw, 570px); max-height: 570px; min-height: 420px; background: #0d0f0c; overflow: hidden; }
     #world { display: block; width: 100%; height: 100%; cursor: crosshair; }
-    .world-readout { position: absolute; top: 16px; left: 17px; pointer-events: none; display: flex; gap: 17px; color: #596050; font: 9px/1 var(--mono); letter-spacing: .08em; }
+    .world-readout { position: absolute; top: 16px; left: 17px; pointer-events: none; display: flex; align-items: center; gap: 17px; color: #596050; font: 9px/1 var(--mono); letter-spacing: .08em; }
     .world-readout b { color: #89917e; font-weight: 400; }
+    .seed-badge {
+      pointer-events: auto; border: 0; background: transparent; padding: 3px 5px; margin: -3px -5px;
+      border-radius: 4px; color: inherit; font: inherit; letter-spacing: inherit; cursor: pointer; transition: .18s;
+    }
+    .seed-badge:hover { color: var(--acid-dim); background: rgba(214, 250, 114, .06); }
+    .seed-badge:hover b { color: var(--acid); }
+    .seed-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 11px 0 4px; }
+    .seed-input {
+      width: 156px; height: 34px; border: 1px solid var(--line); border-radius: 5px;
+      background: #12150f; color: var(--text); padding: 0 10px; font: 11px/1 var(--mono);
+    }
+    .seed-input:focus { outline: 1px solid var(--acid); border-color: var(--acid-dim); }
+    .entity-inspector {
+      position: absolute; right: 12px; bottom: 12px; width: min(286px, calc(100% - 24px));
+      border: 1px solid #39422f; border-radius: 7px; background: rgba(18, 21, 15, .93);
+      backdrop-filter: blur(8px); padding: 10px 11px; z-index: 4; box-shadow: 0 10px 30px rgba(0,0,0,.45);
+    }
+    .entity-inspector[hidden] { display: none; }
+    .inspector-head { display: flex; align-items: center; gap: 8px; }
+    .inspector-glyph { width: 24px; height: 24px; padding: 3px; border-radius: 4px; background: #1d2217; color: var(--acid); flex: 0 0 auto; display: grid; place-items: center; }
+    .inspector-glyph svg { width: 18px; height: 18px; }
+    .inspector-title { color: #e2e8d7; font: 11px/1.2 var(--mono); }
+    .inspector-kicker { color: #67715c; font: 7px/1 var(--mono); letter-spacing: .11em; text-transform: uppercase; margin-top: 3px; }
+    .inspector-close { margin-left: auto; border: 0; background: transparent; color: #78826c; cursor: pointer; padding: 2px 5px; font: 13px/1 var(--mono); border-radius: 3px; }
+    .inspector-close:hover { color: var(--acid); background: rgba(255,255,255,.04); }
+    .inspector-meta { margin-top: 8px; padding-top: 7px; border-top: 1px solid #252b1f; color: #929c86; font: 9px/1.55 var(--mono); }
+    .inspector-note { margin-top: 5px; color: #596250; font: 7.5px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .06em; }
     .perturb-button {
       position: absolute; top: 12px; right: 12px;
       border: 1px solid #30362a; border-radius: 5px; background: rgba(20, 23, 17, .82);
@@ -308,7 +335,7 @@
           <circle cx="16" cy="16" r="3" fill="currentColor" />
           <path d="M16 0v7M16 25v7M0 16h7M25 16h7" stroke="currentColor" stroke-width=".8" />
         </svg>
-        <div><div class="brand-name">NUL</div><div class="brand-sub">Autonomous ontology lab · <span id="brand-version">v0.01.001</span></div></div>
+        <div><div class="brand-name">NUL</div><div class="brand-sub">Autonomous ontology lab · <span id="brand-version">v0.01.002</span></div></div>
       </div>
       <div class="top-status"><span class="status-dot"></span>Symbolic system · 0 model calls · offline</div>
       <div class="top-actions">
@@ -340,7 +367,7 @@
         <div class="left-column">
           <section class="panel world-panel" aria-label="World simulation">
             <div class="companion-bar">
-              <span class="companion-pulse"></span><span class="companion-word" id="companion-version-title" title="NUL v0.01.001· BOOTSTRAP/0.1">NUL</span><span class="companion-agent" id="companion-agent-name">unnamed</span>
+              <span class="companion-pulse"></span><span class="companion-word" id="companion-version-title" title="NUL v0.01.002· BOOTSTRAP/0.1">NUL</span><span class="companion-agent" id="companion-agent-name">unnamed</span>
               <span class="companion-spacer"></span>
               <button class="desktop-api-only" id="companion-pin" title="Toggle always-on-top">Pin</button>
               <button id="companion-expand" title="Return to the full lab">Lab</button>
@@ -352,14 +379,26 @@
             </div>
             <div class="canvas-wrap" id="canvas-wrap">
               <canvas id="world" aria-label="A dark world containing one autonomous agent and unlabelled perturbations"></canvas>
-              <div class="world-readout"><span>T+<b id="world-time">00000</b></span><span>EVENTS <b id="event-count">00</b></span><span>SEED <b id="seed-readout">—</b></span></div>
+              <div class="world-readout"><span>T+<b id="world-time">00000</b></span><span>EVENTS <b id="event-count">00</b></span><button type="button" class="seed-badge" id="seed-badge" title="Enter or copy world seed">SEED <b id="seed-readout">—</b></button></div>
               <button class="perturb-button" id="perturb-button" title="Add an unlabelled sensory event (N)">+ Perturb world</button>
               <div class="empty-state" id="empty-state">
                 <div class="empty-orbit"></div>
                 <div class="empty-title">Nothing has a name. Yet.</div>
                 <div class="empty-copy">The first sensation will arrive without an explanation.</div>
               </div>
-              <div class="canvas-foot">Observer rendering · shapes are not visible to the agent as categories</div>
+              <div class="entity-inspector" id="entity-inspector" hidden aria-live="polite">
+                <div class="inspector-head">
+                  <div class="inspector-glyph" id="inspector-glyph"></div>
+                  <div>
+                    <div class="inspector-title" id="inspector-title">—</div>
+                    <div class="inspector-kicker" id="inspector-kicker">Observer inspection</div>
+                  </div>
+                  <button type="button" class="inspector-close" id="inspector-close" aria-label="Close inspection">×</button>
+                </div>
+                <div class="inspector-meta" id="inspector-meta"></div>
+                <div class="inspector-note">Observer view only · zero effect on agent state</div>
+              </div>
+              <div class="canvas-foot">Observer rendering · click entity to inspect · click empty space or N to perturb</div>
             </div>
             <div class="controls">
               <button class="control-button primary" id="play-button">Pause</button>
@@ -371,7 +410,7 @@
                 <button class="speed-button" data-speed="8">8×</button>
               </div>
               <div class="control-spacer"></div>
-              <span class="seed-label">APP <b id="controls-version">v0.01.001</b> · RULESET <b>BOOTSTRAP/0.1</b></span>
+              <span class="seed-label">APP <b id="controls-version">v0.01.002</b> · RULESET <b>BOOTSTRAP/0.1</b></span>
               <button class="control-button" id="reset-button">Reset</button>
             </div>
           </section>
@@ -442,7 +481,7 @@
         <div class="bootstrap-card"><div class="bootstrap-label">Given by design</div><div class="bootstrap-items"><span>time</span><span>a body</span><span>4-number sensations</span><span>memory</span><span>energy</span><span>move / attend / combine</span></div></div>
         <div class="bootstrap-card"><div class="bootstrap-label">Not given</div><div class="bootstrap-items"><span>object names</span><span>categories</span><span>a dictionary</span><span>semantic values</span><span>world laws</span><span>a final objective</span></div></div>
       </section>
-      <footer class="footer"><span>NUL <span id="footer-version">v0.01.001</span> / bootstrap 0.1 / deterministic seeded simulation</span><span>Space: pause · N: perturb · Ctrl/⌘+Shift+C: companion · Not a consciousness claim</span></footer>
+      <footer class="footer"><span>NUL <span id="footer-version">v0.01.002</span> / bootstrap 0.1 / deterministic seeded simulation</span><span>Space: pause · N: perturb · Ctrl/⌘+Shift+C: companion · Not a consciousness claim</span></footer>
     </main>
   </div>
 
@@ -489,6 +528,13 @@
         <button class="control-button" id="import-snapshot-button">Import snapshot</button>
         <input type="file" id="import-file" accept="application/json,.json" hidden />
       </div>
+      <h3>Deterministic world seed</h3>
+      <p>Replay or share a specific initial world by entering an integer seed (<code>1</code>–<code>2147483647</code>).</p>
+      <div class="seed-row">
+        <input type="number" class="seed-input" id="seed-input" min="1" max="2147483647" step="1" aria-label="World seed" />
+        <button class="control-button" id="apply-seed-button">Load seed</button>
+        <button class="control-button" id="copy-seed-button">Copy seed</button>
+      </div>
       <div class="method-callout">Browser storage is local to this browser and site. Clearing site data removes the autosave, and it does not synchronize across devices. Keep a downloaded snapshot for a durable backup. If storage is blocked by an embedded preview, use snapshots instead.</div>
     </div>
   </dialog>
@@ -505,11 +551,20 @@
       const pad = (n, length = 5) => String(n).padStart(length, '0');
       const distance = (a, b) => Math.sqrt(a.reduce((sum, value, i) => sum + (value - b[i]) ** 2, 0) / a.length);
       const esc = (value) => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-      const APP_VERSION = '0.01.001';
+      const APP_VERSION = '0.01.002';
       const RULESET_VERSION = 'BOOTSTRAP/0.1';
       const STORAGE_KEY = 'nul.world.autosave.v1';
       const SAVE_FORMAT = 'nul-resumable-world';
       const SAVE_VERSION = 1;
+      const MAX_CONCEPTS = 8;
+      const MAX_ARTIFACTS = 24;
+      const MAX_MEMORIES = 100;
+      const MAX_LOGS = 70;
+      const MAX_TRAIL = 65;
+      const MAX_FEATURE_HISTORY = 24;
+      const MAX_SIGNALS = 18;
+      const MAX_PARTICLES = 160;
+      const MAX_RIPPLES = 40;
       let rng = () => 0.5;
       function mulberry32(initialSeed) {
         let state = initialSeed >>> 0;
@@ -534,12 +589,13 @@
       let accumulator = 0, previousTime = performance.now(), uiClock = 0;
       let seed = 0, tick = 0, totalEvents = 0, nextSpawn = 12;
       let signals = [], artifacts = [], particles = [], ripples = [], featureHistory = [];
-      let agent = null, logs = [], toastTimer = null;
+      let agent = null, logs = [], toastTimer = null, inspectedTarget = null;
 
       function freshAgent() {
         return {
           x: width / 2, y: height / 2, vx: 0, vy: 0, heading: 0,
-          energy: .72, senseRange: 146, concepts: [], memories: [], beliefs: [], artifacts: [],
+          energy: .72, senseRange: 146, concepts: [], memories: [], beliefs: [], artifacts,
+          totalArtifactsCreated: 0,
           selfName: null, selfGlyph: null, selfBorn: null, interactions: 0, targetId: null, goal: null,
           lastConceptId: null, lastInteractionTick: -999, lastArtifactTick: -150,
           lastGoalKey: '', usedNames: new Set(), relationCounts: {}, trail: [],
@@ -548,8 +604,24 @@
         };
       }
 
+      function pruneUnusedNames() {
+        if (!agent) return;
+        const active = new Set();
+        if (agent.selfName) active.add(agent.selfName);
+        agent.concepts.forEach(c => active.add(c.name));
+        artifacts.forEach(a => active.add(a.name));
+        const ordered = new Set();
+        for (const existing of agent.usedNames) {
+          if (active.has(existing)) ordered.add(existing);
+        }
+        for (const req of active) ordered.add(req);
+        agent.usedNames = ordered;
+      }
+
       function resizeCanvas() {
-        const rect = wrap.getBoundingClientRect();
+        const rect = wrap._mockWidth && wrap._mockHeight
+          ? { width: wrap._mockWidth, height: wrap._mockHeight }
+          : wrap.getBoundingClientRect();
         const oldWidth = width, oldHeight = height;
         width = Math.max(280, rect.width); height = Math.max(300, rect.height);
         dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -606,7 +678,7 @@
 
       function addLog(raw, translation, kind = 'agent') {
         logs.push({ tick, raw, translation, kind });
-        if (logs.length > 70) logs.shift();
+        if (logs.length > MAX_LOGS) logs.shift();
         renderLog();
       }
       function renderLog() {
@@ -617,15 +689,22 @@
         if (atBottom || logs.length < 4) log.scrollTop = log.scrollHeight;
       }
 
-      function resetWorld(newSeed = true) {
-        if (newSeed) seed = (crypto.getRandomValues(new Uint32Array(1))[0] % 900000) + 100000;
+      function resetWorld(newSeed = true, explicitSeed = null) {
+        if (Number.isInteger(explicitSeed) && explicitSeed >= 1 && explicitSeed <= 2147483647) {
+          seed = explicitSeed;
+        } else if (newSeed) {
+          seed = (crypto.getRandomValues(new Uint32Array(1))[0] % 900000) + 100000;
+        }
         rng = mulberry32(seed);
         tick = 0; totalEvents = 0; nextSpawn = 14; accumulator = 0;
         signals = []; artifacts = []; particles = []; ripples = []; featureHistory = []; logs = [];
+        inspectedTarget = null;
         agent = freshAgent();
         running = true;
         $('#empty-state').classList.remove('hidden');
         $('#seed-readout').textContent = seed;
+        const seedInput = $('#seed-input');
+        if (seedInput) seedInput.value = String(seed);
         addLog('·', 'No symbols. No observations. The world has not yet been differentiated.', 'system');
         updateControls(); renderAll();
         saveWorld(false);
@@ -676,9 +755,30 @@
         if (!validSnapshot(data)) throw new Error('This is not a valid NUL world snapshot.');
         seed = data.seed; rng = mulberry32(seed); rng.setState(data.rngState);
         tick = data.tick; totalEvents = data.totalEvents; nextSpawn = data.nextSpawn;
-        signals = data.signals; artifacts = data.artifacts; particles = data.particles;
-        ripples = data.ripples; featureHistory = data.featureHistory; logs = data.logs;
-        agent = data.agent; agent.usedNames = new Set(data.agent.usedNames); agent.artifacts = artifacts;
+        const seenArtifactIds = new Set();
+        const dedupedArtifacts = [];
+        for (const item of data.artifacts) {
+          if (!seenArtifactIds.has(item.id)) {
+            seenArtifactIds.add(item.id);
+            dedupedArtifacts.push(item);
+          }
+        }
+        while (dedupedArtifacts.length > MAX_ARTIFACTS) dedupedArtifacts.shift();
+        signals = data.signals.slice(-MAX_SIGNALS);
+        artifacts = dedupedArtifacts;
+        particles = data.particles.slice(-MAX_PARTICLES);
+        ripples = data.ripples.slice(-MAX_RIPPLES);
+        featureHistory = data.featureHistory.slice(-MAX_FEATURE_HISTORY);
+        logs = data.logs.slice(-MAX_LOGS);
+        inspectedTarget = null;
+        agent = data.agent;
+        agent.usedNames = new Set(data.agent.usedNames);
+        agent.artifacts = artifacts;
+        const maxArtifactId = artifacts.reduce((max, item) => Math.max(max, item.id), 0);
+        agent.totalArtifactsCreated = Number.isFinite(data.agent.totalArtifactsCreated)
+          ? Math.max(data.agent.totalArtifactsCreated, maxArtifactId, artifacts.length)
+          : Math.max(maxArtifactId, artifacts.length);
+        pruneUnusedNames();
 
         // Preserve relative positions if the world was saved at another viewport size.
         const sx = width / data.world.width, sy = height / data.world.height;
@@ -695,6 +795,8 @@
         logMode = data.ui && ['dual', 'agent', 'observer'].includes(data.ui.logMode) ? data.ui.logMode : 'dual';
         accumulator = 0; previousTime = performance.now();
         $('#seed-readout').textContent = seed;
+        const seedInput = $('#seed-input');
+        if (seedInput) seedInput.value = String(seed);
         $('#empty-state').classList.toggle('hidden', totalEvents > 0 || artifacts.length > 0);
         $$('.speed-button').forEach(button => button.classList.toggle('active', Number(button.dataset.speed) === speed));
         $$('.log-mode').forEach(button => button.classList.toggle('active', button.dataset.logmode === logMode));
@@ -774,10 +876,12 @@
           conceptId: null, touched: false, manual: !!options.manual
         };
         signals.push(signal);
+        if (signals.length > MAX_SIGNALS) signals.shift();
         featureHistory.push(features.slice());
-        if (featureHistory.length > 24) featureHistory.shift();
+        if (featureHistory.length > MAX_FEATURE_HISTORY) featureHistory.shift();
         $('#empty-state').classList.add('hidden');
         ripples.push({ x, y, age: 0, max: 48, color: 'event' });
+        if (ripples.length > MAX_RIPPLES) ripples.shift();
         return signal;
       }
 
@@ -788,7 +892,7 @@
           if (d < nearestDistance) { nearestDistance = d; nearest = concept; }
         }
         const threshold = .27;
-        if (!nearest || (nearestDistance > threshold && agent.concepts.length < 8)) {
+        if (!nearest || (nearestDistance > threshold && agent.concepts.length < MAX_CONCEPTS)) {
           const index = agent.concepts.length + 1;
           const concept = {
             id: index, name: makeName(), glyph: makeGlyph(), prototype: signal.features.slice(),
@@ -877,8 +981,9 @@
         c.valence = clamp(c.totalEffect / (c.contacts * .09), -1, 1);
         const episode = { tick, conceptId: c.id, signalId: signal.id, effect: signal.effect, energyAfter: agent.energy };
         agent.memories.push(episode);
-        if (agent.memories.length > 100) agent.memories.shift();
+        if (agent.memories.length > MAX_MEMORIES) agent.memories.shift();
         ripples.push({ x: signal.x, y: signal.y, age: 0, max: 58, color: signal.effect >= 0 ? 'positive' : 'negative' });
+        if (ripples.length > MAX_RIPPLES) ripples.shift();
         burst(signal.x, signal.y, signal.effect >= 0 ? 'positive' : 'negative', 8);
 
         if (agent.lastConceptId && agent.lastConceptId !== c.id && tick - agent.lastInteractionTick < 100) {
@@ -922,18 +1027,26 @@
         const b = candidates.find(c => c.id !== a.id) || candidates[1];
         if (!a || !b) return;
         const name = makeName();
+        agent.totalArtifactsCreated = (agent.totalArtifactsCreated || artifacts.length) + 1;
         const artifact = {
-          id: agent.artifacts.length + 1, name, glyph: makeGlyph(), parents: [a.id, b.id],
+          id: agent.totalArtifactsCreated, name, glyph: makeGlyph(), parents: [a.id, b.id],
           x: clamp(agent.x + randomBetween(-60, 60), 35, width - 35),
           y: clamp(agent.y + randomBetween(-60, 60), 55, height - 35),
           born: tick, phase: randomBetween(0, Math.PI * 2),
           features: a.prototype.map((v, i) => clamp((v + b.prototype[i]) / 2 + randomBetween(-.08, .08)))
         };
-        agent.artifacts.push(artifact); artifacts.push(artifact);
+        artifacts.push(artifact);
+        if (agent.artifacts !== artifacts) agent.artifacts = artifacts;
+        if (artifacts.length > MAX_ARTIFACTS) {
+          artifacts.shift();
+          pruneUnusedNames();
+        }
         agent.lastArtifactTick = tick; agent.energy = clamp(agent.energy - .08);
         featureHistory.push(artifact.features.slice());
+        if (featureHistory.length > MAX_FEATURE_HISTORY) featureHistory.shift();
         addLog(`${agent.selfName || '·'} ${agent.operators.create} ${name} ${agent.operators.is} ${a.name} ${agent.operators.join} ${b.name}`, `Two self-named patterns, “${a.name}” and “${b.name},” are combined. The resulting persistent artifact is named “${name}.”`);
         ripples.push({ x: artifact.x, y: artifact.y, age: 0, max: 90, color: 'artifact' });
+        if (ripples.length > MAX_RIPPLES) ripples.shift();
         burst(artifact.x, artifact.y, 'artifact', 22);
       }
 
@@ -942,6 +1055,7 @@
           const angle = randomBetween(0, Math.PI * 2), velocity = randomBetween(.2, 1.25);
           particles.push({ x, y, vx: Math.cos(angle) * velocity, vy: Math.sin(angle) * velocity, age: 0, max: randomBetween(25, 70), color });
         }
+        if (particles.length > MAX_PARTICLES) particles.splice(0, particles.length - MAX_PARTICLES);
       }
 
       function simulate() {
@@ -987,7 +1101,7 @@
         if (agent.y < 45 || agent.y > height - 25) { agent.vy *= -.7; agent.y = clamp(agent.y, 45, height - 25); }
         if (tick % 3 === 0) {
           agent.trail.push([agent.x, agent.y]);
-          if (agent.trail.length > 65) agent.trail.shift();
+          if (agent.trail.length > MAX_TRAIL) agent.trail.shift();
         }
         particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vx *= .97; p.vy *= .97; p.age++; });
         particles = particles.filter(p => p.age < p.max);
@@ -1102,6 +1216,96 @@
         }
         ctx.globalAlpha = 1;
         drawAgent();
+        const inspectedEntity = resolveInspectedEntity();
+        if (inspectedEntity) {
+          ctx.save();
+          ctx.strokeStyle = inspectedEntity.kind === 'artifact' ? 'rgba(232,189,114,.75)' : 'rgba(214,250,114,.75)';
+          ctx.lineWidth = 1.1;
+          ctx.setLineDash([3, 3]);
+          ctx.beginPath();
+          ctx.arc(inspectedEntity.entity.x, inspectedEntity.entity.y, inspectedEntity.kind === 'artifact' ? 33 : 23, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      // ---------- Observer inspection (pure readout; never touches PRNG or agent state) ----------
+      function findEntityAt(x, y) {
+        if (!agent) return null;
+        if (Math.hypot(agent.x - x, agent.y - y) <= 22) return { kind: 'agent', id: 0, entity: agent };
+        let best = null, bestDist = Infinity;
+        for (const artifact of artifacts) {
+          const d = Math.hypot(artifact.x - x, artifact.y - y);
+          if (d <= 29 && d < bestDist) { bestDist = d; best = { kind: 'artifact', id: artifact.id, entity: artifact }; }
+        }
+        for (const signal of signals) {
+          const d = Math.hypot(signal.x - x, signal.y - y);
+          if (d <= 21 && d < bestDist) { bestDist = d; best = { kind: 'signal', id: signal.id, entity: signal }; }
+        }
+        return best;
+      }
+
+      function resolveInspectedEntity() {
+        if (!inspectedTarget || !agent) return null;
+        if (inspectedTarget.kind === 'agent') return { kind: 'agent', entity: agent };
+        if (inspectedTarget.kind === 'artifact') {
+          const item = artifacts.find(a => a.id === inspectedTarget.id);
+          return item ? { kind: 'artifact', entity: item } : null;
+        }
+        if (inspectedTarget.kind === 'signal') {
+          const item = signals.find(s => s.id === inspectedTarget.id);
+          return item ? { kind: 'signal', entity: item } : null;
+        }
+        return null;
+      }
+
+      function clearInspection() {
+        inspectedTarget = null;
+        const box = $('#entity-inspector');
+        if (box) box.hidden = true;
+      }
+
+      function renderInspector() {
+        const box = $('#entity-inspector');
+        if (!box) return;
+        const resolved = resolveInspectedEntity();
+        if (!resolved) {
+          inspectedTarget = null;
+          box.hidden = true;
+          return;
+        }
+        box.hidden = false;
+        const { kind, entity } = resolved;
+        const defaultSvg = '<svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="5" stroke="currentColor"/></svg>';
+        if (kind === 'agent') {
+          $('#inspector-glyph').innerHTML = agent.selfGlyph ? glyphSVG(agent.selfGlyph) : defaultSvg;
+          $('#inspector-title').textContent = agent.selfName || 'unnamed locus';
+          $('#inspector-kicker').textContent = 'Persistent embodied agent';
+          $('#inspector-meta').innerHTML = `Energy ${Math.round(agent.energy * 100)}% · ${agent.interactions} contacts<br>${agent.concepts.length} concepts · ${agent.beliefs.length} beliefs · ${artifacts.length} active creations`;
+        } else if (kind === 'artifact') {
+          const parents = entity.parents.map(conceptById).filter(Boolean).map(c => c.name).join(` ${agent.operators.join} `);
+          const vec = entity.features.map(v => v.toFixed(2)).join(', ');
+          $('#inspector-glyph').innerHTML = glyphSVG(entity.glyph) || defaultSvg;
+          $('#inspector-title').textContent = entity.name;
+          $('#inspector-kicker').textContent = `Authored artifact #${pad(entity.id, 2)}`;
+          $('#inspector-meta').innerHTML = `Combined: ${esc(parents || '—')} · born T+${pad(entity.born)}<br>Vector [${esc(vec)}]`;
+        } else if (kind === 'signal') {
+          const c = entity.conceptId ? conceptById(entity.conceptId) : null;
+          const vec = entity.features.map(v => v.toFixed(2)).join(', ');
+          $('#inspector-glyph').innerHTML = c ? glyphSVG(c.glyph) : defaultSvg;
+          $('#inspector-title').textContent = c ? c.name : 'unclassified sensation';
+          $('#inspector-kicker').textContent = c ? `Assigned to symbol #${pad(c.id, 2)}` : `Unlabelled event #${pad(entity.id, 2)}`;
+          const valenceInfo = c ? `learned valence ${c.valence >= 0 ? '+' : ''}${c.valence.toFixed(2)}` : 'not yet perceived within sense range';
+          $('#inspector-meta').innerHTML = `${esc(valenceInfo)}<br>Raw 4D vector [${esc(vec)}]`;
+        }
+      }
+
+      function inspectAt(x, y) {
+        const hit = findEntityAt(x, y);
+        if (!hit) return null;
+        inspectedTarget = { kind: hit.kind, id: hit.id };
+        renderInspector();
+        return hit;
       }
 
       function coherence() {
@@ -1121,9 +1325,13 @@
         $('#stat-concepts').textContent = agent.concepts.length;
         $('#stat-memories').textContent = agent.memories.length;
         $('#stat-laws').textContent = agent.beliefs.length;
-        $('#stat-artifacts').textContent = agent.artifacts.length;
+        const totalCreated = agent.totalArtifactsCreated || artifacts.length;
+        $('#stat-artifacts').textContent = totalCreated;
+        $('#stat-artifacts').title = totalCreated > artifacts.length
+          ? `${artifacts.length} active in world (capped at ${MAX_ARTIFACTS}) · ${totalCreated} authored total`
+          : `${artifacts.length} active in world`;
         $('#lexicon-count').textContent = agent.concepts.length;
-        $('#world-count').textContent = agent.beliefs.length + agent.artifacts.length;
+        $('#world-count').textContent = agent.beliefs.length + artifacts.length;
         $('#intent-raw').textContent = agent.goal ? agent.goal.raw : '·';
         $('#intent-description').textContent = agent.goal ? agent.goal.description : 'No preference has formed. The agent is only capable of noticing.';
         $('#energy-value').textContent = Math.round(agent.energy * 100) + '%';
@@ -1133,7 +1341,7 @@
         const coh = coherence();
         $('#coherence-value').textContent = Math.round(coh * 100) + '%';
         $('#coherence-bar').style.width = coh * 100 + '%';
-        renderIdentity(); renderMemories();
+        renderIdentity(); renderMemories(); renderInspector();
         if (activeTab === 'lexicon') renderLexicon();
         if (activeTab === 'laws') renderLaws();
       }
@@ -1225,13 +1433,22 @@
         renderAll(); saveWorld(false);
       }
       $('#perturb-button').addEventListener('click', () => perturb());
+      $('#inspector-close').addEventListener('click', () => clearInspection());
+      canvas.addEventListener('mousemove', event => {
+        const rect = canvas.getBoundingClientRect();
+        const hit = findEntityAt(event.clientX - rect.left, event.clientY - rect.top);
+        canvas.style.cursor = hit && !event.shiftKey ? 'pointer' : 'crosshair';
+      });
       canvas.addEventListener('click', event => {
         const rect = canvas.getBoundingClientRect();
-        perturb({ x: event.clientX - rect.left, y: event.clientY - rect.top });
+        const x = event.clientX - rect.left, y = event.clientY - rect.top;
+        if (!event.shiftKey && inspectAt(x, y)) return;
+        perturb({ x, y });
       });
-      function replaceWorld(newSeed) {
-        if (agent && agent.interactions > 0 && !confirm('Replace the current world and its autosave? Download a snapshot first if you want to keep it.')) return;
-        resetWorld(newSeed);
+      function replaceWorld(newSeed, explicitSeed = null) {
+        if (agent && agent.interactions > 0 && !confirm('Replace the current world and its autosave? Download a snapshot first if you want to keep it.')) return false;
+        resetWorld(newSeed, explicitSeed);
+        return true;
       }
       $('#reset-button').addEventListener('click', () => replaceWorld(false));
       $('#new-world-button').addEventListener('click', () => replaceWorld(true));
@@ -1268,9 +1485,40 @@
         downloadJSON(data, `nul-ontology-${seed}-t${tick}.json`, 'Ontology exported as JSON.');
       });
       const saveDialog = $('#save-dialog');
-      $('#save-button').addEventListener('click', () => { updateSaveUI(); saveDialog.showModal(); });
+      function openSaveDialog(focusSeed = false) {
+        updateSaveUI();
+        const seedInput = $('#seed-input');
+        if (seedInput) seedInput.value = String(seed);
+        saveDialog.showModal();
+        if (focusSeed && seedInput) { seedInput.focus(); seedInput.select(); }
+      }
+      $('#save-button').addEventListener('click', () => openSaveDialog(false));
+      $('#seed-badge').addEventListener('click', () => openSaveDialog(true));
       $('#close-save').addEventListener('click', () => saveDialog.close());
       saveDialog.addEventListener('click', event => { if (event.target === saveDialog) saveDialog.close(); });
+      $('#apply-seed-button').addEventListener('click', () => {
+        const parsed = Number.parseInt($('#seed-input').value, 10);
+        if (!Number.isInteger(parsed) || parsed < 1 || parsed > 2147483647) {
+          showToast('Enter an integer seed between 1 and 2147483647.');
+          return;
+        }
+        if (replaceWorld(true, parsed)) {
+          saveDialog.close();
+          showToast(`Started deterministic world with seed ${parsed}.`);
+        }
+      });
+      $('#seed-input').addEventListener('keydown', event => {
+        if (event.key === 'Enter') { event.preventDefault(); $('#apply-seed-button').click(); }
+      });
+      $('#copy-seed-button').addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(String(seed));
+          showToast(`Copied seed ${seed} to clipboard.`);
+        } catch {
+          $('#seed-input').select();
+          showToast(`Seed: ${seed}`);
+        }
+      });
       $('#save-now-button').addEventListener('click', () => { saveWorld(true); updateSaveUI(); });
       $('#restore-button').addEventListener('click', () => {
         try {
@@ -1302,6 +1550,7 @@
           event.preventDefault(); requestMode(desktopMode === 'companion' ? 'lab' : 'companion'); return;
         }
         if (dialog.open || saveDialog.open || ['INPUT','TEXTAREA','BUTTON'].includes(document.activeElement.tagName)) return;
+        if (event.code === 'Escape' && inspectedTarget) { clearInspection(); return; }
         if (event.code === 'Space') { event.preventDefault(); toggleRunning(); }
         if (event.key.toLowerCase() === 'n') perturb();
       });
@@ -1323,7 +1572,51 @@
         $('#save-indicator').textContent = `Restored autosave · T+${pad(tick)}`;
         setTimeout(() => showToast(`Welcome back. World restored at T+${pad(tick)}.`), 250);
       }
-      updateSaveUI(); requestAnimationFrame(frame);
+      updateSaveUI();
+      if (window.__NUL_ENABLE_TEST_HOOK__) {
+        window.__NUL_LAB__ = {
+          step: () => simulate(),
+          steps: count => { for (let i = 0; i < count; i++) simulate(); },
+          resetWorld: (newSeed = true, explicitSeed = null) => resetWorld(newSeed, explicitSeed),
+          perturb: at => perturb(at),
+          inspectAt: (x, y) => inspectAt(x, y),
+          clearInspection: () => clearInspection(),
+          createSnapshot: () => createSnapshot(),
+          restoreSnapshot: data => restoreSnapshot(data),
+          validSnapshot: data => validSnapshot(data),
+          saveWorld: (notify = false) => saveWorld(notify),
+          setViewport: (w, h) => {
+            wrap._mockWidth = w;
+            wrap._mockHeight = h;
+            resizeCanvas();
+          },
+          getState: () => ({
+            seed, tick, totalEvents, nextSpawn,
+            rngState: rng.getState ? rng.getState() : null,
+            width, height, running, speed, inspectedTarget,
+            counts: {
+              concepts: agent.concepts.length,
+              memories: agent.memories.length,
+              beliefs: agent.beliefs.length,
+              artifacts: artifacts.length,
+              totalArtifactsCreated: agent.totalArtifactsCreated || artifacts.length,
+              usedNames: agent.usedNames.size,
+              relationKeys: Object.keys(agent.relationCounts).length,
+              signals: signals.length,
+              particles: particles.length,
+              ripples: ripples.length,
+              logs: logs.length,
+              trail: agent.trail.length,
+              featureHistory: featureHistory.length
+            }
+          }),
+          constants: {
+            APP_VERSION, RULESET_VERSION, SAVE_FORMAT, SAVE_VERSION,
+            MAX_CONCEPTS, MAX_ARTIFACTS, MAX_MEMORIES, MAX_LOGS, MAX_TRAIL, MAX_SIGNALS
+          }
+        };
+      }
+      requestAnimationFrame(frame);
     })();
   </script>
 </body>

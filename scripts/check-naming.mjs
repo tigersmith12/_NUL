@@ -28,7 +28,7 @@ export const TRUNK_BRANCHES = new Set(['main', 'Initial-reference']);
 const SEMVER_STRICT_RE = /^(\d+)\.(\d+)\.(\d+)$/;
 const DISPLAY_VERSION_RE = /^v?(\d+)\.(\d{2,})\.(\d{3,})$/;
 
-const LINE_BRANCH_RE = /^v(\d+)\.(\d{2,})$/;
+const LINE_BRANCH_RE = /^v(\d+)(?:\.(\d{2,}))?$/;
 const WORK_BRANCH_RE = new RegExp(
   `^(${WORK_TYPES.join('|')})\\/v(\\d+)\\.(\\d{2,})\\.(xxx|\\d{3,})-([a-z0-9]+(?:-[a-z0-9]+)*)$`
 );
@@ -158,14 +158,14 @@ export function classifyBranch(branchName) {
   const lineMatch = branchName.match(LINE_BRANCH_RE);
   if (lineMatch) {
     const major = Number(lineMatch[1]);
-    const minor = Number(lineMatch[2]);
+    const minor = lineMatch[2] !== undefined ? Number(lineMatch[2]) : null;
     return {
       valid: true,
       kind: 'version-line',
       branch: branchName,
       major,
       minor,
-      line: formatLineVersion(major, minor)
+      line: minor !== null ? formatLineVersion(major, minor) : `v${major}`
     };
   }
 
