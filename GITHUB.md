@@ -1,110 +1,104 @@
 # GitHub, Versioning & Branch Naming Guide
 
-This guide defines how branches, pull requests, versions, and release tags are named in **NUL** so it is immediately clear what version and purpose any branch or change belongs to.
+This guide defines how branches, pull requests, versions, and release tags are named in **NUL** so every branch and PR clearly shows its version line and purpose.
 
 ---
 
-## 1. Branch Naming Scheme
+## 1. How `.xxx` Branches & `.001` PRs Work Together
 
-All human-created working branches follow **`<type>/v<X.Y.Z>-<short-name>`** (lowercase kebab-case for `<short-name>`):
+NUL uses a **zero-padded version line with a `.xxx` placeholder on working branches** that resolves to a **sequential 3-digit PR number (`.001`, `.002`, …)** when opening a pull request:
 
 ```text
-<type>/v<major>.<minor>.<patch>-<short-name>
+Version-line branch : v0.01
+Working branch      : <type>/v0.01.xxx-<short-name>
+Pull Request #1     : [v0.01.001] <type>: <short summary>   (or <type>/v0.01.001-<short-name>)
+Pull Request #2     : [v0.01.002] <type>: <short summary>
+...
+Next version line   : v0.02  ->  <type>/v0.02.xxx-<short-name>  ->  PRs start at v0.02.001
 ```
 
-| Prefix | Purpose | Example |
-| --- | --- | --- |
-| `feat/` | New simulation, UI, or desktop companion capability | `feat/v0.2.1-artifact-cap` |
-| `fix/` | Bug fix, persistence repair, or window/tray behavior fix | `fix/v0.2.1-tray-restore` |
-| `perf/` | Memory footprint or rendering/runtime optimization | `perf/v0.3.0-memory-budget` |
-| `refactor/` | Internal code restructuring with unchanged behavior | `refactor/v0.2.1-canvas-split` |
-| `docs/` | Documentation, handoff notes, or architecture guides | `docs/v0.2.0-branch-scheme` |
-| `test/` | Deterministic snapshot, UI, or memory soak tests | `test/v0.2.1-snapshot-determinism` |
-| `build/` | Electron packaging, CI workflows, or developer scripts | `build/v0.2.0-windows-signing` |
-| `chore/` | Dependency updates or repository housekeeping | `chore/v0.2.1-deps-bump` |
-| `exp/` | Bounded artificial-life or native-runtime experiments | `exp/v0.3.0-native-shell` |
-| `release/` | Release preparation (`release/v<X.Y.Z>` or with suffix) | `release/v0.2.0` |
+Why `.xxx` on the branch? Because you never have to rename a working branch if PR numbers shift before merge—the concrete `.001`, `.002`, `.003` slot is locked in the PR and synced via `npm run version:next`.
 
-### Trunk & Automated Session Branches
+### Working Branch Prefixes
 
-- **Trunk / baseline branches:** `main` and `Initial-reference` are exempt from `<type>/v...` prefixes.
-- **Arena session branches (`arena/<id>-<slug>`):** Arena locks each coding session to its auto-generated `arena/*` branch name. Those branches are accepted by CI and rely on the **Pull Request title** below to display the version, type, and readable name on GitHub.
-
----
-
-## 2. Pull Request Title Scheme
-
-Every pull request—whether opened from a local `<type>/v<X.Y.Z>-<short-name>` branch or a fixed `arena/*` branch—uses:
-
-```text
-[v<X.Y.Z>] <type>: <short summary>
-```
-
-Examples:
-
-- `[v0.2.0] build: add readable branch and version naming scheme`
-- `[v0.2.1] fix: preserve companion bounds across display changes`
-- `[v0.3.0] exp: prototype single-process native companion`
-
-When a PR comes from a standard `<type>/v<X.Y.Z>-<short-name>` branch, CI also checks that the branch's `<type>` and `v<X.Y.Z>` match the PR title so they never drift apart.
-
----
-
-## 3. Version Identifiers in NUL
-
-NUL tracks three distinct version numbers with separate jobs:
-
-| Identifier | Current Value | Where It Lives | When to Increment |
+| Prefix | Purpose | Working Branch Example | Resolved PR Example |
 | --- | --- | --- | --- |
-| **App version** | `0.2.0` (`v0.2.0`) | `package.json` `"version"`, `index.html` (`APP_VERSION`, topbar, controls bar, footer), branch names, PR titles, Git tags | Patch (`0.2.x`) for fixes/docs/tooling, minor (`0.x.0`) for notable features or runtime milestones, major (`x.0.0`) for milestone architecture shifts |
-| **Simulation ruleset** | `BOOTSTRAP/0.1` | `index.html` (`RULESET_VERSION`, controls bar, footer, ontology exports) | Only when deterministic agent/world rules change |
-| **Snapshot schema** | `1` (`nul-resumable-world`) | `index.html` (`SAVE_VERSION = 1`, `STORAGE_KEY = 'nul.world.autosave.v1'`) | Only on breaking changes to saved-world JSON structure |
+| `feat/` | New simulation, UI, or desktop companion capability | `feat/v0.01.xxx-artifact-cap` | `[v0.01.002] feat: cap world artifacts` |
+| `fix/` | Bug fix, persistence repair, or window/tray fix | `fix/v0.01.xxx-tray-restore` | `[v0.01.003] fix: restore companion from tray` |
+| `perf/` | Memory footprint or rendering/runtime optimization | `perf/v0.02.xxx-memory-budget` | `[v0.02.001] perf: reduce idle memory budget` |
+| `refactor/` | Internal restructuring with unchanged behavior | `refactor/v0.01.xxx-canvas-split` | `[v0.01.004] refactor: isolate canvas renderer` |
+| `docs/` | Documentation, handoff notes, or workflow guides | `docs/v0.01.xxx-handoff-notes` | `[v0.01.005] docs: update handoff notes` |
+| `test/` | Deterministic snapshot, UI, or memory soak tests | `test/v0.01.xxx-snapshot-soak` | `[v0.01.006] test: add snapshot determinism suite` |
+| `build/` | Electron packaging, CI workflows, or dev tooling | `build/v0.01.xxx-branch-scheme` | `[v0.01.001] build: establish v0.01.xxx branch and PR naming scheme` |
+| `chore/` | Dependency updates or repository housekeeping | `chore/v0.01.xxx-deps-bump` | `[v0.01.007] chore: update build dependencies` |
+| `exp/` | Bounded artificial-life or native-runtime experiments | `exp/v0.02.xxx-native-shell` | `[v0.02.001] exp: prototype native companion shell` |
+| `release/` | Release preparation (`release/v0.01.xxx`) | `release/v0.01.xxx` | `[v0.01.008] release: prepare v0.01 release` |
 
-Whenever you bump `"version"` in `package.json`, update `APP_VERSION` and the three static `vX.Y.Z` labels (`#brand-version`, `#controls-version`, `#footer-version`) in `index.html`. Run `npm run check:naming` to verify they match.
+### Trunk, Version-Line & Arena Session Branches
+
+- **Version-line branches (`v0.01`, `v0.02`, …):** Long-lived branches for each minor line where `.001`, `.002`, … PRs land.
+- **Trunk / reference branches (`main`, `Initial-reference`):** Exempt from `<type>/` prefixes.
+- **Arena session branches (`arena/<id>-<slug>`):** Arena locks each coding session to its auto-generated `arena/*` branch name. Those branches pass CI automatically and carry the resolved `v0.01.001` version in the PR title and app metadata. Once a PR merges on GitHub, the `arena/*` head branch can be deleted cleanly (or auto-deleted via GitHub **Settings → General → Automatically delete head branches**).
 
 ---
 
-## 4. Helper Commands & Automated Checks
+## 2. Version Identifiers & SemVer Mapping
 
-These scripts use built-in Node.js modules only (no `npm install` required to run them):
+NUL tracks three distinct version numbers, and maps the padded display version cleanly to strict SemVer for `npm` and `electron-builder`:
+
+| Identifier | Current Value | Where It Lives | Purpose |
+| --- | --- | --- | --- |
+| **App / PR version** | `v0.01.001` (`0.1.1` in `package.json`) | `index.html` (`APP_VERSION = '0.01.001'`, header, controls, footer), `package.json` (`"0.1.1"`), PR titles, Git tags | Tracks the `<M>.<MM>.<PPP>` release line and sequential PR number (`0.1.1` ↔ `v0.01.001` keeps `npm`/`electron-builder` SemVer valid without leading-zero errors) |
+| **Simulation ruleset** | `BOOTSTRAP/0.1` | `index.html` (`RULESET_VERSION`, controls bar, footer, ontology exports) | Changes **only** when deterministic world/agent simulation mechanics change |
+| **Snapshot schema** | `1` (`nul-resumable-world`) | `index.html` (`SAVE_VERSION = 1`, `STORAGE_KEY = 'nul.world.autosave.v1'`) | Changes **only** on breaking saved-world JSON schema updates |
+
+---
+
+## 3. CLI Helpers & Automated CI Checks
+
+All helper commands use built-in Node.js modules only (no `npm install` needed):
 
 ```bash
-# Generate a compliant branch name + matching PR title (uses package.json version by default)
-npm run branch:suggest -- feat artifact-memory-cap
-npm run branch:suggest -- fix tray-restore --version 0.2.1
+# Increment to the next PR number in the current line (e.g. v0.01.001 -> v0.01.002)
+npm run version:next
 
-# Validate version sync (package.json <-> index.html) and current branch name
+# Or set a new version line explicitly (updates package.json, package-lock.json & index.html)
+npm run version:set -- v0.02.001
+
+# Generate a compliant .xxx working branch + resolved PR title
+npm run branch:suggest -- feat artifact-memory-cap
+
+# Validate version sync and active branch / PR / tag naming
 npm run check:naming
 
-# Test any candidate branch, PR title, or release tag locally
-node scripts/check-naming.mjs --branch "feat/v0.2.0-artifact-cap" --pr-title "[v0.2.0] feat: cap world artifacts"
-node scripts/check-naming.mjs --tag "v0.2.0"
+# Run the automated naming & syntax integrity test suite
+npm test
 ```
 
-In GitHub Actions, `.github/workflows/branch-naming.yml` runs `node scripts/check-naming.mjs` automatically on branch pushes, pull requests (`opened`, `edited`, `synchronize`, `reopened`), and `v*` tag pushes.
+In GitHub Actions, `.github/workflows/branch-naming.yml` runs `npm test` and `node scripts/check-naming.mjs` on every pull request (`opened`, `edited`, `synchronize`, `reopened`), branch push, and `v*` tag push.
+
+---
+
+## 4. Setting Up `v0.01` After Merging PR #1
+
+1. Merge **PR #1 (`v0.01.001`)** on GitHub when ready.
+2. In GitHub's branch selector, create branch **`v0.01`** (and/or `main`) from the merged commit—and optionally set it as the default base branch under **Settings → General → Default branch**.
+3. For each subsequent change on `v0.01`:
+   - Branch locally as `<type>/v0.01.xxx-<short-name>` (or work in an Arena session targeting `v0.01`).
+   - Run `npm run version:next` so `v0.01.001` → `v0.01.002` across `package.json`, `package-lock.json`, and `index.html`.
+   - Open the PR with `[v0.01.002] <type>: <summary>`.
 
 ---
 
 ## 5. Release Tags & Cross-Platform Builds
 
-Release tags use exact SemVer prefixed with `v` (matching `package.json`):
+Push a matching tag (`v0.01.001` or `v0.1.1`) or run **Build desktop apps** manually via `workflow_dispatch`:
 
 ```bash
-git tag v0.2.0
-git push origin v0.2.0
+git tag v0.01.001
+git push origin v0.01.001
 ```
 
-Pushing a `v*` tag (or triggering **Build desktop apps** manually via `workflow_dispatch`) runs:
-
-1. **`.github/workflows/branch-naming.yml`** — verifies the tag matches `v<X.Y.Z>` and aligns with `package.json` and `index.html`.
-2. **`.github/workflows/desktop-builds.yml`** — builds native Windows (`.exe`), macOS (`.dmg` + `.zip`), and Linux (`.AppImage`) artifacts and uploads them for 30 days.
-
-Add code-signing credentials only through GitHub's encrypted Actions secrets; never commit certificates, private keys, notarization credentials, or tokens.
-
----
-
-## 6. Requirements Summary
-
-- **Repository development & CI:** Node.js **22.12+**
-- **Standalone browser runtime:** open `index.html` directly; no Node, server, or network required
-- **Packaged desktop recipients:** download and open the built app; no Node, npm, or internet connection required
+- **`.github/workflows/branch-naming.yml`** verifies the tag matches `package.json` and `index.html`.
+- **`.github/workflows/desktop-builds.yml`** builds native Windows (`.exe`), macOS (`.dmg` + `.zip`), and Linux (`.AppImage`) artifacts and uploads them for 30 days.
+- Store signing credentials only in GitHub's encrypted Actions secrets; never commit certificates, keys, or tokens.

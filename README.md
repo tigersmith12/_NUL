@@ -117,16 +117,16 @@ This disables hardware acceleration and unneeded Chromium background services. I
 
 NUL separates three version identifiers so app releases, deterministic rules, and saved worlds stay clear:
 
-- **App version (`v0.2.0`)** — tracked in `package.json` and displayed in `index.html` (`APP_VERSION`, header, controls bar, and footer); used in branch names, PR titles, and release tags.
+- **App / PR version (`v0.01.001`, SemVer `0.1.1` in `package.json`)** — displayed in `index.html` (`APP_VERSION`, header, controls bar, and footer) and used across branches, PRs, and release tags.
 - **Simulation ruleset (`BOOTSTRAP/0.1`)** — identifies the deterministic symbolic simulation rules.
 - **Snapshot format (`nul-resumable-world` `v1`)** — identifies the resumable save schema.
 
-Naming conventions (enforced in CI via `.github/workflows/branch-naming.yml` and locally via `npm run check:naming`; full details in `GITHUB.md`):
+Naming conventions (enforced in CI via `.github/workflows/branch-naming.yml` and locally via `npm run check:naming` / `npm test`; full details in `GITHUB.md`):
 
-- **Working branches:** `<type>/v<X.Y.Z>-<short-name>` (e.g., `feat/v0.2.1-artifact-cap`, `fix/v0.2.1-tray-restore`, `exp/v0.3.0-native-shell`)
-- **Release branches & tags:** `release/v<X.Y.Z>` and `v<X.Y.Z>`
-- **Pull request titles:** `[v<X.Y.Z>] <type>: <short summary>` (keeps PRs readable even when an automated tool locks the session branch name, such as `arena/*`)
-- **Quick generator:** `npm run branch:suggest -- feat short-name`
+- **Version-line branches:** `v0.01`, `v0.02`, …
+- **Working branches (`.xxx` placeholder):** `<type>/v0.01.xxx-<short-name>` (e.g., `feat/v0.01.xxx-artifact-cap`, `fix/v0.01.xxx-tray-restore`, `exp/v0.02.xxx-native-shell`)
+- **Pull requests (resolves `.xxx` → `.001`, `.002`, …):** `[v0.01.001] <type>: <short summary>` (or `<type>/v0.01.001-<short-name>`)
+- **Quick helpers:** `npm run branch:suggest -- feat short-name` · `npm run version:next` · `npm run version:set -- v0.02.001`
 
 ## Implementation
 

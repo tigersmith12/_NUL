@@ -27,5 +27,8 @@ jobs:
         with:
           node-version: 22
 
-      - name: Validate naming scheme and version alignment
+      - name: Run naming & integrity tests
+        run: npm test
+
+      - name: Validate active branch, PR title & version alignment
         run: node scripts/check-naming.mjs
