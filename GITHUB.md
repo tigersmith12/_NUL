@@ -36,7 +36,7 @@ Why `.xxx` on the branch? Because you never have to rename a working branch if P
 
 ### Trunk, Version-Line & Arena Session Branches
 
-- **Version-line branches (`v0.01`, `v0.02`, …):** Long-lived branches for each minor line where `.001`, `.002`, … PRs land.
+- **Version-line branches (`v1`, `v0.01`, `v0.02`, …):** Long-lived branches for each major/minor line where `.001`, `.002`, … PRs land.
 - **Trunk / reference branches (`main`, `Initial-reference`):** Exempt from `<type>/` prefixes.
 - **Arena session branches (`arena/<id>-<slug>`):** Arena locks each coding session to its auto-generated `arena/*` branch name. Those branches pass CI automatically and carry the resolved `v0.01.001` version in the PR title and app metadata. Once a PR merges on GitHub, the `arena/*` head branch can be deleted cleanly (or auto-deleted via GitHub **Settings → General → Automatically delete head branches**).
 
@@ -48,7 +48,7 @@ NUL tracks three distinct version numbers, and maps the padded display version c
 
 | Identifier | Current Value | Where It Lives | Purpose |
 | --- | --- | --- | --- |
-| **App / PR version** | `v0.01.001` (`0.1.1` in `package.json`) | `index.html` (`APP_VERSION = '0.01.001'`, header, controls, footer), `package.json` (`"0.1.1"`), PR titles, Git tags | Tracks the `<M>.<MM>.<PPP>` release line and sequential PR number (`0.1.1` ↔ `v0.01.001` keeps `npm`/`electron-builder` SemVer valid without leading-zero errors) |
+| **App / PR version** | `v0.01.002` (`0.1.2` in `package.json`) | `index.html` (`APP_VERSION = '0.01.002'`, header, controls, footer), `package.json` (`"0.1.2"`), PR titles, Git tags | Tracks the `<M>.<MM>.<PPP>` release line and sequential PR number (`0.1.2` ↔ `v0.01.002` keeps `npm`/`electron-builder` SemVer valid without leading-zero errors) |
 | **Simulation ruleset** | `BOOTSTRAP/0.1` | `index.html` (`RULESET_VERSION`, controls bar, footer, ontology exports) | Changes **only** when deterministic world/agent simulation mechanics change |
 | **Snapshot schema** | `1` (`nul-resumable-world`) | `index.html` (`SAVE_VERSION = 1`, `STORAGE_KEY = 'nul.world.autosave.v1'`) | Changes **only** on breaking saved-world JSON schema updates |
 

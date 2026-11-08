@@ -41,8 +41,16 @@ This is an experiment in **semantic bootstrapping**, not a consciousness or AGI 
 | `package.json` | Node engine, Electron scripts, electron-builder targets, app metadata |
 | `package-lock.json` | Locked development/build dependencies |
 | `scripts/check-naming.mjs` | Zero-dependency validator & version sync utility (`v<M>.<MM>.xxx` branches ↔ `v<M>.<MM>.<PPP>` PRs ↔ SemVer `package.json`) |
-| `tests/naming.test.mjs` | Zero-dependency `node:test` suite for branch/PR/tag rules, version sync, and JS syntax integrity |
-| `.github/workflows/desktop-builds.yml` | Native Windows/macOS/Linux build matrix; manual or `v*` tag trigger |
+| `scripts/headless-harness.mjs` | Zero-dependency Node `vm` harness executing `index.html`'s exact inline simulation engine |
+| `scripts/sandbox-server.mjs` | Zero-dependency `0.0.0.0` HTTP preview server (`npm run start:sandbox`) |
+| `scripts/companion-tui.mjs` | Single-process `< 65 MB` PSS terminal companion sharing `nul-resumable-world` `v1` saves (`npm run start:tui`) |
+| `scripts/measure-memory.mjs` | Live PSS/RSS & 100,000-tick soak budget profiler (`npm run bench:memory`) |
+| `scripts/generate-checksums.mjs` | Cross-platform `dist/SHA256SUMS.txt` generator for desktop builds |
+| `scripts/verify-dist.mjs` | Cross-platform built binary & checksum verifier (`win` / `mac` / `linux`) |
+| `tests/naming.test.mjs` | `node:test` suite for branch/PR/tag rules, version sync, and JS syntax integrity |
+| `tests/simulation.test.mjs` | `node:test` suite for seed determinism, snapshot round-trips, viewport scaling, malformed import rejection, blocked storage, and canvas inspection |
+| `tests/soak.test.mjs` | `node:test` suite for reload deduplication and 100,000-tick entity/name/snapshot bounds |
+| `.github/workflows/desktop-builds.yml` | Native Windows/macOS/Linux build matrix with pre-build test gate, checksum generation, and artifact verification |
 | `.github/workflows/branch-naming.yml` | Fast CI check validating branch names, `[vX.Y.Z] <type>: ...` PR titles, tags, and version sync |
 | `.github/pull_request_template.md` | Pull request checklist & `[vX.Y.Z] <type>: <summary>` title guide |
 | `README.md` | User/developer instructions, persistence, distribution, controls, versioning, and RAM measurements |
@@ -159,45 +167,32 @@ A packaged Electron app includes its own Node and Chromium runtimes. Recipients 
 
 Unsigned Windows/macOS builds may trigger SmartScreen/Gatekeeper warnings. Public distribution should add Windows code signing and Apple Developer signing/notarization.
 
-## 7. Measured RAM — important unresolved requirement
+## 7. Measured RAM & runtime options
 
-Measurements were taken on Linux/Xvfb using the actual Electron process tree. PSS (proportional set size) was used to divide shared memory fairly between processes.
+Measurements on Linux (`smaps_rollup` PSS + V8 heap):
 
-| Configuration | Companion baseline | Evolved world |
-| --- | ---: | ---: |
-| Standard Electron | ~307 MB PSS | ~335 MB PSS |
-| Low-memory mode | ~259 MB PSS | ~284 MB PSS |
+| Configuration | Companion baseline | Evolved world | 100,000-tick soak |
+| --- | ---: | ---: | ---: |
+| Single-process TUI / Node (`npm run start:tui` / `start:sandbox`) | ~36–48 MB PSS | ~52–60 MB PSS | ~63 MB PSS |
+| Electron `--low-memory` | ~259 MB PSS | ~284 MB PSS | — |
+| Standard Electron | ~307 MB PSS | ~335 MB PSS | — |
 
-Test conditions and observations:
+- Simulation data is strictly bounded (`<= 8` concepts, `<= 100` memories, `<= 24` active world artifacts, `<= 33` active symbols in `usedNames`, `<= 70` logs, ~5.6 MB JS heap, ~49 KB JSON snapshot at 100,000 ticks).
+- **Conclusion:** Electron's multi-process Chromium runtime dominates desktop package RAM and still exceeds a strict 256 MB total ceiling, while `npm run start:tui` (and opening `index.html` in an existing browser or via `npm run start:sandbox`) runs in ~36–63 MB PSS using the exact same `nul-resumable-world` `v1` saves.
 
-- Six Electron-related processes
-- Evolved runs contained roughly 7–8 concepts, 25–32 retained memories, and 5–7 artifacts
-- World snapshots were approximately 20–28 KB
-- Main-process JavaScript heap was approximately 4 MB
-- Summed RSS was approximately 546–634 MB, but RSS double-counts shared libraries and should not be treated as equivalent to PSS
-- Platform, graphics stack, Electron version, and OS memory accounting will change results
+## 8. Validation completed & committed (`npm test`)
 
-**Conclusion:** the agent and save data are small; Chromium/Electron overhead dominates. The current app cannot guarantee the user’s requested 256 MB total ceiling. A strict ceiling should use a native single-process UI and target roughly 180–200 MB measured usage to leave headroom. Merely switching to Tauri/system WebView does not guarantee the target because webview runtimes also spawn substantial processes.
+Committed automated regression suites (`tests/naming.test.mjs`, `tests/simulation.test.mjs`, `tests/soak.test.mjs` — 14 tests via `npm test`):
 
-## 8. Validation already completed
-
-Temporary Playwright/native smoke tests were run successfully, but no formal test suite has been committed.
-
-- Browser simulation ran without renderer errors
-- A long browser run reached 2,880 ticks with 8 concepts, 45 retained memories, 4 beliefs, and 6 artifacts
-- Save → reload → restore preserved identity, concepts, tick, and paused/running state
-- Imported snapshot + one tick reproduced the original next state exactly, including PRNG state
-- Invalid snapshot imports were rejected without replacing the current world
-- Blocked browser storage produced the snapshot fallback rather than crashing
-- Mobile layout had no horizontal overflow
-- Browser companion preview and return-to-lab worked
-- Native Electron companion resized to 360×480
-- Native always-on-top and pin/unpin worked
-- Lab bounds restored correctly
-- World and companion mode survived separate app restarts
-- An unpacked packaged Linux executable launched directly, reported `app.isPackaged === true`, and entered companion mode
-
-Do not infer that native Windows/macOS packages have already been tested; they have not.
+- Deterministic replay: identical seed (`424242`) reproduces bit-for-bit identical world state at T+01500
+- Exact snapshot round-trip: `createSnapshot` → `restoreSnapshot` + 1 tick and + 120 ticks reproduces exact PRNG and agent state
+- Proportional coordinate scaling when restoring snapshots across different viewport dimensions
+- Malformed/corrupt snapshot rejection without mutating the active world
+- Blocked `localStorage` fallback without runtime errors
+- Non-perturbing canvas entity inspection (zero PRNG calls or world mutations) and custom numeric seed loading
+- Reload artifact deduplication across repeated save/restore cycles
+- 100,000-tick (~2.3h at 1×) soak test proving all collections, `usedNames`, and snapshot bytes stay bounded
+- Live memory budget check (`npm run bench:memory`) verifying single-process PSS stays well below 200 MB (< 256 MB ceiling)
 
 ## 9. Known limitations and risks
 

@@ -35,11 +35,23 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Run simulation, soak & version checks
+        run: |
+          npm test
+          node scripts/check-naming.mjs
+
       - name: Install build dependencies
         run: npm ci
 
       - name: Build native packages
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
         run: npx electron-builder --${{ matrix.target }} --publish never
+
+      - name: Generate SHA-256 checksums & verify artifacts
+        run: |
+          node scripts/generate-checksums.mjs
+          node scripts/verify-dist.mjs ${{ matrix.target }}
 
       - name: Upload downloadable apps
         uses: actions/upload-artifact@v4
@@ -52,4 +64,5 @@ jobs:
             dist/*.AppImage
             dist/*.dmg
             dist/*.zip
+            dist/SHA256SUMS.txt
             dist/latest*.yml

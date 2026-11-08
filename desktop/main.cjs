@@ -11,7 +11,10 @@ if (lowMemory) {
   app.disableHardwareAcceleration();
   app.commandLine.appendSwitch('disable-background-networking');
   app.commandLine.appendSwitch('disable-component-update');
-  app.commandLine.appendSwitch('disable-features', 'MediaRouter,OptimizationHints,Translate');
+  app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
+  app.commandLine.appendSwitch('renderer-process-limit', '1');
+  app.commandLine.appendSwitch('js-flags', '--max-old-space-size=64');
+  app.commandLine.appendSwitch('disable-features', 'MediaRouter,OptimizationHints,Translate,SpellcheckServiceInit');
 }
 
 const singleInstance = app.requestSingleInstanceLock();
@@ -162,7 +165,8 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: true
+      sandbox: true,
+      spellcheck: false
     }
   });
 
