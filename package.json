@@ -3,8 +3,12 @@
   "version": "0.1.2",
   "private": true,
   "description": "An offline, non-LLM autonomous ontology lab and desktop companion.",
+  "homepage": "https://github.com/tigersmith12/_NUL",
   "main": "desktop/main.cjs",
-  "author": "NUL Experiment",
+  "author": {
+    "name": "NUL Experiment",
+    "email": "noreply@users.noreply.github.com"
+  },
   "license": "MIT",
   "engines": {
     "node": ">=22.12.0"
@@ -48,6 +52,7 @@
       "target": [
         "AppImage"
       ],
+      "artifactName": "${productName}-${version}-linux-${arch}.${ext}",
       "category": "Utility",
       "icon": "assets/icon.png"
     },
@@ -63,13 +68,18 @@
         "dmg",
         "zip"
       ],
+      "artifactName": "${productName}-${version}-mac-${arch}.${ext}",
       "category": "public.app-category.utilities",
       "icon": "assets/icon.png"
     },
     "nsis": {
+      "artifactName": "${productName}-${version}-win-setup.${ext}",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "runAfterFinish": true
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-win-portable.${ext}"
     }
   }
 }
