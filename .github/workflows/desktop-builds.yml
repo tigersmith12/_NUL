@@ -49,10 +49,21 @@ jobs:
         shell: bash
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ELECTRON_BUILDER_BINARIES_ALLOW_HTTP: "true"
+          ELECTRON_BUILDER_BINARIES_MIRROR: "http://127.0.0.1:18765/"
         run: |
+          node scripts/binaries-mirror.mjs > mirror.log 2>&1 &
+          MIRROR_PID=$!
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            curl --noproxy 127.0.0.1 -fsS http://127.0.0.1:18765/healthz >/dev/null 2>&1 && break
+            sleep 0.3
+          done
           set +e
           npx electron-builder --${{ matrix.target }} --publish never > build.log 2>&1
           code=$?
+          curl --noproxy 127.0.0.1 -fsS http://127.0.0.1:18765/shutdown >/dev/null 2>&1 || kill -9 "$MIRROR_PID" 2>/dev/null || true
+          cat mirror.log
           cat build.log
           if [ "$code" -ne 0 ]; then
             msg=$(tail -n 35 build.log | sed 's/%/%25/g; s/\r//g' | awk '{printf "%s%%0A", $0}')
