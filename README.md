@@ -2,7 +2,7 @@
 
 A standalone, non-LLM artificial-life experiment and desktop companion. For the browser version, open `index.html` in a modern browser; no installation, server, API key, model, or network connection is required.
 
-**GitHub import:** see `GITHUB.md`. **New assistant/session handoff:** start with `project.md`.
+**Git, branches & versioning:** see `GITHUB.md`. **New assistant/session handoff:** start with `project.md`.
 
 ## Desktop companion
 
@@ -112,6 +112,21 @@ This disables hardware acceleration and unneeded Chromium background services. I
 - **Reset** — replay the same seed
 - **New world** — generate a new seed
 - **Export ontology** — download the actual agent state as JSON
+
+## Versioning & branch naming
+
+NUL separates three version identifiers so app releases, deterministic rules, and saved worlds stay clear:
+
+- **App / PR version (`v0.01.001`, SemVer `0.1.1` in `package.json`)** — displayed in `index.html` (`APP_VERSION`, header, controls bar, and footer) and used across branches, PRs, and release tags.
+- **Simulation ruleset (`BOOTSTRAP/0.1`)** — identifies the deterministic symbolic simulation rules.
+- **Snapshot format (`nul-resumable-world` `v1`)** — identifies the resumable save schema.
+
+Naming conventions (enforced in CI via `.github/workflows/branch-naming.yml` and locally via `npm run check:naming` / `npm test`; full details in `GITHUB.md`):
+
+- **Version-line branches:** `v0.01`, `v0.02`, …
+- **Working branches (`.xxx` placeholder):** `<type>/v0.01.xxx-<short-name>` (e.g., `feat/v0.01.xxx-artifact-cap`, `fix/v0.01.xxx-tray-restore`, `exp/v0.02.xxx-native-shell`)
+- **Pull requests (resolves `.xxx` → `.001`, `.002`, …):** `[v0.01.001] <type>: <short summary>` (or `<type>/v0.01.001-<short-name>`)
+- **Quick helpers:** `npm run branch:suggest -- feat short-name` · `npm run version:next` · `npm run version:set -- v0.02.001`
 
 ## Implementation
 

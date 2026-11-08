@@ -1,44 +1,104 @@
-# Importing NUL into GitHub
+# GitHub, Versioning & Branch Naming Guide
 
-This project is ready to be hosted as a source repository. Application code is included; generated dependencies, desktop packages, local saves, logs, and signing credentials are excluded.
+This guide defines how branches, pull requests, versions, and release tags are named in **NUL** so every branch and PR clearly shows its version line and purpose.
 
-## Option A — push the included Git repository
+---
 
-The supplied project directory is initialized on `main` with an initial commit and **no remote configured**.
+## 1. How `.xxx` Branches & `.001` PRs Work Together
 
-1. Create an empty repository on GitHub. Do not initialize it with a README, license, or `.gitignore`, because those files already exist here.
-2. From this directory, run:
+NUL uses a **zero-padded version line with a `.xxx` placeholder on working branches** that resolves to a **sequential 3-digit PR number (`.001`, `.002`, …)** when opening a pull request:
 
-```bash
-git remote add origin https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
-git push -u origin main
+```text
+Version-line branch : v0.01
+Working branch      : <type>/v0.01.xxx-<short-name>
+Pull Request #1     : [v0.01.001] <type>: <short summary>   (or <type>/v0.01.001-<short-name>)
+Pull Request #2     : [v0.01.002] <type>: <short summary>
+...
+Next version line   : v0.02  ->  <type>/v0.02.xxx-<short-name>  ->  PRs start at v0.02.001
 ```
 
-If the remote repository already contains commits, reconcile them deliberately rather than force-pushing over work you need.
+Why `.xxx` on the branch? Because you never have to rename a working branch if PR numbers shift before merge—the concrete `.001`, `.002`, `.003` slot is locked in the PR and synced via `npm run version:next`.
 
-## Option B — upload the clean repo ZIP
+### Working Branch Prefixes
 
-The `nul-github-repo.zip` archive contains only the committed source tree, with no `.git`, `node_modules`, or `dist` directory.
+| Prefix | Purpose | Working Branch Example | Resolved PR Example |
+| --- | --- | --- | --- |
+| `feat/` | New simulation, UI, or desktop companion capability | `feat/v0.01.xxx-artifact-cap` | `[v0.01.002] feat: cap world artifacts` |
+| `fix/` | Bug fix, persistence repair, or window/tray fix | `fix/v0.01.xxx-tray-restore` | `[v0.01.003] fix: restore companion from tray` |
+| `perf/` | Memory footprint or rendering/runtime optimization | `perf/v0.02.xxx-memory-budget` | `[v0.02.001] perf: reduce idle memory budget` |
+| `refactor/` | Internal restructuring with unchanged behavior | `refactor/v0.01.xxx-canvas-split` | `[v0.01.004] refactor: isolate canvas renderer` |
+| `docs/` | Documentation, handoff notes, or workflow guides | `docs/v0.01.xxx-handoff-notes` | `[v0.01.005] docs: update handoff notes` |
+| `test/` | Deterministic snapshot, UI, or memory soak tests | `test/v0.01.xxx-snapshot-soak` | `[v0.01.006] test: add snapshot determinism suite` |
+| `build/` | Electron packaging, CI workflows, or dev tooling | `build/v0.01.xxx-branch-scheme` | `[v0.01.001] build: establish v0.01.xxx branch and PR naming scheme` |
+| `chore/` | Dependency updates or repository housekeeping | `chore/v0.01.xxx-deps-bump` | `[v0.01.007] chore: update build dependencies` |
+| `exp/` | Bounded artificial-life or native-runtime experiments | `exp/v0.02.xxx-native-shell` | `[v0.02.001] exp: prototype native companion shell` |
+| `release/` | Release preparation (`release/v0.01.xxx`) | `release/v0.01.xxx` | `[v0.01.008] release: prepare v0.01 release` |
 
-1. Extract the archive.
-2. Create an empty repository on GitHub.
-3. In GitHub's web interface, choose **Add file → Upload files** and upload the **contents** of the extracted `nul/` directory, including hidden paths such as `.github/`, `.gitignore`, and `.gitattributes`.
-4. Commit directly to `main`.
+### Trunk, Version-Line & Arena Session Branches
 
-The web-upload route creates a new GitHub commit rather than preserving the local commit metadata.
+- **Version-line branches (`v0.01`, `v0.02`, …):** Long-lived branches for each minor line where `.001`, `.002`, … PRs land.
+- **Trunk / reference branches (`main`, `Initial-reference`):** Exempt from `<type>/` prefixes.
+- **Arena session branches (`arena/<id>-<slug>`):** Arena locks each coding session to its auto-generated `arena/*` branch name. Those branches pass CI automatically and carry the resolved `v0.01.001` version in the PR title and app metadata. Once a PR merges on GitHub, the `arena/*` head branch can be deleted cleanly (or auto-deleted via GitHub **Settings → General → Automatically delete head branches**).
 
-## After import
+---
 
-- Read `README.md` for running, packaging, persistence, and RAM details.
-- Read `project.md` for architectural context, validation results, constraints, and unresolved decisions.
-- Enable GitHub Actions if your repository settings do not enable them automatically.
-- Run **Build desktop apps** manually with **workflow_dispatch**, or push a tag such as `v0.2.0` to build Windows, macOS, and Linux artifacts on native runners.
-- Add code-signing credentials only through your platform's encrypted secret storage. Do not commit certificates, private keys, notarization credentials, or tokens.
+## 2. Version Identifiers & SemVer Mapping
 
-## Requirements
+NUL tracks three distinct version numbers, and maps the padded display version cleanly to strict SemVer for `npm` and `electron-builder`:
 
-- Repository development/build: **Node.js 22.12+**
-- Browser runtime: open `index.html`; no Node required
-- Packaged desktop recipients: no Node, npm, or internet connection required
+| Identifier | Current Value | Where It Lives | Purpose |
+| --- | --- | --- | --- |
+| **App / PR version** | `v0.01.001` (`0.1.1` in `package.json`) | `index.html` (`APP_VERSION = '0.01.001'`, header, controls, footer), `package.json` (`"0.1.1"`), PR titles, Git tags | Tracks the `<M>.<MM>.<PPP>` release line and sequential PR number (`0.1.1` ↔ `v0.01.001` keeps `npm`/`electron-builder` SemVer valid without leading-zero errors) |
+| **Simulation ruleset** | `BOOTSTRAP/0.1` | `index.html` (`RULESET_VERSION`, controls bar, footer, ontology exports) | Changes **only** when deterministic world/agent simulation mechanics change |
+| **Snapshot schema** | `1` (`nul-resumable-world`) | `index.html` (`SAVE_VERSION = 1`, `STORAGE_KEY = 'nul.world.autosave.v1'`) | Changes **only** on breaking saved-world JSON schema updates |
 
-No GitHub remote has been configured and nothing has been published by the preparation process.
+---
+
+## 3. CLI Helpers & Automated CI Checks
+
+All helper commands use built-in Node.js modules only (no `npm install` needed):
+
+```bash
+# Increment to the next PR number in the current line (e.g. v0.01.001 -> v0.01.002)
+npm run version:next
+
+# Or set a new version line explicitly (updates package.json, package-lock.json & index.html)
+npm run version:set -- v0.02.001
+
+# Generate a compliant .xxx working branch + resolved PR title
+npm run branch:suggest -- feat artifact-memory-cap
+
+# Validate version sync and active branch / PR / tag naming
+npm run check:naming
+
+# Run the automated naming & syntax integrity test suite
+npm test
+```
+
+In GitHub Actions, `.github/workflows/branch-naming.yml` runs `npm test` and `node scripts/check-naming.mjs` on every pull request (`opened`, `edited`, `synchronize`, `reopened`), branch push, and `v*` tag push.
+
+---
+
+## 4. Setting Up `v0.01` After Merging PR #1
+
+1. Merge **PR #1 (`v0.01.001`)** on GitHub when ready.
+2. In GitHub's branch selector, create branch **`v0.01`** (and/or `main`) from the merged commit—and optionally set it as the default base branch under **Settings → General → Default branch**.
+3. For each subsequent change on `v0.01`:
+   - Branch locally as `<type>/v0.01.xxx-<short-name>` (or work in an Arena session targeting `v0.01`).
+   - Run `npm run version:next` so `v0.01.001` → `v0.01.002` across `package.json`, `package-lock.json`, and `index.html`.
+   - Open the PR with `[v0.01.002] <type>: <summary>`.
+
+---
+
+## 5. Release Tags & Cross-Platform Builds
+
+Push a matching tag (`v0.01.001` or `v0.1.1`) or run **Build desktop apps** manually via `workflow_dispatch`:
+
+```bash
+git tag v0.01.001
+git push origin v0.01.001
+```
+
+- **`.github/workflows/branch-naming.yml`** verifies the tag matches `package.json` and `index.html`.
+- **`.github/workflows/desktop-builds.yml`** builds native Windows (`.exe`), macOS (`.dmg` + `.zip`), and Linux (`.AppImage`) artifacts and uploads them for 30 days.
+- Store signing credentials only in GitHub's encrypted Actions secrets; never commit certificates, keys, or tokens.

@@ -40,12 +40,16 @@ This is an experiment in **semantic bootstrapping**, not a consciousness or AGI 
 | `assets/icon.png` | Generated 512×512 application/tray icon |
 | `package.json` | Node engine, Electron scripts, electron-builder targets, app metadata |
 | `package-lock.json` | Locked development/build dependencies |
+| `scripts/check-naming.mjs` | Zero-dependency validator & version sync utility (`v<M>.<MM>.xxx` branches ↔ `v<M>.<MM>.<PPP>` PRs ↔ SemVer `package.json`) |
+| `tests/naming.test.mjs` | Zero-dependency `node:test` suite for branch/PR/tag rules, version sync, and JS syntax integrity |
 | `.github/workflows/desktop-builds.yml` | Native Windows/macOS/Linux build matrix; manual or `v*` tag trigger |
-| `README.md` | User/developer instructions, persistence, distribution, controls, and RAM measurements |
+| `.github/workflows/branch-naming.yml` | Fast CI check validating branch names, `[vX.Y.Z] <type>: ...` PR titles, tags, and version sync |
+| `.github/pull_request_template.md` | Pull request checklist & `[vX.Y.Z] <type>: <summary>` title guide |
+| `README.md` | User/developer instructions, persistence, distribution, controls, versioning, and RAM measurements |
 | `LICENSE` | MIT license |
 | `.gitignore` | Excludes dependencies, build outputs, logs, OS metadata, and local signing secrets |
 | `.gitattributes` | Normalizes source line endings and marks binary formats |
-| `GITHUB.md` | GitHub import, upload, Actions, and publishing instructions |
+| `GITHUB.md` | Branch, PR, tag, and version naming scheme plus GitHub Actions release instructions |
 | `project.md` | This handoff and session-continuity guide |
 
 There is also a convenience archive outside the project directory at `/home/user/nul-desktop-source.zip`. The repository files are the canonical source going forward.
@@ -123,6 +127,21 @@ electron . --low-memory
 ```
 
 `NUL_LOW_MEMORY=1` is also supported. This mode disables hardware acceleration and selected Chromium background services. It is **not a hard RAM cap**.
+
+### Naming & version checks
+
+```bash
+npm test
+npm run check:naming
+npm run branch:suggest -- feat short-description
+npm run version:next
+```
+
+- **Version-line branches:** `v0.01`, `v0.02`, …
+- **Working branches:** `<type>/v<M>.<MM>.xxx-<short-name>` (`feat`, `fix`, `perf`, `refactor`, `docs`, `test`, `build`, `chore`, `exp`), plus `release/v<M>.<MM>.xxx`.
+- **Pull requests:** `.xxx` resolves to the 3-digit PR sequence number (`.001`, `.002`, …), e.g. `[v0.01.001] build: establish v0.01.xxx branch and PR naming scheme` (also accepts `<type>/v0.01.001-<short-name>`).
+- **Arena session branches:** `arena/<id>-<slug>` names are fixed by Arena; bump with `npm run version:next` (or `version:set`) and put the resolved `[v<M>.<MM>.<PPP>] <type>: <summary>` in the PR title.
+- **Version sync:** `package.json` / `package-lock.json` store SemVer without leading zeros (`"0.1.1"`), mapped 1-to-1 to `v0.01.001` in `index.html` (`APP_VERSION` + `#brand-version`, `#controls-version`, `#footer-version`). Simulation ruleset (`BOOTSTRAP/0.1`) and snapshot schema (`SAVE_VERSION = 1`) are tracked separately. See `GITHUB.md`.
 
 ### Build packages
 
