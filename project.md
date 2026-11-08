@@ -40,12 +40,15 @@ This is an experiment in **semantic bootstrapping**, not a consciousness or AGI 
 | `assets/icon.png` | Generated 512×512 application/tray icon |
 | `package.json` | Node engine, Electron scripts, electron-builder targets, app metadata |
 | `package-lock.json` | Locked development/build dependencies |
+| `scripts/check-naming.mjs` | Zero-dependency validator & helper for branch names, PR titles, tags, and `package.json` ↔ `index.html` version sync |
 | `.github/workflows/desktop-builds.yml` | Native Windows/macOS/Linux build matrix; manual or `v*` tag trigger |
-| `README.md` | User/developer instructions, persistence, distribution, controls, and RAM measurements |
+| `.github/workflows/branch-naming.yml` | Fast CI check validating branch names, `[vX.Y.Z] <type>: ...` PR titles, tags, and version sync |
+| `.github/pull_request_template.md` | Pull request checklist & `[vX.Y.Z] <type>: <summary>` title guide |
+| `README.md` | User/developer instructions, persistence, distribution, controls, versioning, and RAM measurements |
 | `LICENSE` | MIT license |
 | `.gitignore` | Excludes dependencies, build outputs, logs, OS metadata, and local signing secrets |
 | `.gitattributes` | Normalizes source line endings and marks binary formats |
-| `GITHUB.md` | GitHub import, upload, Actions, and publishing instructions |
+| `GITHUB.md` | Branch, PR, tag, and version naming scheme plus GitHub Actions release instructions |
 | `project.md` | This handoff and session-continuity guide |
 
 There is also a convenience archive outside the project directory at `/home/user/nul-desktop-source.zip`. The repository files are the canonical source going forward.
@@ -123,6 +126,17 @@ electron . --low-memory
 ```
 
 `NUL_LOW_MEMORY=1` is also supported. This mode disables hardware acceleration and selected Chromium background services. It is **not a hard RAM cap**.
+
+### Naming & version checks
+
+```bash
+npm run check:naming
+npm run branch:suggest -- feat short-description
+```
+
+- **Working branches:** `<type>/v<X.Y.Z>-<short-name>` (`feat`, `fix`, `perf`, `refactor`, `docs`, `test`, `build`, `chore`, `exp`), plus `release/v<X.Y.Z>`.
+- **Arena session branches:** `arena/<id>-<slug>` names are fixed by Arena; pair them with PR titles in the form `[v<X.Y.Z>] <type>: <short summary>`.
+- **Version sync:** `package.json` `"version"` (`0.2.0`) and `index.html` (`APP_VERSION` + `#brand-version`, `#controls-version`, `#footer-version`) must match; simulation ruleset (`BOOTSTRAP/0.1`) and snapshot schema (`SAVE_VERSION = 1`) are tracked separately. See `GITHUB.md`.
 
 ### Build packages
 

@@ -2,7 +2,7 @@
 
 A standalone, non-LLM artificial-life experiment and desktop companion. For the browser version, open `index.html` in a modern browser; no installation, server, API key, model, or network connection is required.
 
-**GitHub import:** see `GITHUB.md`. **New assistant/session handoff:** start with `project.md`.
+**Git, branches & versioning:** see `GITHUB.md`. **New assistant/session handoff:** start with `project.md`.
 
 ## Desktop companion
 
@@ -112,6 +112,21 @@ This disables hardware acceleration and unneeded Chromium background services. I
 - **Reset** — replay the same seed
 - **New world** — generate a new seed
 - **Export ontology** — download the actual agent state as JSON
+
+## Versioning & branch naming
+
+NUL separates three version identifiers so app releases, deterministic rules, and saved worlds stay clear:
+
+- **App version (`v0.2.0`)** — tracked in `package.json` and displayed in `index.html` (`APP_VERSION`, header, controls bar, and footer); used in branch names, PR titles, and release tags.
+- **Simulation ruleset (`BOOTSTRAP/0.1`)** — identifies the deterministic symbolic simulation rules.
+- **Snapshot format (`nul-resumable-world` `v1`)** — identifies the resumable save schema.
+
+Naming conventions (enforced in CI via `.github/workflows/branch-naming.yml` and locally via `npm run check:naming`; full details in `GITHUB.md`):
+
+- **Working branches:** `<type>/v<X.Y.Z>-<short-name>` (e.g., `feat/v0.2.1-artifact-cap`, `fix/v0.2.1-tray-restore`, `exp/v0.3.0-native-shell`)
+- **Release branches & tags:** `release/v<X.Y.Z>` and `v<X.Y.Z>`
+- **Pull request titles:** `[v<X.Y.Z>] <type>: <short summary>` (keeps PRs readable even when an automated tool locks the session branch name, such as `arena/*`)
+- **Quick generator:** `npm run branch:suggest -- feat short-name`
 
 ## Implementation
 

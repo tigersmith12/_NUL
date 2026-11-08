@@ -308,7 +308,7 @@
           <circle cx="16" cy="16" r="3" fill="currentColor" />
           <path d="M16 0v7M16 25v7M0 16h7M25 16h7" stroke="currentColor" stroke-width=".8" />
         </svg>
-        <div><div class="brand-name">NUL</div><div class="brand-sub">Autonomous ontology lab</div></div>
+        <div><div class="brand-name">NUL</div><div class="brand-sub">Autonomous ontology lab · <span id="brand-version">v0.2.0</span></div></div>
       </div>
       <div class="top-status"><span class="status-dot"></span>Symbolic system · 0 model calls · offline</div>
       <div class="top-actions">
@@ -340,7 +340,7 @@
         <div class="left-column">
           <section class="panel world-panel" aria-label="World simulation">
             <div class="companion-bar">
-              <span class="companion-pulse"></span><span class="companion-word">NUL</span><span class="companion-agent" id="companion-agent-name">unnamed</span>
+              <span class="companion-pulse"></span><span class="companion-word" id="companion-version-title" title="NUL v0.2.0 · BOOTSTRAP/0.1">NUL</span><span class="companion-agent" id="companion-agent-name">unnamed</span>
               <span class="companion-spacer"></span>
               <button class="desktop-api-only" id="companion-pin" title="Toggle always-on-top">Pin</button>
               <button id="companion-expand" title="Return to the full lab">Lab</button>
@@ -371,7 +371,7 @@
                 <button class="speed-button" data-speed="8">8×</button>
               </div>
               <div class="control-spacer"></div>
-              <span class="seed-label">RULESET <b>BOOTSTRAP/0.1</b></span>
+              <span class="seed-label">APP <b id="controls-version">v0.2.0</b> · RULESET <b>BOOTSTRAP/0.1</b></span>
               <button class="control-button" id="reset-button">Reset</button>
             </div>
           </section>
@@ -442,7 +442,7 @@
         <div class="bootstrap-card"><div class="bootstrap-label">Given by design</div><div class="bootstrap-items"><span>time</span><span>a body</span><span>4-number sensations</span><span>memory</span><span>energy</span><span>move / attend / combine</span></div></div>
         <div class="bootstrap-card"><div class="bootstrap-label">Not given</div><div class="bootstrap-items"><span>object names</span><span>categories</span><span>a dictionary</span><span>semantic values</span><span>world laws</span><span>a final objective</span></div></div>
       </section>
-      <footer class="footer"><span>NUL / bootstrap 0.1 / deterministic seeded simulation</span><span>Space: pause · N: perturb · Ctrl/⌘+Shift+C: companion · Not a consciousness claim</span></footer>
+      <footer class="footer"><span>NUL <span id="footer-version">v0.2.0</span> / bootstrap 0.1 / deterministic seeded simulation</span><span>Space: pause · N: perturb · Ctrl/⌘+Shift+C: companion · Not a consciousness claim</span></footer>
     </main>
   </div>
 
@@ -505,6 +505,8 @@
       const pad = (n, length = 5) => String(n).padStart(length, '0');
       const distance = (a, b) => Math.sqrt(a.reduce((sum, value, i) => sum + (value - b[i]) ** 2, 0) / a.length);
       const esc = (value) => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+      const APP_VERSION = '0.2.0';
+      const RULESET_VERSION = 'BOOTSTRAP/0.1';
       const STORAGE_KEY = 'nul.world.autosave.v1';
       const SAVE_FORMAT = 'nul-resumable-world';
       const SAVE_VERSION = 1;
@@ -632,7 +634,7 @@
       // ---------- Complete, resumable persistence ----------
       function createSnapshot() {
         return {
-          format: SAVE_FORMAT, version: SAVE_VERSION, savedAt: new Date().toISOString(),
+          format: SAVE_FORMAT, version: SAVE_VERSION, appVersion: APP_VERSION, savedAt: new Date().toISOString(),
           seed, rngState: rng.getState(), tick, totalEvents, nextSpawn,
           world: { width, height },
           signals, artifacts, particles, ripples, featureHistory, logs,
@@ -1251,7 +1253,9 @@
       dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
       $('#export-button').addEventListener('click', () => {
         const data = {
-          experiment: 'NUL / bootstrap 0.1',
+          experiment: `NUL v${APP_VERSION} / bootstrap 0.1`,
+          appVersion: APP_VERSION,
+          ruleset: RULESET_VERSION,
           architecture: 'Non-LLM symbolic artificial life; seeded rules + vector similarity + episodic memory',
           seed, tick, observerNote: 'Names and categories below were generated during this run. Observer metadata is not supplied to the agent.',
           agent: {
@@ -1301,6 +1305,12 @@
         if (event.code === 'Space') { event.preventDefault(); toggleRunning(); }
         if (event.key.toLowerCase() === 'n') perturb();
       });
+      ['#brand-version', '#controls-version', '#footer-version'].forEach(selector => {
+        const el = $(selector);
+        if (el) el.textContent = `v${APP_VERSION}`;
+      });
+      const companionTitle = $('#companion-version-title');
+      if (companionTitle) companionTitle.title = `NUL v${APP_VERSION} · ${RULESET_VERSION}`;
       new ResizeObserver(() => resizeCanvas()).observe(wrap);
       resizeCanvas();
       let restored = false;

@@ -17,7 +17,9 @@
     "dist:win": "electron-builder --win --publish never",
     "dist:mac": "electron-builder --mac --publish never",
     "dist:linux": "electron-builder --linux --publish never",
-    "pack": "electron-builder --dir"
+    "pack": "electron-builder --dir",
+    "check:naming": "node scripts/check-naming.mjs",
+    "branch:suggest": "node scripts/check-naming.mjs --suggest"
   },
   "devDependencies": {
     "electron": "^45.2.3",
