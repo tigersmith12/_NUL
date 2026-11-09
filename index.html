@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="NUL is a local, non-LLM artificial-life experiment in autonomous concept formation." />
+  <meta name="description" content="NUL is a local, non-LLM artificial-life experiment in autonomous world-definition and causal agency." />
   <title>NUL — A world before meaning</title>
   <style id="nul-inline-styles">
 :root {
@@ -400,6 +400,109 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
 }
+
+/* SUBSTRATE/0.2 — Canvas lenses, ontology modes, causal cycle & discovered operators */
+.panel-right-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.lens-modes, .ont-modes {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.lens-mode, .ont-mode {
+  padding: 5px 9px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color .18s ease, background .18s ease;
+}
+.lens-mode:hover, .ont-mode:hover { color: var(--text); }
+.lens-mode.active, .ont-mode.active {
+  color: var(--signal);
+  background: rgba(214,250,114,.09);
+}
+.ont-mode-bar {
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+  background: rgba(13,15,12,.55);
+}
+.ont-mode-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.causal-card {
+  padding: 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: rgba(20,24,18,.52);
+  margin-bottom: 18px;
+}
+.causal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--signal);
+}
+.causal-badge {
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+.causal-meta {
+  margin-top: 7px;
+  font-size: 11.5px;
+  line-height: 1.52;
+  color: var(--muted);
+}
+.causal-deltas {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  line-height: 1.55;
+  color: var(--faint);
+}
+.macro-list { display: grid; gap: 9px; margin-bottom: 18px; }
+.macro-card {
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: rgba(20,24,18,.48);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.macro-code { font-family: var(--mono); font-size: 12px; color: var(--signal); }
+.macro-vec { font-family: var(--mono); font-size: 9.5px; color: var(--muted); margin-top: 3px; }
+.macro-rel { font-family: var(--mono); font-size: 10px; color: var(--amber); text-align: right; white-space: nowrap; }
+@media (max-width: 540px) {
+  .lens-mode, .ont-mode { padding: 4px 7px; font-size: 8px; letter-spacing: .08em; }
+  .ont-mode-label { display: none; }
+}
   </style>
 </head>
 <body>
@@ -411,9 +514,9 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
           <circle cx="16" cy="16" r="3" fill="currentColor" />
           <path d="M16 0v7M16 25v7M0 16h7M25 16h7" stroke="currentColor" stroke-width=".8" />
         </svg>
-        <div><div class="brand-name">NUL</div><div class="brand-sub">Autonomous ontology lab · <span id="brand-version">v0.01.003</span></div></div>
+        <div><div class="brand-name">NUL</div><div class="brand-sub">Autonomous ontology lab · <span id="brand-version">v0.02.001</span></div></div>
       </div>
-      <div class="top-status"><span class="status-dot"></span>Symbolic system · 0 model calls · offline</div>
+      <div class="top-status"><span class="status-dot"></span>Symbolic &amp; causal system · 0 model calls · offline</div>
       <div class="top-actions">
         <button class="text-button" id="method-button">Method</button>
         <button class="text-button" id="save-button">Saves</button>
@@ -430,12 +533,12 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     <main>
       <section class="intro">
         <div>
-          <div class="eyebrow">Experiment 001 / Symbolic artificial life</div>
+          <div class="eyebrow">Experiment 002 / Agent-defined world &amp; causal bootstrapping</div>
           <h1>A world before <em>meaning.</em></h1>
-          <p class="intro-copy">One agent receives unnamed sensations. It must invent symbols, group recurring patterns, form preferences, and author a world of its own. You can observe its mind, but you cannot teach it what anything means.</p>
+          <p class="intro-copy">No pre-built objects, food pellets, or preset verbs exist here—only a continuous 4-channel numerical medium. One embodied agent segments boundaries, crystallizes its own motor operators, sculpts persistent structures on the canvas, and defines meaning with or without an ontology.</p>
         </div>
         <div class="constraints" aria-label="System constraints">
-          <span class="constraint">No LLM</span><span class="constraint">No training data</span><span class="constraint">No preset lexicon</span>
+          <span class="constraint">No LLM</span><span class="constraint">No preset objects</span><span class="constraint">Optional ontology</span>
         </div>
       </section>
 
@@ -443,24 +546,31 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
         <div class="left-column">
           <section class="panel world-panel" aria-label="World simulation">
             <div class="companion-bar">
-              <span class="companion-pulse"></span><span class="companion-word" id="companion-version-title" title="NUL v0.01.003· BOOTSTRAP/0.1">NUL</span><span class="companion-agent" id="companion-agent-name">unnamed</span>
+              <span class="companion-pulse"></span><span class="companion-word" id="companion-version-title" title="NUL v0.02.001· SUBSTRATE/0.2">NUL</span><span class="companion-agent" id="companion-agent-name">unnamed</span>
               <span class="companion-spacer"></span>
               <button class="desktop-api-only" id="companion-pin" title="Toggle always-on-top">Pin</button>
               <button id="companion-expand" title="Return to the full lab">Lab</button>
               <button class="desktop-api-only" id="companion-hide" title="Hide to tray">×</button>
             </div>
             <div class="panel-header">
-              <div class="panel-title"><span class="index">01</span> Unlabelled world</div>
-              <div class="run-state" id="run-state"><span class="status-dot"></span><span id="run-label">Running</span></div>
+              <div class="panel-title"><span class="index">01</span> Continuous medium</div>
+              <div class="panel-right-controls">
+                <div class="lens-modes" aria-label="Canvas lens">
+                  <button class="lens-mode active" data-lens="combined" title="Faint raw medium + agent-authored contours &amp; structures">Combined</button>
+                  <button class="lens-mode" data-lens="agent" title="Pure dark void; only what the agent has sensed, segmented, or built">Agent</button>
+                  <button class="lens-mode" data-lens="medium" title="Observer view of the raw 4-channel numerical field">Medium</button>
+                </div>
+                <div class="run-state" id="run-state"><span class="status-dot"></span><span id="run-label">Running</span></div>
+              </div>
             </div>
             <div class="canvas-wrap" id="canvas-wrap">
-              <canvas id="world" aria-label="A dark world containing one autonomous agent and unlabelled perturbations"></canvas>
-              <div class="world-readout"><span>T+<b id="world-time">00000</b></span><span>EVENTS <b id="event-count">00</b></span><button type="button" class="seed-badge" id="seed-badge" title="Enter or copy world seed">SEED <b id="seed-readout">—</b></button></div>
-              <button class="perturb-button" id="perturb-button" title="Add an unlabelled sensory event (N)">+ Perturb world</button>
+              <canvas id="world" aria-label="Continuous 4-channel numerical medium shaped and segmented by one autonomous agent"></canvas>
+              <div class="world-readout"><span>T+<b id="world-time">00000</b></span><span>LOCI <b id="event-count">00</b></span><button type="button" class="seed-badge" id="seed-badge" title="Enter or copy world seed">SEED <b id="seed-readout">—</b></button></div>
+              <button class="perturb-button" id="perturb-button" title="Inject an unlabelled 4-channel wavepacket (N)">+ Perturb medium</button>
               <div class="empty-state" id="empty-state">
                 <div class="empty-orbit"></div>
-                <div class="empty-title">Nothing has a name. Yet.</div>
-                <div class="empty-copy">The first sensation will arrive without an explanation.</div>
+                <div class="empty-title">Nothing has a boundary. Yet.</div>
+                <div class="empty-copy">The agent must segment raw numbers into contours and actions of its own.</div>
               </div>
               <div class="entity-inspector" id="entity-inspector" hidden aria-live="polite">
                 <div class="inspector-head">
@@ -474,7 +584,7 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
                 <div class="inspector-meta" id="inspector-meta"></div>
                 <div class="inspector-note">Observer view only · zero effect on agent state</div>
               </div>
-              <div class="canvas-foot">Observer rendering · click entity to inspect · click empty space or N to perturb</div>
+              <div class="canvas-foot">L: switch lens · click contour/structure to inspect · click empty medium or N to perturb</div>
             </div>
             <div class="controls">
               <button class="control-button primary" id="play-button">Pause</button>
@@ -486,7 +596,7 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
                 <button class="speed-button" data-speed="8">8×</button>
               </div>
               <div class="control-spacer"></div>
-              <span class="seed-label">APP <b id="controls-version">v0.01.003</b> · RULESET <b>BOOTSTRAP/0.1</b></span>
+              <span class="seed-label">APP <b id="controls-version">v0.02.001</b> · RULESET <b>SUBSTRATE/0.2</b></span>
               <button class="control-button" id="reset-button">Reset</button>
             </div>
           </section>
@@ -512,7 +622,7 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
             <div>
               <div class="identity-label">Persistent agent</div>
               <div class="identity-name" id="identity-name">unnamed</div>
-              <div class="identity-sub" id="identity-sub">No self-symbol has formed</div>
+              <div class="identity-sub" id="identity-sub">Pre-symbolic · gathering causal traces</div>
             </div>
           </div>
           <div class="stats">
@@ -520,6 +630,14 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
             <div class="stat"><div class="stat-value" id="stat-memories">0</div><div class="stat-label">Memories</div></div>
             <div class="stat"><div class="stat-value" id="stat-laws">0</div><div class="stat-label">Beliefs</div></div>
             <div class="stat"><div class="stat-value" id="stat-artifacts">0</div><div class="stat-label">Creations</div></div>
+          </div>
+          <div class="ont-mode-bar" aria-label="Ontology mode">
+            <span class="ont-mode-label">Ontology</span>
+            <div class="ont-modes">
+              <button class="ont-mode active" data-ontmode="emergent" title="Starts ontology-free; coins symbols only when causal trace pressure builds">Emergent</button>
+              <button class="ont-mode" data-ontmode="none" title="Strictly ontology-free forever; operates purely via causal deltas, macros &amp; canvas marks">None</button>
+              <button class="ont-mode" data-ontmode="imported" title="Test &amp; falsify an imported ontology against this seed's medium">Imported</button>
+            </div>
           </div>
           <nav class="tabs" aria-label="Mind sections">
             <button class="tab active" data-tab="mind">Mind</button>
@@ -529,23 +647,34 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
           <div class="tab-content">
             <div class="tab-pane" id="pane-mind">
               <div class="section-kicker">Current intent / self-selected</div>
-              <div class="intent-card"><div class="intent-raw" id="intent-raw">·</div><div class="intent-description" id="intent-description">No preference has formed. The agent is only capable of noticing.</div></div>
+              <div class="intent-card"><div class="intent-raw" id="intent-raw">·</div><div class="intent-description" id="intent-description">Sampling local 4-channel gradients before forming first purpose seed.</div></div>
+              <div class="section-kicker">Causal cycle / Purpose → Critic → Δ Evaluation</div>
+              <div class="causal-card" id="causal-cycle-card">
+                <div class="causal-head">
+                  <span id="causal-drive">drive: initializing</span>
+                  <span class="causal-badge" id="causal-acc">acc —</span>
+                </div>
+                <div class="causal-meta" id="causal-meta">Awaiting first 8-tick motor coupling episode.</div>
+                <div class="causal-deltas" id="causal-deltas">pred Δ [ · ]<br>real Δ [ · ]</div>
+              </div>
               <div class="section-kicker">Internal state / observer measurements</div>
-              <div class="drive"><div class="drive-head"><span>Energy</span><span id="energy-value">72%</span></div><div class="bar energy"><i id="energy-bar"></i></div></div>
-              <div class="drive"><div class="drive-head"><span>Novelty pull</span><span id="novelty-value">—</span></div><div class="bar"><i id="novelty-bar"></i></div></div>
-              <div class="drive"><div class="drive-head"><span>Model coherence</span><span id="coherence-value">0%</span></div><div class="bar"><i id="coherence-bar"></i></div></div>
-              <p class="observer-note">These labels belong to the observer, not the agent. They expose numerical state; they do not supply meanings or instructions.</p>
-              <div class="section-kicker" style="margin-top:20px">Recent episodic memory</div>
+              <div class="drive"><div class="drive-head"><span>Viability</span><span id="energy-value">72%</span></div><div class="bar energy"><i id="energy-bar"></i></div></div>
+              <div class="drive"><div class="drive-head"><span>Exploration pull</span><span id="novelty-value">—</span></div><div class="bar"><i id="novelty-bar"></i></div></div>
+              <div class="drive"><div class="drive-head"><span>Causal coherence</span><span id="coherence-value">0%</span></div><div class="bar"><i id="coherence-bar"></i></div></div>
+              <p class="observer-note">Observer labels expose numerical state; they supply zero meanings, categories, or instructions to the agent.</p>
+              <div class="section-kicker" style="margin-top:20px">Recent causal episodes</div>
               <div class="memory-list" id="memory-list"><div class="empty-panel">No episodes have been stored.</div></div>
             </div>
             <div class="tab-pane" id="pane-lexicon" hidden>
-              <div class="section-kicker">Self-generated symbol table</div>
+              <div class="section-kicker">Self-generated causal symbol table</div>
               <div class="concept-list" id="concept-list"></div>
             </div>
             <div class="tab-pane" id="pane-laws" hidden>
-              <div class="section-kicker">Inferred regularities</div>
+              <div class="section-kicker">Discovered motor operators (self-crystallized verbs)</div>
+              <div class="macro-list" id="macro-list"></div>
+              <div class="section-kicker">Inferred &amp; critic-tested causal regularities</div>
               <div class="law-list" id="law-list"></div>
-              <div class="section-kicker">Authored artifacts</div>
+              <div class="section-kicker">Sculpted canvas structures</div>
               <div class="artifact-list" id="artifact-list"></div>
             </div>
           </div>
@@ -554,7 +683,7 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
             <div class="ontology-actions">
               <button class="export-button" id="import-ontology-button" title="Import an exported ontology into this world">Import ontology ↙</button>
               <span class="ontology-divider" aria-hidden="true">·</span>
-              <button class="export-button" id="export-button" title="Download the agent's concepts, beliefs, and symbols as JSON">Export ontology ↗</button>
+              <button class="export-button" id="export-button" title="Download the agent's concepts, operators, beliefs, and symbols as JSON">Export ontology ↗</button>
               <input type="file" id="import-ontology-file" accept="application/json,.json" hidden />
             </div>
           </div>
@@ -562,36 +691,30 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
       </section>
 
       <section class="bootstrap" aria-label="Bootstrap boundary">
-        <div class="bootstrap-card"><div class="bootstrap-label">Given by design</div><div class="bootstrap-items"><span>time</span><span>a body</span><span>4-number sensations</span><span>memory</span><span>energy</span><span>move / attend / combine</span></div></div>
-        <div class="bootstrap-card"><div class="bootstrap-label">Not given</div><div class="bootstrap-items"><span>object names</span><span>categories</span><span>a dictionary</span><span>semantic values</span><span>world laws</span><span>a final objective</span></div></div>
+        <div class="bootstrap-card"><div class="bootstrap-label">Given by design</div><div class="bootstrap-items"><span>time</span><span>4D continuous medium</span><span>homeostasis</span><span>raw 6D motor coupling</span><span>causal delta traces</span><span>critic gate</span></div></div>
+        <div class="bootstrap-card"><div class="bootstrap-label">Not given</div><div class="bootstrap-items"><span>discrete objects</span><span>food pellets</span><span>action verbs</span><span>categories</span><span>a mandatory ontology</span><span>a final objective</span></div></div>
       </section>
-      <footer class="footer"><span>NUL <span id="footer-version">v0.01.003</span> / bootstrap 0.1 / deterministic seeded simulation</span><span>Space: pause · N: perturb · Ctrl/⌘+Shift+C: companion · Not a consciousness claim</span></footer>
+      <footer class="footer"><span>NUL <span id="footer-version">v0.02.001</span> / substrate 0.2 / deterministic seeded simulation</span><span>Space: pause · N: perturb · L: lens · Ctrl/⌘+Shift+C: companion · Not a consciousness claim</span></footer>
     </main>
   </div>
 
   <dialog id="method-dialog">
-    <div class="method-head"><h2>What is—and is not—emergent?</h2><button class="close-button" id="close-method" aria-label="Close method">×</button></div>
+    <div class="method-head"><h2>What is—and is not—emergent in SUBSTRATE/0.2?</h2><button class="close-button" id="close-method" aria-label="Close method">×</button></div>
     <div class="method-body">
       <h3>The honest boundary</h3>
-      <p>NUL is a <strong>non-LLM artificial-life simulation</strong>. It uses a seeded random generator, hand-written rules, vector similarity, episodic memory, and a symbolic grammar. It does not call an AI service, load a model, or use training data.</p>
-      <p>“Nothing” means <em>no predefined semantic ontology</em>: no object names, taxonomy, dictionary, labelled concepts, or final task. It cannot mean no implementation. A process without any mechanism would not run.</p>
-      <h3>The minimal bootstrap</h3>
+      <p>NUL is a <strong>non-LLM artificial-life simulation</strong>. It uses a seeded random generator, a continuous 4-channel reaction-diffusion/wave medium, causal delta traces, an internal critic gate, and optional symbolic compression. It does not call an AI service, load a model, or use training data.</p>
+      <h3>Zero pre-defined objects or verbs</h3>
       <ul>
-        <li>The world emits recurrent, unlabelled four-number patterns. Some patterns affect energy when contacted.</li>
-        <li>The agent groups similar sensations into prototypes and generates a unique glyph and phonetic symbol for each cluster.</li>
-        <li>Contact outcomes alter the valence attached to its own symbols. Those associations influence which pattern it attends to next.</li>
-        <li>Sequential memories become candidate regularities. Repeated transitions increase confidence; these are fallible beliefs, not necessarily true laws.</li>
-        <li>A built-in combine operator lets the agent join two of its concepts. It invents the artifact’s symbol and name; the engine merely executes the operator.</li>
+        <li><strong>No objects or food pellets:</strong> The world is solely a <code>32×20×4</code> numerical grid Φ(x,y,t) governed by a seed-derived conservative skew-symmetric coupling matrix and a sorted fast-to-plastic timescale spectrum.</li>
+        <li><strong>Agent-defined boundaries:</strong> Coherent contours on the canvas (<em>loci</em>) exist because the agent segmented local gradients into regions of interest.</li>
+        <li><strong>Self-crystallized operators:</strong> At the hardware level the agent only outputs continuous velocity and 4-channel field coupling. Repeatable gestures that produce reliable physical deltas crystallize into reusable motor operators (<code>μ01</code>, <code>μ02</code>, …).</li>
+        <li><strong>Habitat sculpting beyond energy:</strong> Slow plastic channels retain concentrated imprints, letting the agent carve calm shelters, waveguides, and persistent anchors that refract waves and sustain homeostatic viability without consuming disappearing items.</li>
       </ul>
-      <h3>Language</h3>
-      <p>The green transcript is the agent’s local symbol stream. The gray text is an <strong>observer translation supplied by the program</strong>. Roman-letter names are a display convenience; the underlying concepts are numerical prototypes. Generated glyphs are the agent’s more native notation.</p>
-      <h3>What drives it?</h3>
-      <p>Energy regulation, novelty-weighted attention, similarity clustering, and action selection are engineered. The particular concepts, names, preferences, inferred relationships, artifacts, and sequence of intents are produced during the run. There is no hidden list of objects waiting to be unlocked.</p>
-      <h3>Persistence &amp; ontology portability</h3>
-      <p>The complete world autosaves to browser-local storage every 120 ticks, on pause, and when the page closes. <strong>Saves</strong> provides manual restoration and portable JSON snapshots. Snapshots include the PRNG position and active world state, so imported runs continue deterministically. <strong>Export / Import ontology</strong> transfers the agent’s learned prototypes, symbols, beliefs, and operators into any world seed without overwriting the world’s physics or PRNG.</p>
-      <h3>A note on early AI</h3>
-      <p>Logic Theorist (1956), General Problem Solver (1959), and ELIZA (1966) demonstrated remarkable symbolic methods in constrained settings. They generally manipulated representations supplied by their authors; they did not autonomously define an open-ended world from raw experience. NUL borrows the transparent, local, symbolic spirit without claiming to reproduce those systems.</p>
-      <div class="method-callout">This is an experiment in representation and agency, not evidence of consciousness, understanding, or general intelligence. Export the ontology to inspect the actual state rather than trusting the narrative alone.</div>
+      <h3>Meaning with and without an ontology</h3>
+      <p>Every 8-tick cycle forms a self-selected <strong>PurposeSeed</strong>, deliberates across candidate traces/operators through an internal <strong>Critic</strong>, executes on the medium, and evaluates <code>predicted_delta</code> vs. <code>actual_delta</code>. Switch between <strong>Emergent</strong> (starts ontology-free and coins symbols only under trace compression pressure), <strong>None</strong> (strictly ontology-free forever), and <strong>Imported</strong> (tests transplanted beliefs against a new seed’s physics and falsifies broken ones).</p>
+      <h3>Canvas lenses</h3>
+      <p>Toggle <strong>Combined</strong>, <strong>Agent</strong> (pure black void except what the agent itself has sensed, segmented, or built), and <strong>Medium</strong> (raw observer 4-channel field) at any time without affecting the simulation.</p>
+      <div class="method-callout">This is an experiment in world-definition, causal agency, and representation—not evidence of consciousness or general intelligence. Export the ontology or snapshot to inspect exact numerical state.</div>
     </div>
   </dialog>
 
@@ -599,42 +722,54 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     <div class="method-head"><h2>Persistent world data</h2><button class="close-button" id="close-save" aria-label="Close saves">×</button></div>
     <div class="method-body">
       <h3>Browser autosave</h3>
-      <p>The current world is saved in this browser every 120 simulation ticks, whenever you pause, and when the page closes. Reloading resumes the latest saved state.</p>
+      <p>The current world—including the lossless 32-bit continuous medium—is saved in this browser every 120 ticks, whenever you pause, and when the page closes.</p>
       <div class="save-summary" id="save-summary">Checking browser storage…</div>
       <div class="data-actions">
         <button class="control-button primary" id="save-now-button">Save now</button>
         <button class="control-button" id="restore-button">Restore autosave</button>
       </div>
       <h3>Portable snapshot (complete world)</h3>
-      <p>Download a complete, resumable world—including its random-generator state—or import one later to resume deterministically.</p>
+      <p>Download a complete, resumable world—including lossless IEEE-754 field state and PRNG position—or import one later to resume deterministically.</p>
       <div class="data-actions">
         <button class="control-button" id="download-snapshot-button">Download world snapshot</button>
         <button class="control-button" id="import-snapshot-button">Import snapshot</button>
         <input type="file" id="import-file" accept="application/json,.json" hidden />
       </div>
-      <h3>Portable ontology (agent mind)</h3>
-      <p>Export or transplant the agent’s learned concepts, glyphs, valences, sequence beliefs, and operators into the current world without replacing its seed or PRNG.</p>
+      <h3>Portable ontology (agent mind &amp; operators)</h3>
+      <p>Export or transplant the agent’s learned causal concepts, motor operators, glyphs, and sequence beliefs into the current world seed (compatible with both <code>v0.01</code> and <code>v0.02</code> ontology JSON files).</p>
       <div class="data-actions">
         <button class="control-button" id="save-export-ontology-button">Export ontology</button>
         <button class="control-button" id="save-import-ontology-button">Import ontology</button>
       </div>
       <h3>Deterministic world seed</h3>
-      <p>Replay or share a specific initial world by entering an integer seed (<code>1</code>–<code>2147483647</code>).</p>
+      <p>Replay or share a specific initial medium and physics kernel by entering an integer seed (<code>1</code>–<code>2147483647</code>).</p>
       <div class="seed-row">
         <input type="number" class="seed-input" id="seed-input" min="1" max="2147483647" step="1" aria-label="World seed" />
         <button class="control-button" id="apply-seed-button">Load seed</button>
         <button class="control-button" id="copy-seed-button">Copy seed</button>
       </div>
-      <div class="method-callout">Browser storage is local to this browser and site. Clearing site data removes the autosave, and it does not synchronize across devices. Keep a downloaded snapshot for a durable backup. If storage is blocked by an embedded preview, use snapshots instead.</div>
+      <div class="method-callout">Browser storage is local to this browser and site. Keep a downloaded snapshot for a durable backup. If storage is blocked by an embedded preview, use snapshots instead.</div>
     </div>
   </dialog>
   <div class="toast" id="toast"></div>
 
   <script id="nul-inline-engine">
 /**
- * NUL Core Simulation, Persistence & Ontology Engine
+ * NUL Core Simulation, Persistence & Ontology Engine (v0.02.001 · SUBSTRATE/0.2)
  * Zero external dependencies, zero DOM requirements, deterministic seeded PRNG.
- * Works identically in Browser (<script src="src/engine.js">), Electron, and Node.js.
+ *
+ * SUBSTRATE/0.2 Architecture:
+ * - Zero pre-defined objects or high-level verbs: the world is a continuous 4-channel
+ *   numerical medium Φ(x,y,t) ∈ [-1,1]^4 governed by a seed-derived skew-symmetric
+ *   conservative coupling kernel + sorted fast-to-plastic timescale spectrum.
+ * - The agent autonomously segments coherent medium pockets into Loci contours,
+ *   couples with the medium via raw 6D motor vectors (dx, dy, a0..a3), crystallizes
+ *   repeatable gestures into reusable Macro-Operators, sculpts persistent slow-channel
+ *   structures, and inscribes external stigmergic marks onto the canvas.
+ * - Meaning is grounded in a 4-stage causal cycle (PurposeSeed -> Proposer/Critic/Synthesizer
+ *   -> Physical Execution -> Delta Evaluation) operable across three ontology modes:
+ *   'emergent' (starts ontology-free; coins symbols under causal trace compression pressure),
+ *   'none' (strictly ontology-free forever), and 'imported' (cross-world mind testing & falsification).
  */
 (function (root, factory) {
   const api = factory();
@@ -645,25 +780,37 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
 })(typeof globalThis !== 'undefined' ? globalThis : window, function () {
   'use strict';
 
-  const APP_VERSION = '0.01.003';
-  const RULESET_VERSION = 'BOOTSTRAP/0.1';
-  const STORAGE_KEY = 'nul.world.autosave.v1';
+  const APP_VERSION = '0.02.001';
+  const RULESET_VERSION = 'SUBSTRATE/0.2';
+  const STORAGE_KEY = 'nul.world.autosave.v2';
   const SAVE_FORMAT = 'nul-resumable-world';
-  const SAVE_VERSION = 1;
+  const SAVE_VERSION = 2;
   const ONTOLOGY_FORMAT = 'nul-ontology';
-  const ONTOLOGY_VERSION = 1;
+  const ONTOLOGY_VERSION = 2;
+
+  const GRID_W = 32;
+  const GRID_H = 20;
+  const CHANNELS = 4;
+  const FIELD_LEN = GRID_W * GRID_H * CHANNELS;
+  const CELLS_LEN = GRID_W * GRID_H;
 
   const MAX_CONCEPTS = 8;
   const MAX_ARTIFACTS = 24;
-  const MAX_MEMORIES = 100;
+  const MAX_LOCI = 16;
+  const MAX_MACROS = 8;
+  const MAX_TRACES = 22;
+  const MAX_MARKS = 18;
+  const MAX_MEMORIES = 60;
   const MAX_LOGS = 70;
   const MAX_TRAIL = 65;
   const MAX_FEATURE_HISTORY = 24;
-  const MAX_SIGNALS = 18;
-  const MAX_PARTICLES = 160;
-  const MAX_RIPPLES = 40;
+  const MAX_PARTICLES = 120;
+  const MAX_RIPPLES = 32;
+  const VALID_ONTOLOGY_MODES = ['emergent', 'none', 'imported'];
+  const VALID_CANVAS_LENSES = ['combined', 'agent', 'medium'];
 
   const clamp = (n, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, n));
+  const cloneData = (val) => (val === undefined ? undefined : JSON.parse(JSON.stringify(val)));
   const pad = (n, length = 5) => String(n).padStart(length, '0');
   const esc = (value) => String(value).replace(/[&<>'"]/g, (c) => ({
     '&': '&amp;',
@@ -673,15 +820,79 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     '"': '&quot;'
   }[c]));
 
-  // Allocation-free RMS feature distance (bit-for-bit identical to reduce/sqrt).
   function distance(a, b) {
     let sum = 0;
-    const len = a.length;
+    const len = Math.min(a.length, b.length);
+    if (len === 0) return 0;
     for (let i = 0; i < len; i++) {
       const diff = a[i] - b[i];
       sum += diff * diff;
     }
     return Math.sqrt(sum / len);
+  }
+
+  function vecNorm(a) {
+    let sum = 0;
+    for (let i = 0; i < a.length; i++) sum += a[i] * a[i];
+    return Math.sqrt(sum / a.length);
+  }
+
+  function cosineAlignment(a, b) {
+    let dot = 0;
+    let na = 0;
+    let nb = 0;
+    const len = Math.min(a.length, b.length);
+    for (let i = 0; i < len; i++) {
+      dot += a[i] * b[i];
+      na += a[i] * a[i];
+      nb += b[i] * b[i];
+    }
+    if (na < 1e-9 || nb < 1e-9) return 0;
+    return dot / Math.sqrt(na * nb);
+  }
+
+  // Lossless IEEE-754 Float32Array <-> Base64 (browser, Electron & Node compatible)
+  const B64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  const B64_LOOKUP = new Uint8Array(128);
+  for (let i = 0; i < B64_CHARS.length; i++) B64_LOOKUP[B64_CHARS.charCodeAt(i)] = i;
+
+  function encodeFloat32Base64(f32) {
+    const bytes = new Uint8Array(f32.buffer, f32.byteOffset, f32.byteLength);
+    let out = '';
+    const len = bytes.length;
+    for (let i = 0; i < len; i += 3) {
+      const b0 = bytes[i];
+      const b1 = i + 1 < len ? bytes[i + 1] : 0;
+      const b2 = i + 2 < len ? bytes[i + 2] : 0;
+      out += B64_CHARS[b0 >> 2];
+      out += B64_CHARS[((b0 & 3) << 4) | (b1 >> 4)];
+      out += i + 1 < len ? B64_CHARS[((b1 & 15) << 2) | (b2 >> 6)] : '=';
+      out += i + 2 < len ? B64_CHARS[b2 & 63] : '=';
+    }
+    return out;
+  }
+
+  function decodeFloat32Base64(b64, expectedFloats) {
+    if (typeof b64 !== 'string') return null;
+    const clean = b64.replace(/=+$/, '');
+    const byteLen = Math.floor((clean.length * 3) / 4);
+    if (byteLen !== expectedFloats * 4) return null;
+    const bytes = new Uint8Array(byteLen);
+    let p = 0;
+    for (let i = 0; i < clean.length; i += 4) {
+      const c0 = B64_LOOKUP[clean.charCodeAt(i) & 127];
+      const c1 = B64_LOOKUP[clean.charCodeAt(i + 1) & 127];
+      const c2 = i + 2 < clean.length ? B64_LOOKUP[clean.charCodeAt(i + 2) & 127] : 0;
+      const c3 = i + 3 < clean.length ? B64_LOOKUP[clean.charCodeAt(i + 3) & 127] : 0;
+      bytes[p++] = (c0 << 2) | (c1 >> 4);
+      if (p < byteLen) bytes[p++] = ((c1 & 15) << 4) | (c2 >> 2);
+      if (p < byteLen) bytes[p++] = ((c2 & 3) << 6) | c3;
+    }
+    const f32 = new Float32Array(bytes.buffer);
+    for (let i = 0; i < f32.length; i++) {
+      if (!Number.isFinite(f32[i])) return null;
+    }
+    return f32;
   }
 
   function mulberry32(initialSeed) {
@@ -706,7 +917,6 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     return { path, dot };
   }
 
-  // Deterministic fallback glyph derived from a symbol string without touching world PRNG.
   function deterministicGlyphFromText(text) {
     const str = String(text || 'nul');
     let h = 2166136261 >>> 0;
@@ -721,9 +931,7 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     };
     const coords = [];
     const count = 4 + (next() % 3);
-    for (let i = 0; i < count; i++) {
-      coords.push([pts[next() % 3], pts[next() % 3]]);
-    }
+    for (let i = 0; i < count; i++) coords.push([pts[next() % 3], pts[next() % 3]]);
     let path = `M${coords[0][0]} ${coords[0][1]}`;
     for (let i = 1; i < coords.length; i++) path += ` L${coords[i][0]} ${coords[i][1]}`;
     if ((next() % 100) > 52) path += ` L${coords[0][0]} ${coords[0][1]}`;
@@ -740,36 +948,55 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
 
   function validSnapshot(data) {
     const finite = Number.isFinite;
-    const vector = (value) => Array.isArray(value) && value.length === 4 && value.every(finite);
-    const point = (value) => Boolean(value && finite(value.x) && finite(value.y));
-    const numbers = (object, keys) => keys.every((key) => finite(object[key]));
+    const vec4 = (v) => Array.isArray(v) && v.length === 4 && v.every(finite);
+    const point = (v) => Boolean(v && finite(v.x) && finite(v.y));
+    const numbers = (obj, keys) => Boolean(obj && keys.every((k) => finite(obj[k])));
+
     if (!data || data.format !== SAVE_FORMAT || data.version !== SAVE_VERSION ||
       !Number.isInteger(data.seed) || !finite(data.rngState) || !Number.isInteger(data.tick) || data.tick < 0 ||
-      !Number.isInteger(data.totalEvents) || !finite(data.nextSpawn) ||
+      !Number.isInteger(data.totalEvents) ||
       !data.world || !finite(data.world.width) || data.world.width <= 0 || !finite(data.world.height) || data.world.height <= 0 ||
+      data.world.gridW !== GRID_W || data.world.gridH !== GRID_H ||
+      typeof data.fieldB64 !== 'string' || typeof data.imprintB64 !== 'string' ||
+      !data.worldPhysics || !Array.isArray(data.worldPhysics.tau) || data.worldPhysics.tau.length !== 4 ||
       !data.agent || !point(data.agent) || !Array.isArray(data.agent.usedNames) ||
       !data.agent.relationCounts || !data.agent.operators ||
-      !['signals', 'artifacts', 'particles', 'ripples', 'featureHistory', 'logs'].every((key) => Array.isArray(data[key]))) return false;
+      !['loci', 'artifacts', 'particles', 'ripples', 'featureHistory', 'logs'].every((k) => Array.isArray(data[k]))) {
+      return false;
+    }
+
+    if (data.signals !== undefined) {
+      if (!Array.isArray(data.signals) || !data.signals.every((s) => point(s) && vec4(s.features) && numbers(s, ['id', 'born']))) {
+        return false;
+      }
+    }
+
+    if (!decodeFloat32Base64(data.fieldB64, FIELD_LEN)) return false;
+    if (!decodeFloat32Base64(data.imprintB64, CELLS_LEN)) return false;
+
     const a = data.agent;
-    return a.usedNames.every((name) => typeof name === 'string') &&
+    return VALID_ONTOLOGY_MODES.includes(a.ontologyMode || 'emergent') &&
+      a.usedNames.every((name) => typeof name === 'string') &&
+      vec4(a.bodyState) && vec4(a.setpoint) &&
       numbers(a, ['vx', 'vy', 'energy', 'senseRange', 'interactions', 'lastInteractionTick', 'lastArtifactTick', 'novelty']) &&
-      Array.isArray(a.concepts) && Array.isArray(a.memories) && Array.isArray(a.beliefs) && Array.isArray(a.trail) &&
-      Object.values(a.operators).every((value) => typeof value === 'string') &&
-      a.concepts.every((c) => typeof c.name === 'string' && vector(c.prototype) && numbers(c, ['id', 'born', 'seen', 'contacts', 'valence', 'totalEffect', 'examples'])) &&
-      a.memories.every((m) => numbers(m, ['tick', 'conceptId', 'signalId', 'effect', 'energyAfter'])) &&
+      Array.isArray(a.concepts) && Array.isArray(a.memories) && Array.isArray(a.beliefs) &&
+      Array.isArray(a.macros) && Array.isArray(a.causalTraces) && Array.isArray(a.marks) && Array.isArray(a.trail) &&
+      Object.values(a.operators).every((v) => typeof v === 'string') &&
+      a.concepts.every((c) => typeof c.name === 'string' && vec4(c.prototype) && numbers(c, ['id', 'born', 'seen', 'contacts', 'valence', 'totalEffect', 'examples'])) &&
+      a.memories.every((m) => numbers(m, ['tick', 'effect', 'energyAfter'])) &&
       a.beliefs.every((b) => typeof b.key === 'string' && numbers(b, ['fromId', 'toId', 'count', 'born', 'confidence'])) &&
       a.trail.every((p) => Array.isArray(p) && p.length === 2 && p.every(finite)) &&
-      data.signals.every((s) => point(s) && vector(s.features) && numbers(s, ['id', 'vx', 'vy', 'effect', 'born', 'life', 'phase'])) &&
-      data.artifacts.every((item) => point(item) && vector(item.features) && Array.isArray(item.parents) && numbers(item, ['id', 'born', 'phase'])) &&
+      data.loci.every((l) => point(l) && vec4(l.features) && numbers(l, ['id', 'born', 'lastSeen', 'salience'])) &&
+      data.artifacts.every((item) => point(item) && vec4(item.features) && Array.isArray(item.parents) && numbers(item, ['id', 'born', 'phase'])) &&
       data.particles.every((p) => point(p) && numbers(p, ['vx', 'vy', 'age', 'max'])) &&
       data.ripples.every((r) => point(r) && numbers(r, ['age', 'max'])) &&
-      data.featureHistory.every(vector) &&
+      data.featureHistory.every(vec4) &&
       data.logs.every((entry) => finite(entry.tick) && typeof entry.raw === 'string' && typeof entry.translation === 'string');
   }
 
   function validateOntology(data) {
     const finite = Number.isFinite;
-    const vector = (value) => Array.isArray(value) && value.length === 4 && value.every((n) => finite(n) && n >= -0.01 && n <= 1.01);
+    const vector = (value) => Array.isArray(value) && value.length === 4 && value.every((n) => finite(n) && n >= -1.05 && n <= 1.05);
     if (!data || typeof data !== 'object') {
       return { valid: false, reason: 'This is not a valid NUL ontology JSON file.' };
     }
@@ -782,7 +1009,7 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     if (data.format !== undefined && data.format !== ONTOLOGY_FORMAT) {
       return { valid: false, reason: `Unsupported ontology format "${String(data.format)}".` };
     }
-    if (data.version !== undefined && data.version !== ONTOLOGY_VERSION) {
+    if (data.version !== undefined && data.version !== 1 && data.version !== ONTOLOGY_VERSION) {
       return { valid: false, reason: `Unsupported ontology schema version "${String(data.version)}".` };
     }
 
@@ -791,108 +1018,386 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
       return { valid: false, reason: 'Ontology JSON is missing agent.concepts or agent.beliefs.' };
     }
     if (a.concepts.length > MAX_CONCEPTS) {
-      return { valid: false, reason: `Ontology exceeds MAX_CONCEPTS (${MAX_CONCEPTS}).` };
+      return { valid: false, reason: `Ontology contains ${a.concepts.length} concepts (maximum is ${MAX_CONCEPTS}).` };
     }
 
     const conceptIds = new Set();
-    const conceptNames = new Set();
+    const names = new Set();
     for (const c of a.concepts) {
-      if (!c || typeof c.name !== 'string' || !c.name.trim() || c.name.length > 32 ||
-        !Number.isInteger(c.id) || c.id < 1 || !vector(c.prototype) ||
-        !['born', 'seen', 'contacts', 'valence', 'totalEffect', 'examples'].every((k) => finite(c[k]))) {
-        return { valid: false, reason: 'One or more ontology concepts have invalid structure or non-finite values.' };
+      if (!c || typeof c.name !== 'string' || c.name.trim().length < 2 || c.name.length > 24) {
+        return { valid: false, reason: 'Every concept in the ontology must have a valid symbol name.' };
       }
-      if (conceptIds.has(c.id) || conceptNames.has(c.name)) {
-        return { valid: false, reason: 'Ontology contains duplicate concept IDs or symbol names.' };
+      if (!Number.isInteger(c.id) || c.id < 1 || conceptIds.has(c.id)) {
+        return { valid: false, reason: 'Every concept must have a unique positive integer id.' };
+      }
+      if (names.has(c.name)) {
+        return { valid: false, reason: `Duplicate concept symbol "${c.name}" in ontology.` };
+      }
+      if (!vector(c.prototype)) {
+        return { valid: false, reason: `Concept "${c.name}" is missing a valid 4D prototype vector.` };
+      }
+      for (const k of ['born', 'seen', 'contacts', 'valence', 'totalEffect', 'examples']) {
+        if (!finite(c[k])) {
+          return { valid: false, reason: `Concept "${c.name}" is missing numeric field "${k}".` };
+        }
       }
       conceptIds.add(c.id);
-      conceptNames.add(c.name);
+      names.add(c.name);
     }
 
     for (const b of a.beliefs) {
-      if (!b || typeof b.key !== 'string' || !Number.isInteger(b.fromId) || !Number.isInteger(b.toId) ||
-        b.fromId === b.toId || !conceptIds.has(b.fromId) || !conceptIds.has(b.toId) ||
-        !['count', 'born', 'confidence'].every((k) => finite(b[k])) || b.count < 1) {
-        return { valid: false, reason: 'One or more ontology beliefs reference missing concepts or invalid counts.' };
+      if (!b || typeof b.key !== 'string' || !Number.isInteger(b.fromId) || !Number.isInteger(b.toId)) {
+        return { valid: false, reason: 'Every belief must specify key, fromId, and toId.' };
+      }
+      if (!conceptIds.has(b.fromId) || !conceptIds.has(b.toId)) {
+        return { valid: false, reason: `Belief "${b.key}" references a concept id not present in agent.concepts.` };
+      }
+      for (const k of ['count', 'born', 'confidence']) {
+        if (!finite(b[k])) return { valid: false, reason: `Belief "${b.key}" is missing numeric field "${k}".` };
       }
     }
 
-    const ops = a.generatedOperators || a.operators;
-    if (ops !== undefined) {
-      if (!ops || typeof ops !== 'object' ||
-        !['is', 'sequence', 'join', 'create'].every((k) => typeof ops[k] === 'string' && ops[k].trim().length > 0 && ops[k].length <= 6)) {
-        return { valid: false, reason: 'Ontology generatedOperators must include non-empty is, sequence, join, and create symbols.' };
+    if (a.generatedOperators !== undefined) {
+      const ops = a.generatedOperators;
+      if (!ops || typeof ops !== 'object' || !['is', 'sequence', 'join', 'create'].every((k) => typeof ops[k] === 'string' && ops[k].length > 0 && ops[k].length <= 8)) {
+        return { valid: false, reason: 'generatedOperators must define string symbols for is, sequence, join, and create.' };
       }
     }
 
-    if (a.selfSymbol !== undefined && a.selfSymbol !== null && (typeof a.selfSymbol !== 'string' || a.selfSymbol.length > 32)) {
-      return { valid: false, reason: 'Invalid agent selfSymbol in ontology JSON.' };
+    if (a.macros !== undefined) {
+      if (!Array.isArray(a.macros) || a.macros.length > MAX_MACROS) {
+        return { valid: false, reason: 'Ontology agent.macros exceeds bounds or is malformed.' };
+      }
     }
 
-    return { valid: true };
+    if (a.selfSymbol !== undefined && a.selfSymbol !== null && (typeof a.selfSymbol !== 'string' || a.selfSymbol.length > 24)) {
+      return { valid: false, reason: 'agent.selfSymbol must be null or a short string.' };
+    }
+
+    return { valid: true, reason: null };
   }
 
   function validOntology(data) {
     return validateOntology(data).valid;
   }
 
-  function defaultRandomSeed() {
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      return (crypto.getRandomValues(new Uint32Array(1))[0] % 900000) + 100000;
-    }
-    return (Math.floor(Math.random() * 900000) + 100000);
-  }
-
   function createEngine(options = {}) {
-    let width = Math.max(280, Number(options.width) || 800);
-    let height = Math.max(300, Number(options.height) || 520);
+    let width = Math.max(240, Math.floor(options.width || 800));
+    let height = Math.max(220, Math.floor(options.height || 520));
+    let hooks = options.hooks || {};
+
+    let seed = 0;
+    let rand = mulberry32(1);
+    let tick = 0;
     let running = true;
     let speed = 1;
     let logMode = 'dual';
-    let seed = 0;
-    let tick = 0;
+    let canvasLens = VALID_CANVAS_LENSES.includes(options.canvasLens) ? options.canvasLens : 'combined';
     let totalEvents = 0;
-    let nextSpawn = 12;
-    let signals = [];
+
+    let field = new Float32Array(FIELD_LEN);
+    let fieldNext = new Float32Array(FIELD_LEN);
+    let imprint = new Float32Array(CELLS_LEN);
+    let worldPhysics = null;
+
+    let loci = [];
     let artifacts = [];
     let particles = [];
     let ripples = [];
-    let featureHistory = [];
-    let agent = null;
     let logs = [];
-    let rng = () => 0.5;
+    let featureHistory = [];
+    let ids = { locus: 1, concept: 1, artifact: 1, macro: 1, mark: 1 };
+    let agent = null;
 
-    const hooks = {
-      onLog: options.onLog || null,
-      onIdentity: options.onIdentity || null,
-      onRender: options.onRender || null,
-      onAutosave: options.onAutosave || null,
-      onControls: options.onControls || null,
-      onWorldReset: options.onWorldReset || null,
-      onSnapshotRestored: options.onSnapshotRestored || null,
-      onOntologyImported: options.onOntologyImported || null
-    };
+    const r = (min = 0, max = 1) => min + rand() * (max - min);
+    const ri = (min, max) => Math.floor(r(min, max + 1));
+    const pick = (items) => items[Math.floor(rand() * items.length)];
 
-    const randomBetween = (a, b) => a + rng() * (b - a);
-    const pick = (array) => array[Math.floor(rng() * array.length)];
+    function setHooks(nextHooks) {
+      hooks = { ...hooks, ...nextHooks };
+    }
 
-    function freshAgent() {
+    function setDimensions(w, h) {
+      width = Math.max(240, Math.floor(w));
+      height = Math.max(220, Math.floor(h));
+      if (agent) {
+        agent.x = clamp(agent.x, 24, width - 24);
+        agent.y = clamp(agent.y, 24, height - 24);
+      }
+      return { width, height };
+    }
+
+    function setCanvasLens(lens) {
+      if (VALID_CANVAS_LENSES.includes(lens)) {
+        canvasLens = lens;
+        hooks.onRender?.();
+      }
+      return canvasLens;
+    }
+
+    function worldToGrid(x, y) {
+      return [
+        clamp((x / Math.max(1, width)) * (GRID_W - 1), 0, GRID_W - 1.001),
+        clamp((y / Math.max(1, height)) * (GRID_H - 1), 0, GRID_H - 1.001)
+      ];
+    }
+
+    function sampleFieldAt(x, y) {
+      const [gx, gy] = worldToGrid(x, y);
+      const x0 = Math.floor(gx);
+      const y0 = Math.floor(gy);
+      const tx = gx - x0;
+      const ty = gy - y0;
+      const x1 = Math.min(GRID_W - 1, x0 + 1);
+      const y1 = Math.min(GRID_H - 1, y0 + 1);
+
+      const i00 = (y0 * GRID_W + x0) * CHANNELS;
+      const i10 = (y0 * GRID_W + x1) * CHANNELS;
+      const i01 = (y1 * GRID_W + x0) * CHANNELS;
+      const i11 = (y1 * GRID_W + x1) * CHANNELS;
+
+      const channels = [0, 0, 0, 0];
+      for (let c = 0; c < 4; c++) {
+        const top = field[i00 + c] * (1 - tx) + field[i10 + c] * tx;
+        const bot = field[i01 + c] * (1 - tx) + field[i11 + c] * tx;
+        channels[c] = top * (1 - ty) + bot * ty;
+      }
+
+      const xl = Math.max(0, x0 - 1);
+      const xr = Math.min(GRID_W - 1, x0 + 1);
+      const yu = Math.max(0, y0 - 1);
+      const yd = Math.min(GRID_H - 1, y0 + 1);
+      let gradFast = 0;
+      let gradSlow = 0;
+      for (let c = 0; c < 4; c++) {
+        const dx = (field[(y0 * GRID_W + xr) * CHANNELS + c] - field[(y0 * GRID_W + xl) * CHANNELS + c]) * 0.5;
+        const dy = (field[(yd * GRID_W + x0) * CHANNELS + c] - field[(yu * GRID_W + x0) * CHANNELS + c]) * 0.5;
+        const g = Math.hypot(dx, dy);
+        if (c < 2) gradFast += g * 0.5;
+        else gradSlow += g * 0.5;
+      }
+
+      const imp = imprint[y0 * GRID_W + x0];
+      const features = channels.map((v) => clamp((v + 1) * 0.5, 0, 1));
+      const energyDensity = Math.sqrt((channels[0] ** 2 + channels[1] ** 2 + channels[2] ** 2 + channels[3] ** 2) * 0.25);
+
       return {
-        x: width / 2, y: height / 2, vx: 0, vy: 0, heading: 0,
-        energy: 0.72, senseRange: 146, concepts: [], memories: [], beliefs: [], artifacts,
-        totalArtifactsCreated: 0,
-        selfName: null, selfGlyph: null, selfBorn: null, interactions: 0, targetId: null, goal: null,
-        lastConceptId: null, lastInteractionTick: -999, lastArtifactTick: -150,
-        lastGoalKey: '', usedNames: new Set(), relationCounts: {}, trail: [],
-        operators: {
-          is: pick(['::', '≔', '↦']),
-          sequence: pick(['›', '⇝', '⊸']),
-          join: pick(['⊕', '⋈', '∧']),
-          create: pick(['≪', '✣', '∴'])
-        },
-        novelty: 0
+        gx,
+        gy,
+        channels,
+        features,
+        gradFast: clamp(gradFast, 0, 1),
+        gradSlow: clamp(gradSlow, 0, 1),
+        imprint: clamp(imp, 0, 1),
+        salience: clamp(energyDensity * 0.72 + (gradFast + gradSlow) * 0.48, 0, 1)
       };
     }
+
+    function createWorldPhysics() {
+      return {
+        tau: [
+          +r(0.17, 0.23).toFixed(4),
+          +r(0.09, 0.14).toFixed(4),
+          +r(0.028, 0.044).toFixed(4),
+          +r(0.007, 0.013).toFixed(4)
+        ],
+        diff: [
+          +r(0.16, 0.21).toFixed(4),
+          +r(0.11, 0.16).toFixed(4),
+          +r(0.038, 0.062).toFixed(4),
+          +r(0.008, 0.016).toFixed(4)
+        ],
+        skew: [
+          +r(-0.24, 0.24).toFixed(4),
+          +r(-0.18, 0.18).toFixed(4),
+          +r(-0.14, 0.14).toFixed(4),
+          +r(-0.20, 0.20).toFixed(4),
+          +r(-0.15, 0.15).toFixed(4),
+          +r(-0.18, 0.18).toFixed(4)
+        ],
+        pinning: [0.0, 0.04, 0.19, 0.38],
+        damping: [0.045, 0.035, 0.014, 0.004],
+        harmonics: Array.from({ length: 4 }, () => ({
+          gx: +r(4, GRID_W - 5).toFixed(2),
+          gy: +r(4, GRID_H - 5).toFixed(2),
+          vx: +r(-0.022, 0.022).toFixed(4),
+          vy: +r(-0.022, 0.022).toFixed(4),
+          freq: +r(0.014, 0.038).toFixed(4),
+          phase: +r(0, Math.PI * 2).toFixed(4),
+          weights: [+r(-1, 1).toFixed(3), +r(-1, 1).toFixed(3), +r(-0.55, 0.55).toFixed(3), +r(-0.25, 0.25).toFixed(3)]
+        }))
+      };
+    }
+
+    function depositWavepacket(gxCenter, gyCenter, amps, radiusCells = 2.8, imprintAmount = 0) {
+      const rCeil = Math.ceil(radiusCells * 2.1);
+      const xMin = Math.max(0, Math.floor(gxCenter - rCeil));
+      const xMax = Math.min(GRID_W - 1, Math.ceil(gxCenter + rCeil));
+      const yMin = Math.max(0, Math.floor(gyCenter - rCeil));
+      const yMax = Math.min(GRID_H - 1, Math.ceil(gyCenter + rCeil));
+      const denom = 2 * radiusCells * radiusCells;
+
+      for (let y = yMin; y <= yMax; y++) {
+        for (let x = xMin; x <= xMax; x++) {
+          const d2 = (x - gxCenter) ** 2 + (y - gyCenter) ** 2;
+          const w = Math.exp(-d2 / denom);
+          if (w < 0.015) continue;
+          const cellIdx = y * GRID_W + x;
+          const base = cellIdx * CHANNELS;
+          for (let c = 0; c < 4; c++) {
+            field[base + c] = clamp(field[base + c] + amps[c] * w, -1, 1);
+          }
+          if (imprintAmount > 0) {
+            imprint[cellIdx] = clamp(imprint[cellIdx] + imprintAmount * w, 0, 1);
+          }
+        }
+      }
+    }
+
+    function stepContinuousMedium() {
+      const { tau, diff, skew, pinning, damping, harmonics } = worldPhysics;
+      const [j01, j02, j03, j12, j13, j23] = skew;
+
+      for (let h = 0; h < harmonics.length; h++) {
+        const src = harmonics[h];
+        src.gx += src.vx;
+        src.gy += src.vy;
+        if (src.gx < 3 || src.gx > GRID_W - 4) src.vx *= -1;
+        if (src.gy < 3 || src.gy > GRID_H - 4) src.vy *= -1;
+        const osc = Math.sin(tick * src.freq + src.phase) * 0.044;
+        const ix = Math.round(clamp(src.gx, 1, GRID_W - 2));
+        const iy = Math.round(clamp(src.gy, 1, GRID_H - 2));
+        const base = (iy * GRID_W + ix) * CHANNELS;
+        for (let c = 0; c < 4; c++) {
+          field[base + c] = clamp(field[base + c] + src.weights[c] * osc, -1, 1);
+        }
+      }
+
+      for (let i = 0; i < artifacts.length; i++) {
+        const art = artifacts[i];
+        const [gx, gy] = worldToGrid(art.x, art.y);
+        const ix = Math.round(gx);
+        const iy = Math.round(gy);
+        const cell = iy * GRID_W + ix;
+        const base = cell * CHANNELS;
+        const s2 = (art.features[2] * 2 - 1) * 0.045;
+        const s3 = (art.features[3] * 2 - 1) * 0.055;
+        field[base + 2] = clamp(field[base + 2] + s2, -1, 1);
+        field[base + 3] = clamp(field[base + 3] + s3, -1, 1);
+        imprint[cell] = clamp(imprint[cell] + 0.008, 0, 1);
+      }
+
+      for (let y = 0; y < GRID_H; y++) {
+        const yu = y > 0 ? y - 1 : 0;
+        const yd = y < GRID_H - 1 ? y + 1 : GRID_H - 1;
+        const row = y * GRID_W;
+        const rowU = yu * GRID_W;
+        const rowD = yd * GRID_W;
+
+        for (let x = 0; x < GRID_W; x++) {
+          const xl = x > 0 ? x - 1 : 0;
+          const xr = x < GRID_W - 1 ? x + 1 : GRID_W - 1;
+          const cell = row + x;
+          const idx = cell * CHANNELS;
+          const iL = (row + xl) * CHANNELS;
+          const iR = (row + xr) * CHANNELS;
+          const iU = (rowU + x) * CHANNELS;
+          const iD = (rowD + x) * CHANNELS;
+
+          const u0 = field[idx];
+          const u1 = field[idx + 1];
+          const u2 = field[idx + 2];
+          const u3 = field[idx + 3];
+
+          const rot0 = j01 * u1 + j02 * u2 + j03 * u3;
+          const rot1 = -j01 * u0 + j12 * u2 + j13 * u3;
+          const rot2 = -j02 * u0 - j12 * u1 + j23 * u3;
+          const rot3 = -j03 * u0 - j13 * u1 - j23 * u2;
+
+          const barrierFactor = 1 - Math.min(0.68, (u2 * u2 + u3 * u3) * 0.45);
+
+          const lap0 = (field[iL] + field[iR] + field[iU] + field[iD] - 4 * u0) * barrierFactor;
+          const lap1 = (field[iL + 1] + field[iR + 1] + field[iU + 1] + field[iD + 1] - 4 * u1) * barrierFactor;
+          const lap2 = field[iL + 2] + field[iR + 2] + field[iU + 2] + field[iD + 2] - 4 * u2;
+          const lap3 = field[iL + 3] + field[iR + 3] + field[iU + 3] + field[iD + 3] - 4 * u3;
+
+          const du0 = tau[0] * (diff[0] * lap0 + rot0 - damping[0] * u0 - 0.28 * u0 * u0 * u0);
+          const du1 = tau[1] * (diff[1] * lap1 + rot1 + pinning[1] * u1 * (1 - u1 * u1) - damping[1] * u1 - 0.26 * u1 * u1 * u1);
+          const du2 = tau[2] * (diff[2] * lap2 + rot2 + pinning[2] * u2 * (1 - u2 * u2) - damping[2] * u2);
+          const du3 = tau[3] * (diff[3] * lap3 + rot3 + pinning[3] * u3 * (1 - u3 * u3) - damping[3] * u3);
+
+          fieldNext[idx] = clamp(u0 + du0, -1, 1);
+          fieldNext[idx + 1] = clamp(u1 + du1, -1, 1);
+          fieldNext[idx + 2] = clamp(u2 + du2, -1, 1);
+          fieldNext[idx + 3] = clamp(u3 + du3, -1, 1);
+
+          const structHold = Math.abs(fieldNext[idx + 2]) + Math.abs(fieldNext[idx + 3]);
+          imprint[cell] = clamp(imprint[cell] * (structHold > 0.30 ? 0.9995 : 0.9965), 0, 1);
+        }
+      }
+
+      const swap = field;
+      field = fieldNext;
+      fieldNext = swap;
+    }
+
+    function makeName(usedSet) {
+      const onsets = ['k', 's', 't', 'n', 'm', 'r', 'l', 'v', 'z', 'p', 'h', 'd', 'kr', 'st', 'vr', 'th'];
+      const nuclei = ['a', 'e', 'i', 'o', 'u', 'ae', 'io', 'oa'];
+      const codas = ['', '', '', 'n', 'r', 'l', 's', 'x', 'k'];
+      for (let attempt = 0; attempt < 90; attempt++) {
+        const syllables = rand() < 0.72 ? 2 : 3;
+        let out = '';
+        for (let i = 0; i < syllables; i++) out += pick(onsets) + pick(nuclei) + (i === syllables - 1 ? pick(codas) : '');
+        if (out.length >= 3 && out.length <= 8 && !usedSet.has(out)) {
+          usedSet.add(out);
+          return out;
+        }
+      }
+      const fallback = `nul${usedSet.size + 1}`;
+      usedSet.add(fallback);
+      return fallback;
+    }
+
+    function makeGlyph() {
+      const pts = [4, 14, 24];
+      const coords = [];
+      const count = ri(4, 6);
+      while (coords.length < count) {
+        const candidate = [pick(pts), pick(pts)];
+        const prev = coords[coords.length - 1];
+        if (!prev || prev[0] !== candidate[0] || prev[1] !== candidate[1]) coords.push(candidate);
+      }
+      let path = `M${coords[0][0]} ${coords[0][1]}`;
+      for (let i = 1; i < coords.length; i++) path += ` L${coords[i][0]} ${coords[i][1]}`;
+      if (rand() > 0.52) path += ` L${coords[0][0]} ${coords[0][1]}`;
+      const dot = rand() > 0.45 ? [pick(pts), pick(pts)] : null;
+      return { path, dot };
+    }
+
+    function addLog(raw, translation, kind = 'thought') {
+      logs.push({ tick, raw, translation, kind });
+      if (logs.length > MAX_LOGS) logs.shift();
+      hooks.onLog?.(logs[logs.length - 1]);
+    }
+
+    function addRipple(x, y, max = 38, color = 'positive') {
+      ripples.push({ x, y, age: 0, max, color });
+      if (ripples.length > MAX_RIPPLES) ripples.splice(0, ripples.length - MAX_RIPPLES);
+    }
+
+    function burst(x, y, color = 'positive', count = 10) {
+      for (let i = 0; i < count; i++) {
+        const angle = r(0, Math.PI * 2);
+        const sp = r(0.35, 1.8);
+        particles.push({ x, y, vx: Math.cos(angle) * sp, vy: Math.sin(angle) * sp, age: 0, max: ri(20, 42), color });
+      }
+      if (particles.length > MAX_PARTICLES) particles.splice(0, particles.length - MAX_PARTICLES);
+    }
+
+    const conceptById = (id) => (agent ? agent.concepts.find((c) => c.id === id) : undefined);
+    const locusById = (id) => loci.find((l) => l.id === id);
+    const macroById = (id) => (agent ? agent.macros.find((m) => m.id === id) : undefined);
 
     function pruneUnusedNames() {
       if (!agent) return;
@@ -900,397 +1405,917 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
       if (agent.selfName) active.add(agent.selfName);
       for (const c of agent.concepts) active.add(c.name);
       for (const a of artifacts) active.add(a.name);
-      const ordered = new Set();
-      for (const existing of agent.usedNames) {
-        if (active.has(existing)) ordered.add(existing);
+      const preserved = [];
+      for (const name of agent.usedNames) {
+        if (active.has(name)) preserved.push(name);
       }
-      for (const req of active) ordered.add(req);
-      agent.usedNames = ordered;
-    }
-
-    function setDimensions(nextWidth, nextHeight) {
-      const oldWidth = width;
-      const oldHeight = height;
-      width = Math.max(280, Number(nextWidth) || width);
-      height = Math.max(300, Number(nextHeight) || height);
-      if (agent && oldWidth && oldHeight && (oldWidth !== width || oldHeight !== height)) {
-        const sx = width / oldWidth;
-        const sy = height / oldHeight;
-        agent.x *= sx; agent.y *= sy;
-        for (const s of signals) { s.x *= sx; s.y *= sy; }
-        for (const a of artifacts) { a.x *= sx; a.y *= sy; }
-        for (const p of particles) { p.x *= sx; p.y *= sy; }
-        for (const r of ripples) { r.x *= sx; r.y *= sy; }
-        for (const point of agent.trail) { point[0] *= sx; point[1] *= sy; }
+      for (const name of active) {
+        if (!preserved.includes(name)) preserved.push(name);
       }
-      return { width, height };
+      agent.usedNames = new Set(preserved);
     }
 
-    function makeGlyph() {
-      const points = [4, 14, 24];
-      const count = 4 + Math.floor(rng() * 3);
-      const coords = [];
-      for (let i = 0; i < count; i++) coords.push([pick(points), pick(points)]);
-      let path = `M${coords[0][0]} ${coords[0][1]}`;
-      coords.slice(1).forEach((p) => { path += ` L${p[0]} ${p[1]}`; });
-      if (rng() > 0.52) path += ` L${coords[0][0]} ${coords[0][1]}`;
-      return { path, dot: rng() > 0.45 ? [pick(points), pick(points)] : null };
-    }
-
-    function makeName() {
-      const consonants = ['m', 'n', 's', 't', 'r', 'l', 'k', 'v', 'z', 'p', 'h', 'd', 'sh', 'th'];
-      const vowels = ['a', 'e', 'i', 'o', 'u', 'ae', 'ia', 'eo'];
-      let name = '';
-      do {
-        const syllables = 2 + (rng() > 0.72 ? 1 : 0);
-        name = '';
-        for (let i = 0; i < syllables; i++) name += pick(consonants) + pick(vowels);
-        name = name.replace(/([a-z])\1+/g, '$1');
-      } while (agent && agent.usedNames.has(name));
-      if (agent) agent.usedNames.add(name);
-      return name;
-    }
-
-    function addLog(raw, translation, kind = 'agent') {
-      logs.push({ tick, raw, translation, kind });
-      if (logs.length > MAX_LOGS) logs.shift();
-      if (hooks.onLog) hooks.onLog(logs);
-    }
-
-    function conceptById(id) {
-      return agent ? agent.concepts.find((c) => c.id === id) : undefined;
-    }
-
-    function signalById(id) {
-      return signals.find((s) => s.id === id);
-    }
-
-    function burst(x, y, color, count) {
-      for (let i = 0; i < count; i++) {
-        const angle = randomBetween(0, Math.PI * 2);
-        const velocity = randomBetween(0.2, 1.25);
-        particles.push({
-          x, y,
-          vx: Math.cos(angle) * velocity,
-          vy: Math.sin(angle) * velocity,
-          age: 0,
-          max: randomBetween(25, 70),
-          color
-        });
-      }
-      if (particles.length > MAX_PARTICLES) particles.splice(0, particles.length - MAX_PARTICLES);
-    }
-
-    function spawnSignal(opts = {}) {
-      const angle = randomBetween(0, Math.PI * 2);
-      const radius = opts.near ? randomBetween(55, 120) : randomBetween(75, 175);
-      const x = opts.x ?? clamp(agent.x + Math.cos(angle) * radius, 30, width - 30);
-      const y = opts.y ?? clamp(agent.y + Math.sin(angle) * radius, 55, height - 35);
-      let features;
-      if (opts.novel || featureHistory.length === 0 || rng() < 0.31) {
-        features = [rng(), rng(), rng(), rng()];
-      } else {
-        const parent = pick(featureHistory);
-        features = parent.map((v) => clamp(v + randomBetween(-0.105, 0.105), 0.02, 0.98));
-      }
-      const signal = {
-        id: ++totalEvents,
-        x, y,
-        vx: randomBetween(-0.075, 0.075),
-        vy: randomBetween(-0.075, 0.075),
-        features,
-        effect: randomBetween(-0.085, 0.135),
-        born: tick,
-        life: tick + Math.floor(randomBetween(250, 480)),
-        phase: randomBetween(0, Math.PI * 2),
-        conceptId: null,
-        touched: false,
-        manual: Boolean(opts.manual)
+    function createAgent(ontologyMode = 'emergent') {
+      const usedNames = new Set();
+      const sp = sampleFieldAt(width * 0.5, height * 0.5);
+      return {
+        x: width * 0.5,
+        y: height * 0.5,
+        vx: r(-0.35, 0.35),
+        vy: r(-0.35, 0.35),
+        energy: 0.72,
+        novelty: 0.65,
+        senseRange: 138,
+        ontologyMode: VALID_ONTOLOGY_MODES.includes(ontologyMode) ? ontologyMode : 'emergent',
+        bodyState: sp.channels.map((v) => clamp(v * 0.5, -1, 1)),
+        setpoint: sp.channels.map((v) => clamp(v * 0.35, -0.6, 0.6)),
+        selfName: null,
+        selfGlyph: null,
+        selfBorn: null,
+        usedNames,
+        concepts: [],
+        memories: [],
+        beliefs: [],
+        relationCounts: {},
+        macros: [],
+        causalTraces: [],
+        marks: [],
+        totalArtifactsCreated: 0,
+        falsificationsCount: 0,
+        operators: {
+          is: pick(['::', '≔', '≡']),
+          sequence: pick(['↦', '›', '→']),
+          join: pick(['⊕', '⊗', '⋈']),
+          create: pick(['∴', '⊢', '✣'])
+        },
+        goal: null,
+        targetId: null,
+        activeEpisode: null,
+        lastCycle: null,
+        interactions: 0,
+        lastInteractionTick: -999,
+        lastArtifactTick: -999,
+        trail: []
       };
-      signals.push(signal);
-      if (signals.length > MAX_SIGNALS) signals.shift();
-      featureHistory.push(features.slice());
-      if (featureHistory.length > MAX_FEATURE_HISTORY) featureHistory.shift();
-      ripples.push({ x, y, age: 0, max: 48, color: 'event' });
-      if (ripples.length > MAX_RIPPLES) ripples.shift();
-      return signal;
     }
 
-    function classify(signal) {
-      let nearest = null;
-      let nearestDistance = Infinity;
-      for (const concept of agent.concepts) {
-        const d = distance(signal.features, concept.prototype);
-        if (d < nearestDistance) {
-          nearestDistance = d;
-          nearest = concept;
+    // Allocation-free fast salience lookup for contour raymarching
+    function fastSalienceAt(x, y) {
+      const gx = clamp((x / Math.max(1, width)) * (GRID_W - 1), 0, GRID_W - 1.001);
+      const gy = clamp((y / Math.max(1, height)) * (GRID_H - 1), 0, GRID_H - 1.001);
+      const x0 = Math.floor(gx);
+      const y0 = Math.floor(gy);
+      const base = (y0 * GRID_W + x0) * CHANNELS;
+      const u0 = field[base];
+      const u1 = field[base + 1];
+      const u2 = field[base + 2];
+      const u3 = field[base + 3];
+      const ed = Math.sqrt((u0 * u0 + u1 * u1 + u2 * u2 + u3 * u3) * 0.25);
+      return ed * 0.82 + imprint[y0 * GRID_W + x0] * 0.25;
+    }
+
+    function computeLocusContour(cx, cy, baseSalience) {
+      const radii = [];
+      const threshold = Math.max(0.08, baseSalience * 0.52);
+      for (let k = 0; k < 8; k++) {
+        const angle = (k / 8) * Math.PI * 2;
+        const dx = Math.cos(angle);
+        const dy = Math.sin(angle);
+        let rad = 12;
+        for (let step = 12; step <= 42; step += 10) {
+          if (fastSalienceAt(cx + dx * step, cy + dy * step) >= threshold) rad = step;
+          else break;
+        }
+        radii.push(rad);
+      }
+      return radii;
+    }
+
+    function matchConceptForLocus(features, causalDelta = null) {
+      if (!agent || agent.ontologyMode === 'none' || !agent.concepts.length) return null;
+      let best = null;
+      let bestScore = Infinity;
+      for (const c of agent.concepts) {
+        const featDist = distance(features, c.prototype);
+        const causalDist = causalDelta && Array.isArray(c.causalPrototype)
+          ? distance(causalDelta, c.causalPrototype)
+          : featDist;
+        const combined = causalDelta ? featDist * 0.45 + causalDist * 0.55 : featDist;
+        if (combined < bestScore) {
+          bestScore = combined;
+          best = c;
         }
       }
-      const threshold = 0.27;
-      if (!nearest || (nearestDistance > threshold && agent.concepts.length < MAX_CONCEPTS)) {
-        const index = agent.concepts.length + 1;
-        const concept = {
-          id: index,
-          name: makeName(),
-          glyph: makeGlyph(),
-          prototype: signal.features.slice(),
-          born: tick,
-          seen: 0,
-          contacts: 0,
-          valence: 0,
-          totalEffect: 0,
-          examples: 1
-        };
-        agent.concepts.push(concept);
-        nearest = concept;
-        nearestDistance = 0;
-        addLog(
-          `${concept.name} ${agent.operators.is} [${signal.features.map((v) => Math.round(v * 9)).join('·')}]`,
-          `A sensation is differentiated from the void. Its new symbol is “${concept.name}.”`
-        );
-        burst(signal.x, signal.y, 'concept', 13);
-      } else {
-        nearest.examples++;
-        const rate = Math.min(0.22, 1 / (nearest.examples + 2));
-        nearest.prototype = nearest.prototype.map((v, i) => v + (signal.features[i] - v) * rate);
-      }
-      nearest.seen++;
-      signal.conceptId = nearest.id;
-      agent.novelty = clamp(nearestDistance / 0.5);
-      return nearest;
+      return best && bestScore < 0.29 ? best : null;
     }
 
-    function setGoal(type, concept, description) {
-      const key = type + ':' + (concept ? concept.id : 0);
-      const rawName = concept ? concept.name : '?';
-      agent.goal = {
-        type,
-        conceptId: concept ? concept.id : null,
-        raw: `${rawName} ${agent.operators.sequence} ${type === 'restore' ? '+' : type === 'wait' ? '·' : '?'}`,
-        description,
-        key
-      };
-      if (agent.lastGoalKey && agent.lastGoalKey !== key && type === 'restore') {
-        addLog(agent.goal.raw, description);
-      }
-      agent.lastGoalKey = key;
-    }
+    function segmentLocalMedium() {
+      const rings = [
+        [0, 0],
+        [0.48, 0], [-0.48, 0], [0, 0.48], [0, -0.48],
+        [0.78, 0.55], [-0.78, 0.55], [0.78, -0.55], [-0.78, -0.55],
+        [0.25, -0.85], [-0.25, 0.85]
+      ];
 
-    function chooseGoal() {
-      const available = signals.filter((s) => !s.touched && tick - s.born > 3);
-      if (!available.length) {
-        agent.targetId = null;
-        setGoal('wait', null, 'Attend to whatever arrives next; no object is preferred.');
-        return;
-      }
-      let best = null;
-      let bestUtility = -Infinity;
-      let bestNovelty = 0;
-      for (const signal of available) {
-        const concept = signal.conceptId ? conceptById(signal.conceptId) : null;
-        const d = Math.hypot(signal.x - agent.x, signal.y - agent.y);
-        let nearestPrototypeDistance = 1;
-        if (agent.concepts.length) {
-          for (const c of agent.concepts) {
-            const pd = distance(signal.features, c.prototype);
-            if (pd < nearestPrototypeDistance) nearestPrototypeDistance = pd;
+      for (let i = 0; i < rings.length; i++) {
+        const px = clamp(agent.x + rings[i][0] * agent.senseRange * 0.82, 24, width - 24);
+        const py = clamp(agent.y + rings[i][1] * agent.senseRange * 0.82, 24, height - 24);
+        const sample = sampleFieldAt(px, py);
+
+        if (sample.salience < 0.14 && sample.imprint < 0.20) continue;
+
+        let cx = px;
+        let cy = py;
+        let bestS = sample;
+        const stepPx = 14;
+        for (const [ox, oy] of [[stepPx, 0], [-stepPx, 0], [0, stepPx], [0, -stepPx]]) {
+          const candX = clamp(cx + ox, 24, width - 24);
+          const candY = clamp(cy + oy, 24, height - 24);
+          const cs = sampleFieldAt(candX, candY);
+          if (cs.salience > bestS.salience + 0.012) {
+            cx = candX;
+            cy = candY;
+            bestS = cs;
           }
         }
-        const novelty = concept ? clamp(1 / (1 + concept.seen * 0.17)) : clamp(nearestPrototypeDistance * 2.2);
-        const valence = concept ? concept.valence : 0;
-        const need = (1 - agent.energy) * Math.max(0, valence) * 1.4;
-        const aversion = valence < -0.18 && agent.energy < 0.65 ? valence * 1.2 : valence * 0.25;
-        const utility = novelty * 0.62 + aversion + need - d / 700 + rng() * 0.08;
-        if (utility > bestUtility) {
-          best = signal;
-          bestUtility = utility;
-          bestNovelty = novelty;
+
+        let existing = null;
+        let nearestDist = Infinity;
+        for (const l of loci) {
+          const d = Math.hypot(l.x - cx, l.y - cy);
+          if (d < 44 && d < nearestDist) {
+            nearestDist = d;
+            existing = l;
+          }
+        }
+
+        const matchedConcept = matchConceptForLocus(bestS.features, existing?.causalDelta || null);
+
+        if (existing) {
+          existing.vx = (cx - existing.x) * 0.25;
+          existing.vy = (cy - existing.y) * 0.25;
+          existing.x = +(existing.x * 0.72 + cx * 0.28).toFixed(2);
+          existing.y = +(existing.y * 0.72 + cy * 0.28).toFixed(2);
+          existing.features = existing.features.map((v, k) => +(v * 0.65 + bestS.features[k] * 0.35).toFixed(4));
+          existing.salience = +bestS.salience.toFixed(4);
+          existing.sculpted = +Math.max(existing.sculpted || 0, bestS.imprint).toFixed(4);
+          if (tick - existing.lastSeen >= 18) {
+            existing.contour = computeLocusContour(existing.x, existing.y, bestS.salience);
+          }
+          existing.lastSeen = tick;
+          existing.conceptId = matchedConcept ? matchedConcept.id : (agent.ontologyMode === 'none' ? null : existing.conceptId);
+        } else {
+          const contour = computeLocusContour(cx, cy, bestS.salience);
+          const newLocus = {
+            id: ids.locus++,
+            x: +cx.toFixed(2),
+            y: +cy.toFixed(2),
+            vx: 0,
+            vy: 0,
+            features: bestS.features.map((v) => +v.toFixed(4)),
+            causalDelta: null,
+            salience: +bestS.salience.toFixed(4),
+            sculpted: +bestS.imprint.toFixed(4),
+            contour,
+            born: tick,
+            lastSeen: tick,
+            probedCount: 0,
+            conceptId: matchedConcept ? matchedConcept.id : null,
+            phase: +r(0, Math.PI * 2).toFixed(3)
+          };
+          loci.push(newLocus);
+          totalEvents++;
+          featureHistory.push(newLocus.features.slice());
+          if (featureHistory.length > MAX_FEATURE_HISTORY) featureHistory.shift();
         }
       }
-      agent.targetId = best.id;
-      agent.novelty = bestNovelty;
-      const concept = best.conceptId ? conceptById(best.conceptId) : null;
-      if (concept && concept.valence > 0.18 && agent.energy < 0.52) {
-        setGoal('restore', concept, `Attend to “${concept.name}”; past contact with this self-named pattern restored energy.`);
-      } else if (concept && concept.seen > 4 && bestNovelty < 0.3) {
-        setGoal('revisit', concept, `Revisit “${concept.name}” and test whether its stored value remains stable.`);
-      } else if (concept) {
-        setGoal('inspect', concept, `Inspect the pattern currently associated with “${concept.name}.”`);
+
+      for (let i = loci.length - 1; i >= 0; i--) {
+        const l = loci[i];
+        const d = Math.hypot(l.x - agent.x, l.y - agent.y);
+        if (d < agent.senseRange * 0.9 && tick - l.lastSeen > 18) {
+          const check = sampleFieldAt(l.x, l.y);
+          if (check.salience < 0.08 && check.imprint < 0.14) {
+            loci.splice(i, 1);
+            continue;
+          }
+          l.salience = +check.salience.toFixed(4);
+          l.lastSeen = tick;
+        }
+      }
+
+      if (loci.length > MAX_LOCI) {
+        loci.sort((a, b) => (b.sculpted * 40 + b.lastSeen) - (a.sculpted * 40 + a.lastSeen));
+        loci.length = MAX_LOCI;
+      }
+    }
+
+    function updateViabilityAndBody(localSample, motorCoupling, motionMag) {
+      const prevEnergy = agent.energy;
+      let homeostaticError = 0;
+      for (let c = 0; c < 4; c++) {
+        const ambient = localSample.channels[c];
+        const reaction = motorCoupling[c] * 0.035;
+        agent.bodyState[c] = clamp(
+          agent.bodyState[c] + (ambient - agent.bodyState[c]) * 0.045 - reaction + (agent.setpoint[c] - agent.bodyState[c]) * 0.018,
+          -1,
+          1
+        );
+        const diff = agent.bodyState[c] - agent.setpoint[c];
+        homeostaticError += diff * diff;
+      }
+      homeostaticError = Math.sqrt(homeostaticError * 0.25);
+
+      const fastShear = localSample.gradFast;
+      const slowStructure = Math.abs(localSample.channels[2]) * 0.5 + Math.abs(localSample.channels[3]) * 0.5;
+      const shelterBonus = slowStructure > 0.18 && fastShear < 0.34 ? 0.0017 * (0.45 + localSample.imprint) : 0;
+      const resonanceBonus = homeostaticError < 0.28 ? (0.28 - homeostaticError) * 0.0020 : -(homeostaticError - 0.34) * 0.0038;
+      const metabolicLoad = agent.energy > 0.72 ? (agent.energy - 0.72) * 0.0048 : 0;
+      const effortCost = (vecNorm(motorCoupling) * 0.0014) + (motionMag * 0.00042) + 0.00042 + metabolicLoad;
+      const shearDrain = fastShear > 0.38 ? (fastShear - 0.38) * 0.0052 : 0;
+
+      agent.energy = clamp(agent.energy + shelterBonus + resonanceBonus - effortCost - shearDrain, 0.08, 1);
+      return agent.energy - prevEnergy;
+    }
+
+    function randomGesture() {
+      return {
+        biasAngle: +r(-Math.PI, Math.PI).toFixed(3),
+        thrust: +r(0.25, 0.95).toFixed(3),
+        coupling: [
+          +r(-0.85, 0.85).toFixed(3),
+          +r(-0.85, 0.85).toFixed(3),
+          +r(-0.95, 0.95).toFixed(3),
+          +r(-0.95, 0.95).toFixed(3)
+        ]
+      };
+    }
+
+    function mutateGesture(base) {
+      return {
+        biasAngle: +(base.biasAngle + r(-0.55, 0.55)).toFixed(3),
+        thrust: +clamp(base.thrust + r(-0.22, 0.22), 0.1, 1).toFixed(3),
+        coupling: base.coupling.map((v) => +clamp(v + r(-0.32, 0.32), -1, 1).toFixed(3))
+      };
+    }
+
+    function formPurposeSeed() {
+      const unprobed = loci.filter((l) => l.probedCount < 2);
+      const sculptedLoci = loci.filter((l) => l.sculpted > 0.25);
+
+      if (agent.energy < 0.44) {
+        return {
+          drive: 'stabilize',
+          targetDelta: [-0.18, -0.14, 0.22, 0.28],
+          locusId: sculptedLoci[0]?.id ?? loci[0]?.id ?? null,
+          explorationGuidance: 0.22,
+          summary: 'Dampen fast shear & reinforce calm slow-channel equilibrium'
+        };
+      }
+
+      if (unprobed.length > 0 && rand() < 0.55) {
+        unprobed.sort((a, b) => b.salience - a.salience);
+        const target = unprobed[0];
+        return {
+          drive: 'probe',
+          targetDelta: [0.24, -0.20, 0.08, 0.05],
+          locusId: target.id,
+          explorationGuidance: 0.65,
+          summary: `Test causal response of segmented locus #${pad(target.id, 2)}`
+        };
+      }
+
+      if (loci.length > 0 && (agent.macros.length > 0 || tick > 45) && rand() < 0.66) {
+        const anchor = sculptedLoci.length > 0 ? pick(sculptedLoci) : pick(loci);
+        return {
+          drive: 'sculpt',
+          targetDelta: [0.04, 0.08, 0.32, 0.42],
+          locusId: anchor.id,
+          explorationGuidance: 0.38,
+          summary: `Sculpt persistent slow-channel structure near locus #${pad(anchor.id, 2)}`
+        };
+      }
+
+      return {
+        drive: 'explore',
+        targetDelta: [0.15, 0.15, 0.12, 0.16],
+        locusId: loci[0]?.id ?? null,
+        explorationGuidance: 0.78,
+        summary: 'Traverse unmapped canvas medium & segment new regions'
+      };
+    }
+
+    function deliberateAndStartEpisode(localSample) {
+      const purpose = formPurposeSeed();
+      const proposals = [];
+
+      for (const m of agent.macros) {
+        const align = cosineAlignment(m.meanDelta, purpose.targetDelta);
+        proposals.push({
+          source: 'macro',
+          macroId: m.id,
+          label: m.code || `μ${pad(m.id, 2)}`,
+          gesture: m.gesture,
+          predictedDelta: m.meanDelta.slice(),
+          alignment: align,
+          reliability: m.reliability,
+          viabilityBias: m.viabilityEffect,
+          failures: m.failures || 0
+        });
+      }
+
+      let bestTrace = null;
+      let bestTraceScore = -Infinity;
+      for (const tr of agent.causalTraces) {
+        const ctxSim = 1 - distance(localSample.features, tr.contextFeatures);
+        const goalAlign = cosineAlignment(tr.actualDelta, purpose.targetDelta);
+        const score = ctxSim * 0.45 + goalAlign * 0.55;
+        if (score > bestTraceScore) {
+          bestTraceScore = score;
+          bestTrace = tr;
+        }
+      }
+      if (bestTrace) {
+        proposals.push({
+          source: 'trace',
+          macroId: bestTrace.macroId || null,
+          label: bestTrace.macroId ? `μ${pad(bestTrace.macroId, 2)}` : 'trace:Δ',
+          gesture: mutateGesture(bestTrace.gesture),
+          predictedDelta: bestTrace.actualDelta.slice(),
+          alignment: cosineAlignment(bestTrace.actualDelta, purpose.targetDelta),
+          reliability: bestTrace.accuracy,
+          viabilityBias: bestTrace.viabilityDelta * 8,
+          failures: bestTrace.accuracy < 0.4 ? 1 : 0
+        });
+      }
+
+      const expGesture = randomGesture();
+      if (purpose.drive === 'sculpt') {
+        expGesture.coupling[2] = +r(0.50, 0.98).toFixed(3);
+        expGesture.coupling[3] = +r(0.55, 0.99).toFixed(3);
+      } else if (purpose.drive === 'stabilize') {
+        expGesture.coupling[0] = +(-localSample.channels[0] * 0.65).toFixed(3);
+        expGesture.coupling[1] = +(-localSample.channels[1] * 0.65).toFixed(3);
+        expGesture.coupling[3] = +r(0.35, 0.75).toFixed(3);
+      }
+      proposals.push({
+        source: 'explore',
+        macroId: null,
+        label: 'explore:raw',
+        gesture: expGesture,
+        predictedDelta: expGesture.coupling.map((v, k) => +(v * (k >= 2 ? 0.24 : 0.22)).toFixed(4)),
+        alignment: cosineAlignment(expGesture.coupling, purpose.targetDelta),
+        reliability: 0.45,
+        viabilityBias: 0,
+        failures: 0
+      });
+
+      let winner = proposals[0];
+      let bestGateScore = -Infinity;
+      let criticRejections = 0;
+
+      for (const p of proposals) {
+        const failurePenalty = p.failures * 0.18;
+        const energyRiskPenalty = agent.energy < 0.38 && p.viabilityBias < -0.01 ? 0.35 : 0;
+        const explorationBonus = p.source === 'explore' ? purpose.explorationGuidance * 0.28 : 0;
+        const gateScore = p.alignment * 0.52 + p.reliability * 0.32 + p.viabilityBias * 0.25 + explorationBonus - failurePenalty - energyRiskPenalty;
+        p.gateScore = +gateScore.toFixed(3);
+        if (failurePenalty > 0.2 || energyRiskPenalty > 0) criticRejections++;
+        if (gateScore > bestGateScore) {
+          bestGateScore = gateScore;
+          winner = p;
+        }
+      }
+
+      const targetLocus = purpose.locusId ? locusById(purpose.locusId) : null;
+      agent.targetId = targetLocus ? targetLocus.id : null;
+
+      const criticNote = criticRejections > 0
+        ? `Gated ${proposals.length} proposals (${criticRejections} penalized for delta error/risk)`
+        : `Validated ${proposals.length} proposals across ${agent.causalTraces.length} causal traces`;
+
+      const targetConcept = targetLocus?.conceptId ? conceptById(targetLocus.conceptId) : null;
+      if (agent.ontologyMode === 'none' || (!targetConcept && !winner.macroId)) {
+        const dVec = purpose.targetDelta.map((v) => (v >= 0 ? `+${v.toFixed(1)}` : v.toFixed(1))).join(',');
+        agent.goal = {
+          raw: `Δ[${dVec}] ${agent.operators.sequence} ${winner.label}`,
+          description: `${purpose.summary} · ${criticNote}.`
+        };
       } else {
-        setGoal('unknown', null, 'Approach a sensation that does not yet belong to a named concept.');
+        const symLabel = targetConcept ? targetConcept.name : `loc#${pad(targetLocus?.id || 0, 2)}`;
+        agent.goal = {
+          raw: `${agent.selfName || '∅'} ${agent.operators.sequence} ${symLabel} (${winner.label})`,
+          description: `${purpose.summary} using ${winner.label} · ${criticNote}.`
+        };
       }
+
+      agent.novelty = clamp(purpose.explorationGuidance * 0.7 + (1 - winner.reliability) * 0.3, 0.08, 0.98);
+
+      agent.activeEpisode = {
+        startTick: tick,
+        ticksLeft: 8,
+        startX: agent.x,
+        startY: agent.y,
+        purpose,
+        proposalLabel: winner.label,
+        macroId: winner.macroId,
+        locusId: targetLocus ? targetLocus.id : null,
+        gesture: winner.gesture,
+        predictedDelta: winner.predictedDelta,
+        startSample: localSample,
+        startEnergy: agent.energy,
+        proposalsCount: proposals.length,
+        criticNote,
+        prevConceptId: targetConcept ? targetConcept.id : null
+      };
     }
 
-    function perceive() {
-      for (const signal of signals) {
-        if (signal.conceptId || signal.touched) continue;
-        const d = Math.hypot(signal.x - agent.x, signal.y - agent.y);
-        if (d < agent.senseRange) classify(signal);
+    function maybeCompressCausalTracesIntoOntology(trace, targetLocus) {
+      if (agent.ontologyMode === 'none') return null;
+
+      let matched = null;
+      let bestDist = Infinity;
+      for (const c of agent.concepts) {
+        const dFeat = distance(trace.contextFeatures, c.prototype);
+        const dCausal = Array.isArray(c.causalPrototype)
+          ? distance(trace.actualDelta, c.causalPrototype)
+          : dFeat;
+        const jointDist = dFeat * 0.42 + dCausal * 0.58;
+        if (jointDist < bestDist) {
+          bestDist = jointDist;
+          matched = c;
+        }
       }
+
+      if (matched && bestDist < 0.26) {
+        const causalErr = Array.isArray(matched.causalPrototype)
+          ? distance(trace.actualDelta, matched.causalPrototype)
+          : 0;
+        if (causalErr > 0.46 && agent.concepts.length < MAX_CONCEPTS && matched.contacts >= 3) {
+          const splitConcept = {
+            id: ids.concept++,
+            name: makeName(agent.usedNames),
+            glyph: makeGlyph(),
+            prototype: trace.contextFeatures.slice(),
+            causalPrototype: trace.actualDelta.slice(),
+            born: tick,
+            seen: 1,
+            contacts: 1,
+            valence: clamp(trace.viabilityDelta * 12, -1, 1),
+            totalEffect: trace.viabilityDelta,
+            examples: 1
+          };
+          agent.concepts.push(splitConcept);
+          if (targetLocus) targetLocus.conceptId = splitConcept.id;
+          addLog(
+            `${matched.name} ≠ ${splitConcept.name} ${agent.operators.is} Δ!`,
+            `Critic split “${matched.name}” → coined “${splitConcept.name}” after divergent causal response.`
+          );
+          return splitConcept;
+        }
+
+        const n = matched.examples + 1;
+        matched.prototype = matched.prototype.map((v, i) => +((v * matched.examples + trace.contextFeatures[i]) / n).toFixed(4));
+        const baseCausal = Array.isArray(matched.causalPrototype) ? matched.causalPrototype : trace.actualDelta;
+        matched.causalPrototype = baseCausal.map((v, i) => +((v * matched.examples + trace.actualDelta[i]) / n).toFixed(4));
+        matched.examples = n;
+        matched.seen++;
+        matched.contacts++;
+        matched.totalEffect = +(matched.totalEffect + trace.viabilityDelta).toFixed(4);
+        matched.valence = clamp(matched.valence * 0.76 + clamp(trace.viabilityDelta * 14 + (trace.structuralGain || 0) * 0.45, -1, 1) * 0.24, -1, 1);
+        if (targetLocus) targetLocus.conceptId = matched.id;
+        return matched;
+      }
+
+      const pressureThreshold = agent.ontologyMode === 'imported' ? 6 : 12;
+      if (agent.causalTraces.length < pressureThreshold) return null;
+
+      let clusterCount = 0;
+      for (const other of agent.causalTraces) {
+        const d = distance(trace.contextFeatures, other.contextFeatures) * 0.45 + distance(trace.actualDelta, other.actualDelta) * 0.55;
+        if (d < 0.26) clusterCount++;
+      }
+      if (clusterCount < 3) return null;
+
+      if (agent.concepts.length >= MAX_CONCEPTS) {
+        if (matched) {
+          matched.seen++;
+          matched.contacts++;
+          if (targetLocus) targetLocus.conceptId = matched.id;
+        }
+        return matched;
+      }
+
+      const concept = {
+        id: ids.concept++,
+        name: makeName(agent.usedNames),
+        glyph: makeGlyph(),
+        prototype: trace.contextFeatures.slice(),
+        causalPrototype: trace.actualDelta.slice(),
+        born: tick,
+        seen: clusterCount,
+        contacts: 1,
+        valence: clamp(trace.viabilityDelta * 14 + (trace.structuralGain || 0) * 0.4, -1, 1),
+        totalEffect: trace.viabilityDelta,
+        examples: 1
+      };
+      agent.concepts.push(concept);
+      if (targetLocus) targetLocus.conceptId = concept.id;
+      addRipple(agent.x, agent.y, 40, 'concept');
+      addLog(
+        `${concept.name} ${agent.operators.is} Φ(${clusterCount})`,
+        `Trace pressure compressed ${clusterCount} causal episodes into self-authored symbol “${concept.name}”.`
+      );
+      return concept;
     }
 
-    function learnSequence(fromId, toId) {
-      const key = `${fromId}>${toId}`;
+    function updateBeliefsAndFalsification(prevConceptId, nextConcept, trace) {
+      if (agent.ontologyMode === 'none' || !prevConceptId || !nextConcept || prevConceptId === nextConcept.id) return;
+
+      const key = `${prevConceptId}>${nextConcept.id}`;
+      for (let i = agent.beliefs.length - 1; i >= 0; i--) {
+        const b = agent.beliefs[i];
+        if (b.fromId === prevConceptId && b.toId !== nextConcept.id && trace.accuracy < 0.42) {
+          b.falsifications = (b.falsifications || 0) + 1;
+          b.confidence = clamp(b.confidence - 0.16, 0.05, 0.99);
+          agent.falsificationsCount = (agent.falsificationsCount || 0) + 1;
+          if (b.falsifications >= 3 && b.confidence <= 0.24) {
+            const fromC = conceptById(b.fromId);
+            const toC = conceptById(b.toId);
+            agent.beliefs.splice(i, 1);
+            delete agent.relationCounts[b.key];
+            addLog(
+              `¬(${fromC ? fromC.name : '?'} ${agent.operators.sequence} ${toC ? toC.name : '?'})`,
+              `Critic falsified & retired broken belief after ${b.falsifications} failed delta predictions.`
+            );
+          }
+        }
+      }
+
       agent.relationCounts[key] = (agent.relationCounts[key] || 0) + 1;
       const count = agent.relationCounts[key];
-      if (count === 2 && !agent.beliefs.some((b) => b.key === key)) {
-        const from = conceptById(fromId);
-        const to = conceptById(toId);
-        agent.beliefs.push({ key, fromId, toId, count, born: tick, confidence: 0.52 });
-        addLog(
-          `${from.name} ${agent.operators.sequence} ${to.name}`,
-          `A candidate regularity is recorded: encounters with “${from.name}” have preceded “${to.name}.” It is a belief, not a guaranteed law.`
-        );
-      } else if (count > 2) {
-        const belief = agent.beliefs.find((b) => b.key === key);
-        if (belief) {
-          belief.count = count;
-          belief.confidence = clamp(0.42 + Math.log(count) * 0.18, 0, 0.94);
+      let belief = agent.beliefs.find((b) => b.key === key);
+      if (!belief && count >= 2) {
+        belief = {
+          key,
+          fromId: prevConceptId,
+          toId: nextConcept.id,
+          macroId: trace.macroId || null,
+          count,
+          falsifications: 0,
+          born: tick,
+          confidence: 0.48
+        };
+        agent.beliefs.push(belief);
+        const fromC = conceptById(prevConceptId);
+        if (fromC) {
+          addLog(
+            `${fromC.name} ${agent.operators.sequence} ${nextConcept.name}`,
+            `Inferred fallible causal regularity: “${fromC.name}” precedes “${nextConcept.name}”.`
+          );
+        }
+      } else if (belief) {
+        belief.count = count;
+        belief.confidence = clamp(0.36 + count * 0.13 - (belief.falsifications || 0) * 0.12, 0.1, 0.96);
+      }
+
+      if (agent.beliefs.length > 18) {
+        agent.beliefs.sort((a, b) => b.confidence - a.confidence);
+        agent.beliefs.length = 18;
+      }
+    }
+
+    function maybeCrystallizeMacro(trace) {
+      const effectMag = vecNorm(trace.actualDelta);
+      if (effectMag < 0.09) return;
+
+      let match = null;
+      let bestDist = Infinity;
+      for (const m of agent.macros) {
+        const d = distance(m.gesture.coupling, trace.gesture.coupling);
+        if (d < bestDist) {
+          bestDist = d;
+          match = m;
         }
       }
+
+      if (match && bestDist < 0.28) {
+        const predErr = distance(match.meanDelta, trace.actualDelta);
+        const n = match.trials + 1;
+        match.meanDelta = match.meanDelta.map((v, k) => +((v * match.trials + trace.actualDelta[k]) / n).toFixed(4));
+        match.trials = n;
+        match.viabilityEffect = +((match.viabilityEffect * 0.75) + trace.viabilityDelta * 0.25).toFixed(4);
+        if (predErr > 0.42) match.failures = (match.failures || 0) + 1;
+        match.reliability = +clamp(match.reliability * 0.8 + (1 - predErr) * 0.2, 0.1, 0.98).toFixed(3);
+        trace.macroId = match.id;
+        return;
+      }
+
+      if (agent.macros.length >= MAX_MACROS) return;
+
+      let consistentPeers = 0;
+      for (const prev of agent.causalTraces) {
+        if (distance(prev.gesture.coupling, trace.gesture.coupling) < 0.30 &&
+            distance(prev.actualDelta, trace.actualDelta) < 0.28) {
+          consistentPeers++;
+        }
+      }
+      if (consistentPeers < 1) return;
+
+      const macroIdx = ids.macro++;
+      const code = `μ${pad(macroIdx, 2)}`;
+      const macro = {
+        id: macroIdx,
+        code,
+        gesture: cloneData(trace.gesture),
+        meanDelta: trace.actualDelta.slice(),
+        trials: 2,
+        failures: 0,
+        reliability: +clamp(0.58 + trace.accuracy * 0.25, 0.4, 0.95).toFixed(3),
+        viabilityEffect: +trace.viabilityDelta.toFixed(4),
+        born: tick
+      };
+      agent.macros.push(macro);
+      trace.macroId = macro.id;
+      addLog(
+        `${code} ${agent.operators.create} [${macro.gesture.coupling.map((v) => v.toFixed(1)).join(',')}]`,
+        `Crystallized repeatable motor gesture into reusable operator “${code}”.`
+      );
     }
 
-    function authorArtifact() {
-      const candidates = [...agent.concepts].sort((a, b) => (b.contacts + b.valence * 2) - (a.contacts + a.valence * 2));
-      const a = candidates[0];
-      const b = candidates.find((c) => c.id !== a.id) || candidates[1];
-      if (!a || !b) return;
-      const name = makeName();
-      agent.totalArtifactsCreated = (agent.totalArtifactsCreated || artifacts.length) + 1;
-      const artifact = {
-        id: agent.totalArtifactsCreated,
+    function maybeRegisterSculptedStructure(endSample, trace, concept) {
+      if (tick - agent.lastArtifactTick < 95) return;
+      const slowAmp = Math.abs(endSample.channels[2]) + Math.abs(endSample.channels[3]);
+      if (slowAmp < 0.32 || endSample.imprint < 0.16) return;
+
+      for (let i = Math.max(0, artifacts.length - 6); i < artifacts.length; i++) {
+        const a = artifacts[i];
+        if (Math.hypot(a.x - agent.x, a.y - agent.y) < 30) {
+          a.strength = +clamp((a.strength || 0.6) + 0.08, 0.2, 1).toFixed(3);
+          return;
+        }
+      }
+
+      const isSymbolic = agent.ontologyMode !== 'none';
+      const parentConcepts = isSymbolic && agent.concepts.length >= 2
+        ? agent.concepts.slice(-2).map((c) => c.id)
+        : (concept ? [concept.id] : []);
+      const name = isSymbolic ? makeName(agent.usedNames) : `anchor-${pad(ids.artifact, 2)}`;
+      const glyph = isSymbolic ? makeGlyph() : deterministicGlyphFromText(name);
+
+      const structure = {
+        id: ids.artifact++,
         name,
-        glyph: makeGlyph(),
-        parents: [a.id, b.id],
-        x: clamp(agent.x + randomBetween(-60, 60), 35, width - 35),
-        y: clamp(agent.y + randomBetween(-60, 60), 55, height - 35),
+        glyph,
+        parents: parentConcepts,
+        macroId: trace.macroId || null,
+        features: endSample.features.map((v) => +v.toFixed(4)),
+        x: +clamp(agent.x, 34, width - 34).toFixed(2),
+        y: +clamp(agent.y, 34, height - 34).toFixed(2),
         born: tick,
-        phase: randomBetween(0, Math.PI * 2),
-        features: a.prototype.map((v, i) => clamp((v + b.prototype[i]) / 2 + randomBetween(-0.08, 0.08)))
+        phase: +r(0, Math.PI * 2).toFixed(3),
+        strength: +clamp(endSample.imprint, 0.3, 1).toFixed(3)
       };
-      artifacts.push(artifact);
-      if (agent.artifacts !== artifacts) agent.artifacts = artifacts;
+
+      artifacts.push(structure);
       if (artifacts.length > MAX_ARTIFACTS) {
-        artifacts.shift();
+        artifacts.splice(0, artifacts.length - MAX_ARTIFACTS);
         pruneUnusedNames();
       }
+      agent.totalArtifactsCreated = (agent.totalArtifactsCreated || 0) + 1;
       agent.lastArtifactTick = tick;
-      agent.energy = clamp(agent.energy - 0.08);
-      featureHistory.push(artifact.features.slice());
-      if (featureHistory.length > MAX_FEATURE_HISTORY) featureHistory.shift();
+      addRipple(structure.x, structure.y, 52, 'artifact');
+      burst(structure.x, structure.y, 'artifact', 14);
       addLog(
-        `${agent.selfName || '·'} ${agent.operators.create} ${name} ${agent.operators.is} ${a.name} ${agent.operators.join} ${b.name}`,
-        `Two self-named patterns, “${a.name}” and “${b.name},” are combined. The resulting persistent artifact is named “${name}.”`
+        `${agent.operators.create} ${structure.name} @(${Math.round(structure.x)},${Math.round(structure.y)})`,
+        `Stabilized persistent slow-channel structure “${structure.name}” on the canvas.`
       );
-      ripples.push({ x: artifact.x, y: artifact.y, age: 0, max: 90, color: 'artifact' });
-      if (ripples.length > MAX_RIPPLES) ripples.shift();
-      burst(artifact.x, artifact.y, 'artifact', 22);
     }
 
-    function interact(signal) {
-      if (signal.touched) return;
-      signal.touched = true;
-      signal.life = Math.min(signal.life, tick + 32);
-      const concept = signal.conceptId || classify(signal).id;
-      const c = conceptById(concept);
-      agent.interactions++;
-      agent.energy = clamp(agent.energy + signal.effect, 0.05, 1);
-      c.contacts++;
-      c.totalEffect += signal.effect;
-      c.valence = clamp(c.totalEffect / (c.contacts * 0.09), -1, 1);
-      const episode = { tick, conceptId: c.id, signalId: signal.id, effect: signal.effect, energyAfter: agent.energy };
-      agent.memories.push(episode);
-      if (agent.memories.length > MAX_MEMORIES) agent.memories.shift();
-      ripples.push({ x: signal.x, y: signal.y, age: 0, max: 58, color: signal.effect >= 0 ? 'positive' : 'negative' });
-      if (ripples.length > MAX_RIPPLES) ripples.shift();
-      burst(signal.x, signal.y, signal.effect >= 0 ? 'positive' : 'negative', 8);
-
-      if (agent.lastConceptId && agent.lastConceptId !== c.id && tick - agent.lastInteractionTick < 100) {
-        learnSequence(agent.lastConceptId, c.id);
+    function maybeInscribeCanvasMark(trace, endSample) {
+      const highValue = Math.abs(trace.viabilityDelta) > 0.015 || trace.surprise > 0.34;
+      if (!highValue) return;
+      for (const m of agent.marks) {
+        if (Math.hypot(m.x - agent.x, m.y - agent.y) < 34) {
+          m.vec = endSample.channels.map((v) => +v.toFixed(3));
+          m.valence = +clamp(m.valence * 0.6 + trace.viabilityDelta * 12 * 0.4, -1, 1).toFixed(3);
+          m.tick = tick;
+          return;
+        }
       }
-      agent.lastConceptId = c.id;
+      agent.marks.push({
+        id: ids.mark++,
+        x: +agent.x.toFixed(1),
+        y: +agent.y.toFixed(1),
+        vec: endSample.channels.map((v) => +v.toFixed(3)),
+        macroId: trace.macroId || null,
+        valence: +clamp(trace.viabilityDelta * 14, -1, 1).toFixed(3),
+        tick
+      });
+      if (agent.marks.length > MAX_MARKS) agent.marks.shift();
+    }
+
+    function evaluateAndCloseEpisode(endSample) {
+      const ep = agent.activeEpisode;
+      if (!ep) return;
+
+      const originAfter = sampleFieldAt(ep.startX ?? agent.x, ep.startY ?? agent.y);
+      const actualDelta = [
+        +((endSample.channels[0] * 0.5 + originAfter.channels[0] * 0.5) - ep.startSample.channels[0]).toFixed(4),
+        +((endSample.channels[1] * 0.5 + originAfter.channels[1] * 0.5) - ep.startSample.channels[1]).toFixed(4),
+        +((endSample.channels[2] * 0.5 + originAfter.channels[2] * 0.5) - ep.startSample.channels[2]).toFixed(4),
+        +((endSample.channels[3] * 0.5 + originAfter.channels[3] * 0.5) - ep.startSample.channels[3]).toFixed(4)
+      ];
+      const viabilityDelta = +(agent.energy - ep.startEnergy).toFixed(4);
+      const predError = distance(ep.predictedDelta, actualDelta);
+      const accuracy = +clamp(1 - predError, 0, 1).toFixed(3);
+      const completion = +clamp((cosineAlignment(actualDelta, ep.purpose.targetDelta) + 1) * 0.5, 0, 1).toFixed(3);
+      const effort = Math.max(0.15, vecNorm(ep.gesture.coupling));
+      const efficiency = +clamp((vecNorm(actualDelta) / effort) * 0.65, 0, 1).toFixed(3);
+      const overall = +((accuracy * 0.4 + completion * 0.4 + efficiency * 0.2)).toFixed(3);
+      const structuralGain = Math.max(0, Math.max(endSample.imprint, originAfter.imprint) - ep.startSample.imprint);
+
+      const trace = {
+        tick,
+        contextFeatures: ep.startSample.features.slice(),
+        gesture: ep.gesture,
+        macroId: ep.macroId,
+        predictedDelta: ep.predictedDelta.slice(),
+        actualDelta,
+        viabilityDelta,
+        structuralGain: +structuralGain.toFixed(4),
+        accuracy,
+        surprise: +clamp(predError, 0, 1).toFixed(3),
+        locusId: ep.locusId
+      };
+      agent.causalTraces.push(trace);
+      if (agent.causalTraces.length > MAX_TRACES) agent.causalTraces.shift();
+
+      agent.interactions++;
       agent.lastInteractionTick = tick;
 
-      if (c.contacts === 2) {
-        const sign = c.valence >= 0 ? '+' : '−';
-        addLog(
-          `${c.name} ${agent.operators.is} ${sign}${Math.abs(c.valence).toFixed(2)}`,
-          `Repeated contact gives “${c.name}” a ${c.valence >= 0 ? 'positive' : 'negative'} association. The category now carries a learned preference.`
-        );
+      const targetLocus = ep.locusId ? locusById(ep.locusId) : null;
+      if (targetLocus) {
+        targetLocus.probedCount = (targetLocus.probedCount || 0) + 1;
+        targetLocus.causalDelta = actualDelta.slice();
       }
-      if (!agent.selfName && agent.interactions >= 4) {
-        agent.selfName = makeName();
+
+      maybeCrystallizeMacro(trace);
+      const concept = maybeCompressCausalTracesIntoOntology(trace, targetLocus);
+      updateBeliefsAndFalsification(ep.prevConceptId, concept, trace);
+      maybeRegisterSculptedStructure(originAfter.imprint > endSample.imprint ? originAfter : endSample, trace, concept);
+      maybeInscribeCanvasMark(trace, endSample);
+
+      if (agent.ontologyMode !== 'none' && !agent.selfName && agent.interactions >= 5 && agent.concepts.length >= 2) {
+        agent.selfName = makeName(agent.usedNames);
         agent.selfGlyph = makeGlyph();
         agent.selfBorn = tick;
         addLog(
-          `${agent.selfName} ${agent.operators.is} [${agent.memories.length}]`,
-          `One locus persists across ${agent.memories.length} episodes. The agent assigns that recurring locus the self-symbol “${agent.selfName}.”`
+          `${agent.selfName} ${agent.operators.is} ◉`,
+          `Assigned persistent self-symbol “${agent.selfName}” to its own causal locus.`
         );
-        if (hooks.onIdentity) hooks.onIdentity();
+        hooks.onIdentity?.();
       }
-      if (agent.concepts.length >= 2 && agent.interactions >= 8 && tick - agent.lastArtifactTick > 115 && agent.energy > 0.42) {
-        authorArtifact();
+
+      const lastPrevMem = agent.memories[agent.memories.length - 1];
+      if (lastPrevMem?.conceptId && concept && lastPrevMem.conceptId !== concept.id) {
+        updateBeliefsAndFalsification(lastPrevMem.conceptId, concept, trace);
       }
-      agent.targetId = null;
-      chooseGoal();
+
+      agent.memories.push({
+        tick,
+        conceptId: concept ? concept.id : 0,
+        signalId: ep.locusId || 0,
+        label: concept ? concept.name : (ep.proposalLabel || `Δ${overall.toFixed(2)}`),
+        effect: +(viabilityDelta + structuralGain * 0.18).toFixed(4),
+        accuracy,
+        energyAfter: +agent.energy.toFixed(4)
+      });
+      if (agent.memories.length > MAX_MEMORIES) agent.memories.shift();
+
+      agent.lastCycle = {
+        tick,
+        drive: ep.purpose.drive,
+        purposeSummary: ep.purpose.summary,
+        proposalLabel: ep.proposalLabel,
+        proposalsCount: ep.proposalsCount,
+        criticNote: ep.criticNote,
+        predictedDelta: ep.predictedDelta,
+        actualDelta,
+        evaluation: { accuracy, completion, efficiency, overall }
+      };
+
+      if (agent.interactions <= 4 || tick % 32 === 0 || predError > 0.52) {
+        const dStr = actualDelta.map((v) => (v >= 0 ? `+${v.toFixed(2)}` : v.toFixed(2))).join(',');
+        if (agent.ontologyMode === 'none' || !concept) {
+          addLog(
+            `${ep.proposalLabel} ${agent.operators.sequence} Δ[${dStr}] (${Math.round(accuracy * 100)}%)`,
+            `Executed ${ep.purpose.drive} cycle · delta accuracy ${Math.round(accuracy * 100)}%, overall ${Math.round(overall * 100)}%.`
+          );
+        } else {
+          addLog(
+            `${agent.selfName || '∅'} · ${concept.name} ${agent.operators.sequence} Δ[${dStr}]`,
+            `Evaluated “${concept.name}” (${ep.purpose.drive}) · prediction accuracy ${Math.round(accuracy * 100)}%.`
+          );
+        }
+      }
+
+      agent.activeEpisode = null;
     }
+
+    function stepAgent() {
+      if (tick % 6 === 0) segmentLocalMedium();
+
+      const localSample = sampleFieldAt(agent.x, agent.y);
+
+      if (!agent.activeEpisode) {
+        deliberateAndStartEpisode(localSample);
+      }
+
+      const ep = agent.activeEpisode;
+      const targetLocus = ep.locusId ? locusById(ep.locusId) : null;
+
+      let desiredAngle = ep.gesture.biasAngle;
+      if (targetLocus) {
+        desiredAngle = Math.atan2(targetLocus.y - agent.y, targetLocus.x - agent.x) + ep.gesture.biasAngle * 0.22;
+      } else {
+        desiredAngle += Math.sin(tick * 0.04) * 0.35;
+      }
+
+      const thrust = ep.gesture.thrust * 0.22;
+      agent.vx = (agent.vx + Math.cos(desiredAngle) * thrust) * 0.89;
+      agent.vy = (agent.vy + Math.sin(desiredAngle) * thrust) * 0.89;
+
+      const maxSpeed = 2.25;
+      const sp = Math.hypot(agent.vx, agent.vy);
+      if (sp > maxSpeed) {
+        agent.vx = (agent.vx / sp) * maxSpeed;
+        agent.vy = (agent.vy / sp) * maxSpeed;
+      }
+
+      agent.x += agent.vx;
+      agent.y += agent.vy;
+      const margin = 28;
+      if (agent.x < margin) { agent.x = margin; agent.vx = Math.abs(agent.vx) * 0.7; }
+      if (agent.x > width - margin) { agent.x = width - margin; agent.vx = -Math.abs(agent.vx) * 0.7; }
+      if (agent.y < margin) { agent.y = margin; agent.vy = Math.abs(agent.vy) * 0.7; }
+      if (agent.y > height - margin) { agent.y = height - margin; agent.vy = -Math.abs(agent.vy) * 0.7; }
+
+      if (tick % 2 === 0) {
+        agent.trail.push([+agent.x.toFixed(2), +agent.y.toFixed(2)]);
+        if (agent.trail.length > MAX_TRAIL) agent.trail.shift();
+      }
+
+      const [gx, gy] = worldToGrid(agent.x, agent.y);
+      const coupling = ep.gesture.coupling;
+      const slowWork = (Math.abs(coupling[2]) + Math.abs(coupling[3])) * 0.052;
+      depositWavepacket(
+        gx,
+        gy,
+        [coupling[0] * 0.09, coupling[1] * 0.09, coupling[2] * 0.085, coupling[3] * 0.085],
+        1.55,
+        slowWork
+      );
+
+      updateViabilityAndBody(localSample, coupling, sp);
+
+      ep.ticksLeft--;
+      if (ep.ticksLeft <= 0) {
+        const endSample = sampleFieldAt(agent.x, agent.y);
+        evaluateAndCloseEpisode(endSample);
+      }
+    }
+
+    function coherence() {
+      if (!agent) return 0;
+      if (agent.ontologyMode === 'none') {
+        const recent = agent.causalTraces.slice(-16);
+        if (!recent.length) return 0;
+        const meanAcc = recent.reduce((s, t) => s + t.accuracy, 0) / recent.length;
+        const macroFactor = Math.min(1, agent.macros.length / 4);
+        return clamp(meanAcc * 0.7 + macroFactor * 0.3, 0, 1);
+      }
+      if (!agent.concepts.length) {
+        const recent = agent.causalTraces.slice(-10);
+        return recent.length ? clamp((recent.reduce((s, t) => s + t.accuracy, 0) / recent.length) * 0.45, 0, 1) : 0;
+      }
+      const conceptFactor = Math.min(1, agent.concepts.length / 5);
+      const beliefConf = agent.beliefs.length
+        ? agent.beliefs.reduce((sum, b) => sum + b.confidence, 0) / agent.beliefs.length
+        : 0.25;
+      const recent = agent.causalTraces.slice(-12);
+      const predFactor = recent.length ? recent.reduce((s, t) => s + t.accuracy, 0) / recent.length : 0.4;
+      return clamp(conceptFactor * 0.32 + beliefConf * 0.34 + predFactor * 0.34 + (agent.selfName ? 0.08 : 0), 0, 1);
+    }
+
+    let batching = false;
+    let autosaveDue = false;
 
     function simulate() {
       tick++;
-      agent.energy = clamp(agent.energy - 0.00055, 0.05, 1);
-      if (tick >= nextSpawn && signals.length < 9) {
-        spawnSignal();
-        nextSpawn = tick + Math.floor(randomBetween(20, 34));
-      }
-      if (tick % 4 === 0) perceive();
-      if (tick % 30 === 0 || (!agent.targetId && !agent.goal)) chooseGoal();
+      stepContinuousMedium();
+      stepAgent();
 
-      for (const signal of signals) {
-        signal.x += signal.vx;
-        signal.y += signal.vy;
-        if (signal.x < 20 || signal.x > width - 20) signal.vx *= -1;
-        if (signal.y < 35 || signal.y > height - 20) signal.vy *= -1;
-      }
-      signals = signals.filter((s) => tick < s.life);
-
-      let target = signalById(agent.targetId);
-      if (!target || target.touched) {
-        if (tick % 15 === 0 || !target) chooseGoal();
-        target = signalById(agent.targetId);
-      }
-      if (target) {
-        const dx = target.x - agent.x;
-        const dy = target.y - agent.y;
-        const d = Math.max(0.001, Math.hypot(dx, dy));
-        agent.heading = Math.atan2(dy, dx);
-        if (d > 19) {
-          const velocity = 1.5 + agent.energy * 1.05;
-          agent.vx += ((dx / d) * velocity - agent.vx) * 0.13;
-          agent.vy += ((dy / d) * velocity - agent.vy) * 0.13;
-        } else {
-          agent.vx *= 0.75;
-          agent.vy *= 0.75;
-          interact(target);
-        }
-      } else {
-        const angle = tick * 0.008 + (seed % 100) * 0.1;
-        agent.vx += (Math.cos(angle) * 0.48 - agent.vx) * 0.03;
-        agent.vy += (Math.sin(angle * 0.83) * 0.48 - agent.vy) * 0.03;
-      }
-      agent.x += agent.vx;
-      agent.y += agent.vy;
-      if (agent.x < 22 || agent.x > width - 22) {
-        agent.vx *= -0.7;
-        agent.x = clamp(agent.x, 22, width - 22);
-      }
-      if (agent.y < 45 || agent.y > height - 25) {
-        agent.vy *= -0.7;
-        agent.y = clamp(agent.y, 45, height - 25);
-      }
-      if (tick % 3 === 0) {
-        agent.trail.push([agent.x, agent.y]);
-        if (agent.trail.length > MAX_TRAIL) agent.trail.shift();
-      }
       for (const p of particles) {
         p.x += p.vx;
         p.y += p.vy;
@@ -1299,54 +2324,68 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
         p.age++;
       }
       particles = particles.filter((p) => p.age < p.max);
-      for (const r of ripples) r.age++;
-      ripples = ripples.filter((r) => r.age < r.max);
+      for (const rp of ripples) rp.age++;
+      ripples = ripples.filter((rp) => rp.age < rp.max);
 
-      if (tick % 12 === 0 && hooks.onRender) hooks.onRender();
-      if (tick % 120 === 0 && hooks.onAutosave) hooks.onAutosave(false);
-    }
-
-    function resetWorld(newSeed = true, explicitSeed = null) {
-      if (Number.isInteger(explicitSeed) && explicitSeed >= 1 && explicitSeed <= 2147483647) {
-        seed = explicitSeed;
-      } else if (newSeed) {
-        seed = defaultRandomSeed();
+      if (!batching) {
+        hooks.onTick?.(tick);
+        if (tick % 3 === 0) hooks.onRender?.();
+        if (tick % 120 === 0) hooks.onAutosave?.(false);
+      } else if (tick % 120 === 0) {
+        autosaveDue = true;
       }
-      rng = mulberry32(seed);
-      tick = 0;
-      totalEvents = 0;
-      nextSpawn = 14;
-      signals = [];
-      artifacts = [];
-      particles = [];
-      ripples = [];
-      featureHistory = [];
-      logs = [];
-      agent = freshAgent();
-      running = true;
-      addLog('·', 'No symbols. No observations. The world has not yet been differentiated.', 'system');
-      if (hooks.onWorldReset) hooks.onWorldReset();
-      if (hooks.onControls) hooks.onControls();
-      if (hooks.onRender) hooks.onRender();
-      if (hooks.onAutosave) hooks.onAutosave(false);
     }
 
-    function perturb(at) {
-      const sig = spawnSignal({
-        x: at ? at.x : undefined,
-        y: at ? at.y : undefined,
-        novel: true,
-        manual: true,
-        near: true
-      });
-      if (hooks.onRender) hooks.onRender();
-      if (hooks.onAutosave) hooks.onAutosave(false);
-      return sig;
+    function steps(count) {
+      const total = Math.max(0, Math.floor(count));
+      batching = true;
+      autosaveDue = false;
+      try {
+        for (let i = 0; i < total; i++) simulate();
+      } finally {
+        batching = false;
+      }
+      hooks.onTick?.(tick);
+      hooks.onRender?.();
+      if (autosaveDue) hooks.onAutosave?.(false);
+      return tick;
     }
 
-    function coherence() {
-      if (!agent || !agent.concepts.length) return 0;
-      return agent.concepts.reduce((sum, c) => sum + clamp(c.contacts / 5), 0) / agent.concepts.length;
+    function perturb(at = null) {
+      const px = at && Number.isFinite(at.x) ? clamp(at.x, 24, width - 24) : r(40, width - 40);
+      const py = at && Number.isFinite(at.y) ? clamp(at.y, 24, height - 24) : r(40, height - 40);
+      const [gx, gy] = worldToGrid(px, py);
+      const amps = [r(-0.92, 0.92), r(-0.92, 0.92), r(-0.75, 0.75), r(-0.65, 0.65)];
+      depositWavepacket(gx, gy, amps, 2.4, 0);
+      totalEvents++;
+      addRipple(px, py, 34, 'event');
+      burst(px, py, 'concept', 8);
+      hooks.onRender?.();
+      hooks.onAutosave?.(false);
+    }
+
+    function setOntologyMode(nextMode) {
+      if (!VALID_ONTOLOGY_MODES.includes(nextMode) || !agent) {
+        throw new Error(`Invalid ontology mode "${String(nextMode)}". Expected emergent, none, or imported.`);
+      }
+      agent.ontologyMode = nextMode;
+      if (nextMode === 'none') {
+        agent.concepts = [];
+        agent.beliefs = [];
+        agent.relationCounts = {};
+        agent.selfName = null;
+        agent.selfGlyph = null;
+        agent.selfBorn = null;
+        for (const l of loci) l.conceptId = null;
+        pruneUnusedNames();
+        addLog('∅ :: ontology-off', 'Switched to strictly ontology-free mode; agency operates purely on continuous causal deltas & canvas marks.', 'system');
+      } else {
+        addLog(`Φ :: ontology-${nextMode}`, `Ontology mode set to "${nextMode}".`, 'system');
+      }
+      hooks.onIdentity?.();
+      hooks.onRender?.();
+      hooks.onAutosave?.(false);
+      return agent.ontologyMode;
     }
 
     function createSnapshot() {
@@ -1354,82 +2393,104 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
         format: SAVE_FORMAT,
         version: SAVE_VERSION,
         appVersion: APP_VERSION,
+        ruleset: RULESET_VERSION,
         savedAt: new Date().toISOString(),
         seed,
-        rngState: rng.getState(),
+        rngState: rand.getState(),
         tick,
+        running,
+        speed,
+        logMode,
+        canvasLens,
         totalEvents,
-        nextSpawn,
-        world: { width, height },
-        signals,
-        artifacts,
-        particles,
-        ripples,
-        featureHistory,
-        logs,
-        agent: { ...agent, usedNames: [...agent.usedNames] },
-        ui: { running, speed, logMode }
+        world: { width, height, gridW: GRID_W, gridH: GRID_H },
+        worldPhysics: cloneData(worldPhysics),
+        fieldB64: encodeFloat32Base64(field),
+        imprintB64: encodeFloat32Base64(imprint),
+        ids: { ...ids },
+        loci: cloneData(loci),
+        artifacts: cloneData(artifacts),
+        particles: cloneData(particles),
+        ripples: cloneData(ripples),
+        featureHistory: cloneData(featureHistory),
+        logs: cloneData(logs),
+        agent: {
+          ...cloneData({ ...agent, usedNames: undefined }),
+          usedNames: [...agent.usedNames]
+        }
       };
     }
 
     function restoreSnapshot(data) {
-      if (!validSnapshot(data)) throw new Error('This is not a valid NUL world snapshot.');
-      seed = data.seed;
-      rng = mulberry32(seed);
-      rng.setState(data.rngState);
-      tick = data.tick;
-      totalEvents = data.totalEvents;
-      nextSpawn = data.nextSpawn;
+      if (!validSnapshot(data)) throw new Error('This file is not a valid NUL world snapshot.');
+      const nextField = decodeFloat32Base64(data.fieldB64, FIELD_LEN);
+      const nextImprint = decodeFloat32Base64(data.imprintB64, CELLS_LEN);
+      if (!nextField || !nextImprint) throw new Error('This file is not a valid NUL world snapshot.');
 
-      const seenArtifactIds = new Set();
-      const dedupedArtifacts = [];
-      for (const item of data.artifacts) {
-        if (!seenArtifactIds.has(item.id)) {
-          seenArtifactIds.add(item.id);
-          dedupedArtifacts.push(item);
-        }
-      }
-      while (dedupedArtifacts.length > MAX_ARTIFACTS) dedupedArtifacts.shift();
-
-      signals = data.signals.slice(-MAX_SIGNALS);
-      artifacts = dedupedArtifacts;
-      particles = data.particles.slice(-MAX_PARTICLES);
-      ripples = data.ripples.slice(-MAX_RIPPLES);
-      featureHistory = data.featureHistory.slice(-MAX_FEATURE_HISTORY);
-      logs = data.logs.slice(-MAX_LOGS);
-      agent = data.agent;
-      agent.usedNames = new Set(data.agent.usedNames);
-      agent.artifacts = artifacts;
-      const maxArtifactId = artifacts.reduce((max, item) => Math.max(max, item.id), 0);
-      agent.totalArtifactsCreated = Number.isFinite(data.agent.totalArtifactsCreated)
-        ? Math.max(data.agent.totalArtifactsCreated, maxArtifactId, artifacts.length)
-        : Math.max(maxArtifactId, artifacts.length);
-      pruneUnusedNames();
-
-      const sx = width / data.world.width;
-      const sy = height / data.world.height;
-      const scalePoint = (object) => {
-        if (object && Number.isFinite(object.x) && Number.isFinite(object.y)) {
-          object.x *= sx;
-          object.y *= sy;
-        }
-      };
-      [agent, ...signals, ...artifacts, ...particles, ...ripples].forEach(scalePoint);
-      agent.trail.forEach((point) => {
-        if (Array.isArray(point) && Number.isFinite(point[0]) && Number.isFinite(point[1])) {
-          point[0] *= sx;
-          point[1] *= sy;
-        }
+      const sx = data.world.width ? width / data.world.width : 1;
+      const sy = data.world.height ? height / data.world.height : 1;
+      const scalePoint = (item) => ({
+        ...item,
+        x: clamp(item.x * sx, 12, width - 12),
+        y: clamp(item.y * sy, 12, height - 12)
       });
 
-      running = data.ui ? data.ui.running !== false : true;
-      speed = data.ui && [1, 2, 4, 8].includes(data.ui.speed) ? data.ui.speed : 1;
-      logMode = data.ui && ['dual', 'agent', 'observer'].includes(data.ui.logMode) ? data.ui.logMode : 'dual';
+      seed = data.seed >>> 0;
+      rand = mulberry32(seed);
+      rand.setState(data.rngState >>> 0);
+      tick = data.tick;
+      running = Boolean(data.running);
+      speed = [1, 2, 4, 8].includes(data.speed) ? data.speed : 1;
+      logMode = ['dual', 'agent', 'observer'].includes(data.logMode) ? data.logMode : 'dual';
+      if (VALID_CANVAS_LENSES.includes(data.canvasLens)) canvasLens = data.canvasLens;
+      totalEvents = data.totalEvents;
+      worldPhysics = cloneData(data.worldPhysics);
+      field = nextField;
+      fieldNext = new Float32Array(FIELD_LEN);
+      imprint = nextImprint;
 
-      if (hooks.onSnapshotRestored) hooks.onSnapshotRestored();
-      if (hooks.onLog) hooks.onLog(logs);
-      if (hooks.onControls) hooks.onControls();
-      if (hooks.onRender) hooks.onRender();
+      ids = {
+        locus: Number.isInteger(data.ids?.locus) ? data.ids.locus : 1,
+        concept: Number.isInteger(data.ids?.concept) ? data.ids.concept : 1,
+        artifact: Number.isInteger(data.ids?.artifact) ? data.ids.artifact : 1,
+        macro: Number.isInteger(data.ids?.macro) ? data.ids.macro : 1,
+        mark: Number.isInteger(data.ids?.mark) ? data.ids.mark : 1
+      };
+
+      loci = cloneData(data.loci).slice(-MAX_LOCI).map(scalePoint);
+      artifacts = cloneData(data.artifacts).slice(-MAX_ARTIFACTS).map(scalePoint);
+      particles = cloneData(data.particles).slice(-MAX_PARTICLES).map(scalePoint);
+      ripples = cloneData(data.ripples).slice(-MAX_RIPPLES).map(scalePoint);
+      featureHistory = cloneData(data.featureHistory).slice(-MAX_FEATURE_HISTORY);
+      logs = cloneData(data.logs).slice(-MAX_LOGS);
+
+      const restoredAgent = cloneData(data.agent);
+      agent = {
+        ...restoredAgent,
+        ontologyMode: VALID_ONTOLOGY_MODES.includes(restoredAgent.ontologyMode) ? restoredAgent.ontologyMode : 'emergent',
+        x: clamp(restoredAgent.x * sx, 12, width - 12),
+        y: clamp(restoredAgent.y * sy, 12, height - 12),
+        concepts: restoredAgent.concepts.slice(0, MAX_CONCEPTS),
+        memories: restoredAgent.memories.slice(-MAX_MEMORIES),
+        beliefs: restoredAgent.beliefs.slice(0, 18),
+        macros: (restoredAgent.macros || []).slice(0, MAX_MACROS),
+        causalTraces: (restoredAgent.causalTraces || []).slice(-MAX_TRACES),
+        marks: (restoredAgent.marks || []).slice(-MAX_MARKS).map(scalePoint),
+        totalArtifactsCreated: Number.isInteger(restoredAgent.totalArtifactsCreated)
+          ? Math.max(restoredAgent.totalArtifactsCreated, artifacts.length)
+          : artifacts.length,
+        usedNames: new Set(restoredAgent.usedNames),
+        trail: restoredAgent.trail.slice(-MAX_TRAIL).map(([x, y]) => [
+          clamp(x * sx, 12, width - 12),
+          clamp(y * sy, 12, height - 12)
+        ])
+      };
+      pruneUnusedNames();
+
+      hooks.onSnapshotRestored?.();
+      hooks.onControls?.();
+      hooks.onLog?.();
+      hooks.onRender?.();
       return true;
     }
 
@@ -1437,159 +2498,274 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
       return {
         format: ONTOLOGY_FORMAT,
         version: ONTOLOGY_VERSION,
-        experiment: `NUL v${APP_VERSION} / bootstrap 0.1`,
+        experiment: `NUL v${APP_VERSION} / ${RULESET_VERSION}`,
         appVersion: APP_VERSION,
         ruleset: RULESET_VERSION,
         exportedAt: new Date().toISOString(),
-        architecture: 'Non-LLM symbolic artificial life; seeded rules + vector similarity + episodic memory',
         seed,
         tick,
-        observerNote: 'Names and categories below were generated during this run. Observer metadata is not supplied to the agent.',
         agent: {
+          ontologyMode: agent.ontologyMode,
           selfSymbol: agent.selfName,
-          selfGlyph: agent.selfGlyph ? safeGlyph(agent.selfGlyph) : null,
+          selfGlyph: safeGlyph(agent.selfGlyph),
           selfBorn: agent.selfBorn,
-          energy: agent.energy,
-          currentIntent: agent.goal,
-          concepts: agent.concepts.map((c) => ({
-            ...c,
-            glyph: safeGlyph(c.glyph) || deterministicGlyphFromText(c.name),
-            prototype: c.prototype.slice()
-          })),
-          beliefs: agent.beliefs.map((b) => ({ ...b })),
-          relationCounts: { ...agent.relationCounts },
-          artifacts: artifacts.map((a) => ({
-            ...a,
-            glyph: safeGlyph(a.glyph) || deterministicGlyphFromText(a.name),
-            parents: a.parents.slice(),
-            features: a.features.slice()
-          })),
-          episodicMemory: agent.memories.map((m) => ({ ...m })),
-          generatedOperators: { ...agent.operators }
-        },
-        unclassifiedEvents: signals
-          .filter((s) => !s.conceptId)
-          .map((s) => ({ id: s.id, born: s.born, features: s.features.slice() }))
+          energy: +agent.energy.toFixed(3),
+          concepts: cloneData(agent.concepts),
+          beliefs: cloneData(agent.beliefs),
+          relationCounts: cloneData(agent.relationCounts),
+          macros: cloneData(agent.macros),
+          artifacts: cloneData(artifacts),
+          episodicMemory: agent.memories.slice(-30),
+          generatedOperators: cloneData(agent.operators)
+        }
       };
     }
 
-    // Transplants an exported ontology (mind) into the current world without altering world PRNG.
     function importOntology(data) {
       const check = validateOntology(data);
       if (!check.valid) throw new Error(check.reason);
+      if (!agent) throw new Error('World is not initialized yet.');
 
       const src = data.agent;
-      const importedConcepts = src.concepts
-        .slice(0, MAX_CONCEPTS)
-        .map((c, idx) => ({
-          id: idx + 1,
-          name: c.name.trim(),
-          glyph: safeGlyph(c.glyph) || deterministicGlyphFromText(c.name),
-          prototype: c.prototype.map((v) => clamp(Number(v), 0, 1)),
-          born: Math.max(0, Math.round(c.born)),
-          seen: Math.max(0, Math.round(c.seen)),
-          contacts: Math.max(0, Math.round(c.contacts)),
-          valence: clamp(Number(c.valence), -1, 1),
-          totalEffect: Number(c.totalEffect),
-          examples: Math.max(1, Math.round(c.examples))
+      const importedConcepts = src.concepts.slice(0, MAX_CONCEPTS).map((c) => ({
+        id: c.id,
+        name: c.name,
+        glyph: safeGlyph(c.glyph) || deterministicGlyphFromText(c.name),
+        prototype: c.prototype.map((n) => +clamp(n, 0, 1).toFixed(4)),
+        causalPrototype: Array.isArray(c.causalPrototype) && c.causalPrototype.length === 4
+          ? c.causalPrototype.map((n) => +clamp(n, -1, 1).toFixed(4))
+          : null,
+        born: Math.max(0, Math.floor(c.born)),
+        seen: Math.max(0, Math.floor(c.seen)),
+        contacts: Math.max(0, Math.floor(c.contacts)),
+        valence: clamp(c.valence, -1, 1),
+        totalEffect: +Number(c.totalEffect).toFixed(4),
+        examples: Math.max(1, Math.floor(c.examples))
+      }));
+
+      const validIds = new Set(importedConcepts.map((c) => c.id));
+      const importedBeliefs = src.beliefs
+        .filter((b) => validIds.has(b.fromId) && validIds.has(b.toId))
+        .map((b) => ({
+          key: `${b.fromId}>${b.toId}`,
+          fromId: b.fromId,
+          toId: b.toId,
+          macroId: Number.isInteger(b.macroId) ? b.macroId : null,
+          count: Math.max(1, Math.floor(b.count)),
+          falsifications: Math.max(0, Math.floor(b.falsifications || 0)),
+          born: Math.max(0, Math.floor(b.born)),
+          confidence: clamp(b.confidence, 0, 1)
         }));
 
-      const idMap = new Map();
-      src.concepts.slice(0, MAX_CONCEPTS).forEach((orig, idx) => {
-        idMap.set(orig.id, idx + 1);
-      });
-
-      const importedBeliefs = [];
-      const importedRelations = {};
+      const nextRelations = {};
       if (src.relationCounts && typeof src.relationCounts === 'object') {
-        for (const [rawKey, rawVal] of Object.entries(src.relationCounts)) {
-          const m = rawKey.match(/^(\d+)>(\d+)$/);
-          if (m && Number.isFinite(rawVal) && rawVal > 0) {
-            const fromMapped = idMap.get(Number(m[1]));
-            const toMapped = idMap.get(Number(m[2]));
-            if (fromMapped && toMapped && fromMapped !== toMapped) {
-              importedRelations[`${fromMapped}>${toMapped}`] = Math.round(rawVal);
-            }
+        for (const [k, v] of Object.entries(src.relationCounts)) {
+          const parts = k.split('>').map(Number);
+          if (parts.length === 2 && validIds.has(parts[0]) && validIds.has(parts[1]) && Number.isFinite(v) && v > 0) {
+            nextRelations[k] = Math.floor(v);
           }
         }
       }
-
-      for (const b of src.beliefs) {
-        const fromId = idMap.get(b.fromId);
-        const toId = idMap.get(b.toId);
-        if (!fromId || !toId || fromId === toId) continue;
-        const key = `${fromId}>${toId}`;
-        if (importedBeliefs.some((existing) => existing.key === key)) continue;
-        const count = Math.max(2, Math.round(b.count));
-        importedRelations[key] = Math.max(importedRelations[key] || 0, count);
-        importedBeliefs.push({
-          key,
-          fromId,
-          toId,
-          count,
-          born: Math.max(0, Math.round(b.born)),
-          confidence: clamp(Number(b.confidence), 0, 0.99)
-        });
+      for (const b of importedBeliefs) {
+        if (!nextRelations[b.key] || nextRelations[b.key] < b.count) nextRelations[b.key] = b.count;
       }
 
-      const ops = src.generatedOperators || src.operators;
-      if (ops) {
+      agent.ontologyMode = 'imported';
+      agent.concepts = importedConcepts;
+      agent.beliefs = importedBeliefs;
+      agent.relationCounts = nextRelations;
+
+      if (Array.isArray(src.macros) && src.macros.length > 0) {
+        agent.macros = cloneData(src.macros).slice(0, MAX_MACROS);
+        const maxMacroId = agent.macros.reduce((m, op) => Math.max(m, op.id || 0), 0);
+        ids.macro = Math.max(ids.macro, maxMacroId + 1);
+      }
+
+      if (src.generatedOperators) {
         agent.operators = {
-          is: ops.is,
-          sequence: ops.sequence,
-          join: ops.join,
-          create: ops.create
+          is: src.generatedOperators.is,
+          sequence: src.generatedOperators.sequence,
+          join: src.generatedOperators.join,
+          create: src.generatedOperators.create
         };
       }
 
-      if (typeof src.selfSymbol === 'string' && src.selfSymbol.trim()) {
+      if (typeof src.selfSymbol === 'string' && src.selfSymbol.trim().length > 0) {
         agent.selfName = src.selfSymbol.trim();
         agent.selfGlyph = safeGlyph(src.selfGlyph) || deterministicGlyphFromText(agent.selfName);
-        agent.selfBorn = Number.isFinite(src.selfBorn) ? Math.max(0, Math.round(src.selfBorn)) : tick;
+        agent.selfBorn = Number.isFinite(src.selfBorn) ? Math.max(0, Math.floor(src.selfBorn)) : tick;
+      } else {
+        agent.selfName = null;
+        agent.selfGlyph = null;
+        agent.selfBorn = null;
       }
 
-      agent.concepts = importedConcepts;
-      agent.beliefs = importedBeliefs;
-      agent.relationCounts = importedRelations;
-      agent.memories = [];
-      agent.lastConceptId = null;
+      const maxConceptId = importedConcepts.reduce((m, c) => Math.max(m, c.id), 0);
+      ids.concept = Math.max(ids.concept, maxConceptId + 1);
       agent.targetId = null;
-      agent.goal = null;
-      agent.lastGoalKey = '';
+      agent.activeEpisode = null;
 
-      // Re-associate active signals in this world against the imported prototypes (zero PRNG calls).
-      for (const signal of signals) {
-        signal.conceptId = null;
-        if (signal.touched || !importedConcepts.length) continue;
-        let nearest = null;
-        let nearestDist = Infinity;
-        for (const c of importedConcepts) {
-          const d = distance(signal.features, c.prototype);
-          if (d < nearestDist) {
-            nearestDist = d;
-            nearest = c;
-          }
-        }
-        if (nearest && nearestDist <= 0.27) {
-          signal.conceptId = nearest.id;
-        }
+      for (const l of loci) {
+        const match = matchConceptForLocus(l.features, l.causalDelta);
+        l.conceptId = match ? match.id : null;
       }
 
       pruneUnusedNames();
+
+      const label = agent.selfName ? `“${agent.selfName}”` : 'unnamed mind';
       addLog(
-        `${agent.selfName || '·'} ${agent.operators.is} {${importedConcepts.length}/${importedBeliefs.length}}`,
-        `Imported ontology into world ${seed}: ${importedConcepts.length} concepts and ${importedBeliefs.length} beliefs active.`,
+        `ontology ⇐ ${importedConcepts.length}c · ${importedBeliefs.length}b`,
+        `Imported ontology (${label}: ${importedConcepts.length} concepts, ${importedBeliefs.length} beliefs) for cross-world testing.`,
         'system'
       );
 
-      if (hooks.onOntologyImported) hooks.onOntologyImported();
-      if (hooks.onIdentity) hooks.onIdentity();
-      if (hooks.onRender) hooks.onRender();
-      if (hooks.onAutosave) hooks.onAutosave(false);
-      return { concepts: importedConcepts.length, beliefs: importedBeliefs.length, selfName: agent.selfName };
+      hooks.onOntologyImported?.();
+      hooks.onIdentity?.();
+      hooks.onRender?.();
+      hooks.onAutosave?.(false);
+      return {
+        concepts: importedConcepts.length,
+        beliefs: importedBeliefs.length,
+        macros: agent.macros.length,
+        selfSymbol: agent.selfName
+      };
+    }
+
+    function resetWorld(newSeed = true, explicitSeed = null, optionsReset = {}) {
+      if (Number.isInteger(explicitSeed) && explicitSeed >= 1 && explicitSeed <= 2147483647) {
+        seed = explicitSeed;
+      } else if (newSeed || !seed) {
+        if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+          seed = (crypto.getRandomValues(new Uint32Array(1))[0] % 2147483646) + 1;
+        } else {
+          seed = (Math.floor(Math.random() * 2147483646) + 1) >>> 0;
+        }
+      }
+      rand = mulberry32(seed);
+      tick = 0;
+      totalEvents = 0;
+      field = new Float32Array(FIELD_LEN);
+      fieldNext = new Float32Array(FIELD_LEN);
+      imprint = new Float32Array(CELLS_LEN);
+      worldPhysics = createWorldPhysics();
+
+      loci = [];
+      artifacts = [];
+      particles = [];
+      ripples = [];
+      logs = [];
+      featureHistory = [];
+      ids = { locus: 1, concept: 1, artifact: 1, macro: 1, mark: 1 };
+
+      for (let i = 0; i < 6; i++) {
+        const gx = r(4, GRID_W - 5);
+        const gy = r(4, GRID_H - 5);
+        const amps = [r(-0.85, 0.85), r(-0.85, 0.85), r(-0.65, 0.65), r(-0.55, 0.55)];
+        depositWavepacket(gx, gy, amps, r(2.2, 3.6), 0);
+      }
+
+      const modeToUse = VALID_ONTOLOGY_MODES.includes(optionsReset.ontologyMode)
+        ? optionsReset.ontologyMode
+        : (agent && agent.ontologyMode !== 'imported' ? agent.ontologyMode : 'emergent');
+      agent = createAgent(modeToUse);
+      running = true;
+
+      addLog(
+        `0000 :: Φ[${GRID_W}×${GRID_H}×4] · ∅`,
+        `World initialized (${RULESET_VERSION}) · continuous 4-channel medium, ontology=${agent.ontologyMode}.`,
+        'system'
+      );
+      hooks.onWorldReset?.();
+      hooks.onControls?.();
+      hooks.onRender?.();
+      hooks.onAutosave?.(false);
+      return seed;
+    }
+
+    function getState() {
+      return {
+        appVersion: APP_VERSION,
+        ruleset: RULESET_VERSION,
+        seed,
+        rngState: rand ? rand.getState() : null,
+        tick,
+        running,
+        speed,
+        logMode,
+        canvasLens,
+        ontologyMode: agent ? agent.ontologyMode : 'emergent',
+        width,
+        height,
+        gridW: GRID_W,
+        gridH: GRID_H,
+        counts: {
+          signals: loci.length,
+          loci: loci.length,
+          artifacts: artifacts.length,
+          totalArtifactsCreated: agent ? (agent.totalArtifactsCreated || 0) : 0,
+          concepts: agent ? agent.concepts.length : 0,
+          memories: agent ? agent.memories.length : 0,
+          beliefs: agent ? agent.beliefs.length : 0,
+          macros: agent ? agent.macros.length : 0,
+          causalTraces: agent ? agent.causalTraces.length : 0,
+          marks: agent ? agent.marks.length : 0,
+          falsifications: agent ? (agent.falsificationsCount || 0) : 0,
+          usedNames: agent ? agent.usedNames.size : 0,
+          trail: agent ? agent.trail.length : 0,
+          logs: logs.length,
+          particles: particles.length,
+          ripples: ripples.length
+        }
+      };
     }
 
     return {
+      get seed() { return seed; },
+      get rngState() { return rand ? rand.getState() : null; },
+      get tick() { return tick; },
+      get running() { return running; },
+      set running(val) { running = Boolean(val); },
+      get speed() { return speed; },
+      set speed(val) { if ([1, 2, 4, 8].includes(val)) speed = val; },
+      get logMode() { return logMode; },
+      set logMode(val) { if (['dual', 'agent', 'observer'].includes(val)) logMode = val; },
+      get canvasLens() { return canvasLens; },
+      set canvasLens(val) { setCanvasLens(val); },
+      get width() { return width; },
+      get height() { return height; },
+      get totalEvents() { return totalEvents; },
+      get agent() { return agent; },
+      get loci() { return loci; },
+      get signals() { return loci; },
+      get artifacts() { return artifacts; },
+      get particles() { return particles; },
+      get ripples() { return ripples; },
+      get logs() { return logs; },
+      get field() { return field; },
+      get imprint() { return imprint; },
+      get worldPhysics() { return worldPhysics; },
+      setHooks,
+      setDimensions,
+      setCanvasLens,
+      setOntologyMode,
+      sampleFieldAt,
+      conceptById,
+      locusById,
+      signalById: locusById,
+      macroById,
+      coherence,
+      simulate,
+      steps,
+      perturb,
+      resetWorld,
+      createSnapshot,
+      restoreSnapshot,
+      validSnapshot,
+      exportOntology,
+      validateOntology,
+      validOntology,
+      importOntology,
+      getState,
       constants: {
         APP_VERSION,
         RULESET_VERSION,
@@ -1598,78 +2774,23 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
         SAVE_VERSION,
         ONTOLOGY_FORMAT,
         ONTOLOGY_VERSION,
+        GRID_W,
+        GRID_H,
+        CHANNELS,
         MAX_CONCEPTS,
         MAX_ARTIFACTS,
+        MAX_LOCI,
+        MAX_MACROS,
+        MAX_TRACES,
+        MAX_MARKS,
         MAX_MEMORIES,
         MAX_LOGS,
         MAX_TRAIL,
         MAX_FEATURE_HISTORY,
-        MAX_SIGNALS,
+        MAX_SIGNALS: MAX_LOCI,
         MAX_PARTICLES,
         MAX_RIPPLES
-      },
-      get width() { return width; },
-      get height() { return height; },
-      get running() { return running; },
-      set running(val) { running = Boolean(val); },
-      get speed() { return speed; },
-      set speed(val) { if ([1, 2, 4, 8].includes(Number(val))) speed = Number(val); },
-      get logMode() { return logMode; },
-      set logMode(val) { if (['dual', 'agent', 'observer'].includes(val)) logMode = val; },
-      get seed() { return seed; },
-      get tick() { return tick; },
-      get totalEvents() { return totalEvents; },
-      get nextSpawn() { return nextSpawn; },
-      get rngState() { return rng.getState ? rng.getState() : null; },
-      get signals() { return signals; },
-      get artifacts() { return artifacts; },
-      get particles() { return particles; },
-      get ripples() { return ripples; },
-      get featureHistory() { return featureHistory; },
-      get agent() { return agent; },
-      get logs() { return logs; },
-      setHooks: (nextHooks) => Object.assign(hooks, nextHooks),
-      setDimensions,
-      resetWorld,
-      simulate,
-      steps: (count) => { for (let i = 0; i < count; i++) simulate(); },
-      perturb,
-      conceptById,
-      signalById,
-      coherence,
-      createSnapshot,
-      validSnapshot,
-      restoreSnapshot,
-      exportOntology,
-      validateOntology,
-      validOntology,
-      importOntology,
-      getState: () => ({
-        seed,
-        tick,
-        totalEvents,
-        nextSpawn,
-        rngState: rng.getState ? rng.getState() : null,
-        width,
-        height,
-        running,
-        speed,
-        counts: {
-          concepts: agent.concepts.length,
-          memories: agent.memories.length,
-          beliefs: agent.beliefs.length,
-          artifacts: artifacts.length,
-          totalArtifactsCreated: agent.totalArtifactsCreated || artifacts.length,
-          usedNames: agent.usedNames.size,
-          relationKeys: Object.keys(agent.relationCounts).length,
-          signals: signals.length,
-          particles: particles.length,
-          ripples: ripples.length,
-          logs: logs.length,
-          trail: agent.trail.length,
-          featureHistory: featureHistory.length
-        }
-      })
+      }
     };
   }
 
@@ -1681,13 +2802,20 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     SAVE_VERSION,
     ONTOLOGY_FORMAT,
     ONTOLOGY_VERSION,
+    GRID_W,
+    GRID_H,
+    CHANNELS,
     MAX_CONCEPTS,
     MAX_ARTIFACTS,
+    MAX_LOCI,
+    MAX_MACROS,
+    MAX_TRACES,
+    MAX_MARKS,
     MAX_MEMORIES,
     MAX_LOGS,
     MAX_TRAIL,
     MAX_FEATURE_HISTORY,
-    MAX_SIGNALS,
+    MAX_SIGNALS: MAX_LOCI,
     MAX_PARTICLES,
     MAX_RIPPLES,
     clamp,
@@ -1696,6 +2824,7 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     distance,
     mulberry32,
     safeGlyph,
+    deterministicGlyphFromText,
     glyphSVG,
     validSnapshot,
     validateOntology,
@@ -1706,9 +2835,10 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
   </script>
   <script id="nul-inline-app">
 /**
- * NUL Browser & Desktop Companion UI Controller
- * Connects `NULCore` (`src/engine.js`) to Canvas 2D rendering, sticky Lab/Companion
- * layouts, local storage autosave, portable snapshots, and portable ontology import/export.
+ * NUL Browser & Desktop Companion UI Controller (v0.02.001 · SUBSTRATE/0.2)
+ * Connects `NULCore` (`src/engine.js`) to multi-lens Canvas 2D rendering
+ * (`Combined` / `Agent` / `Medium`), ontology mode controls (`Emergent` / `None` / `Imported`),
+ * inspectable causal cycle diagnostics, local storage autosave, and portable snapshots/ontologies.
  */
 (() => {
   'use strict';
@@ -1720,6 +2850,9 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     APP_VERSION,
     RULESET_VERSION,
     STORAGE_KEY,
+    GRID_W,
+    GRID_H,
+    CHANNELS,
     clamp,
     pad,
     esc,
@@ -1793,6 +2926,10 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     $('#play-button').textContent = engine.running ? 'Pause' : 'Resume';
     $('#run-label').textContent = engine.running ? 'Running' : 'Suspended';
     $('#run-state').classList.toggle('paused', !engine.running);
+    $$('.lens-mode').forEach((btn) => btn.classList.toggle('active', btn.dataset.lens === engine.canvasLens));
+    if (engine.agent) {
+      $$('.ont-mode').forEach((btn) => btn.classList.toggle('active', btn.dataset.ontmode === engine.agent.ontologyMode));
+    }
   }
 
   function saveWorld(notify = false) {
@@ -1821,7 +2958,7 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
       const data = JSON.parse(raw);
       if (!engine.validSnapshot(data)) throw new Error('Invalid save');
       const when = new Date(data.savedAt).toLocaleString();
-      $('#save-summary').innerHTML = `<strong>T+${pad(data.tick)}</strong> · seed ${esc(data.seed)}<br>${esc(data.agent.concepts.length)} concepts · ${esc(data.artifacts.length)} artifacts<br>Saved ${esc(when)}`;
+      $('#save-summary').innerHTML = `<strong>T+${pad(data.tick)}</strong> · seed ${esc(data.seed)} · ontology: ${esc(data.agent.ontologyMode || 'emergent')}<br>${esc(data.agent.concepts.length)} concepts · ${esc((data.agent.macros || []).length)} operators · ${esc(data.artifacts.length)} structures<br>Saved ${esc(when)}`;
     } catch {
       restoreButton.disabled = true;
       $('#save-summary').textContent = 'Browser storage is unavailable or the autosave is invalid. Portable snapshots still work.';
@@ -1864,7 +3001,7 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     );
   }
 
-  // ---------- Observer rendering ----------
+  // ---------- Multi-Lens Canvas Rendering (Zero Pre-Drawn Observer Grid) ----------
   function drawGlyphCanvas(glyph, x, y, size, color, alpha = 1) {
     const safe = safeGlyph(glyph);
     if (!safe) return;
@@ -1885,73 +3022,172 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     ctx.restore();
   }
 
-  function drawBackground() {
-    const { width, height, agent } = engine;
-    ctx.fillStyle = '#0d0f0c';
-    ctx.fillRect(0, 0, width, height);
-    const gradient = ctx.createRadialGradient(
-      agent ? agent.x : width / 2,
-      agent ? agent.y : height / 2,
-      0,
-      width / 2,
-      height / 2,
-      Math.max(width, height) * 0.7
-    );
-    gradient.addColorStop(0, 'rgba(47,56,35,.10)');
-    gradient.addColorStop(1, 'rgba(7,9,6,0)');
-    ctx.fillStyle = gradient;
+  function drawSubstrateMedium(lens) {
+    const { width, height, field, imprint } = engine;
+    ctx.fillStyle = lens === 'agent' ? '#080a07' : '#0b0e0a';
     ctx.fillRect(0, 0, width, height);
 
-    ctx.strokeStyle = 'rgba(128,143,104,.035)';
-    ctx.lineWidth = 1;
-    const spacing = 80;
-    for (let x = spacing; x < width; x += spacing) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
-    }
-    for (let y = spacing; y < height; y += spacing) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+    const cellW = width / GRID_W;
+    const cellH = height / GRID_H;
+
+    for (let gy = 0; gy < GRID_H; gy++) {
+      const py = gy * cellH;
+      const row = gy * GRID_W;
+      for (let gx = 0; gx < GRID_W; gx++) {
+        const cell = row + gx;
+        const imp = imprint[cell];
+        const base = cell * CHANNELS;
+        const u0 = field[base];
+        const u1 = field[base + 1];
+        const u2 = field[base + 2];
+        const u3 = field[base + 3];
+
+        if (lens === 'agent') {
+          // Purely what the agent itself has physically imprinted/sculpted on the canvas!
+          if (imp < 0.035) continue;
+          const slowTone = clamp((u2 + u3 + 2) * 0.25, 0, 1);
+          const rCol = Math.round(145 + slowTone * 82);
+          const gCol = Math.round(175 + (1 - slowTone) * 55);
+          const bCol = Math.round(88 + slowTone * 24);
+          ctx.fillStyle = `rgba(${rCol},${gCol},${bCol},${(imp * 0.34).toFixed(3)})`;
+          ctx.fillRect(gx * cellW, py, cellW + 0.6, cellH + 0.6);
+          continue;
+        }
+
+        const fastAmp = Math.sqrt((u0 * u0 + u1 * u1) * 0.5);
+        const slowAmp = Math.sqrt((u2 * u2 + u3 * u3) * 0.5);
+        const total = fastAmp * 0.6 + slowAmp * 0.75 + imp * 0.5;
+        if (total < (lens === 'medium' ? 0.05 : 0.085)) continue;
+
+        const alphaScale = lens === 'medium' ? 0.38 : 0.16;
+        const rCol = Math.round(78 + slowAmp * 145 + imp * 40);
+        const gCol = Math.round(108 + fastAmp * 118 + imp * 35);
+        const bCol = Math.round(72 + Math.max(0, -u0) * 85);
+        const alpha = clamp(total * alphaScale, 0, 0.42);
+        ctx.fillStyle = `rgba(${rCol},${gCol},${bCol},${alpha.toFixed(3)})`;
+        ctx.fillRect(gx * cellW, py, cellW + 0.6, cellH + 0.6);
+
+        // In raw Medium lens, also render subtle fast-channel vector ticks
+        if (lens === 'medium' && fastAmp > 0.16 && (gx + gy) % 2 === 0) {
+          const cx = (gx + 0.5) * cellW;
+          const cy = py + 0.5 * cellH;
+          ctx.strokeStyle = 'rgba(198,224,148,.28)';
+          ctx.lineWidth = 0.75;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + u0 * cellW * 0.55, cy + u1 * cellH * 0.55);
+          ctx.stroke();
+        }
+      }
     }
   }
 
-  function drawSignal(signal) {
-    const c = signal.conceptId ? engine.conceptById(signal.conceptId) : null;
-    const pulse = (Math.sin(engine.tick * 0.075 + signal.phase) + 1) / 2;
-    const size = 2.6 + signal.features[1] * 3.4;
-    const alpha = signal.touched ? clamp((signal.life - engine.tick) / 32) : 0.55 + pulse * 0.35;
+  function drawSegmentedLocus(locus) {
+    const c = locus.conceptId ? engine.conceptById(locus.conceptId) : null;
+    const pulse = (Math.sin(engine.tick * 0.065 + (locus.phase || 0)) + 1) * 0.5;
+    const contour = Array.isArray(locus.contour) && locus.contour.length === 8 ? locus.contour : [18, 18, 18, 18, 18, 18, 18, 18];
+    const isSculpted = (locus.sculpted || 0) > 0.22;
+
     ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.strokeStyle = c ? '#b5ca79' : '#89957a';
-    ctx.fillStyle = c ? '#d6fa72' : '#a6b198';
-    ctx.lineWidth = 0.8;
-    if (c) {
-      drawGlyphCanvas(c.glyph, signal.x, signal.y, 20 + signal.features[0] * 7, '#a9c466', alpha * 0.7);
-    } else {
-      ctx.beginPath(); ctx.arc(signal.x, signal.y, 6 + pulse * 3, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(signal.x, signal.y, size * 0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = clamp(0.38 + locus.salience * 0.55, 0.25, 0.9);
+    ctx.strokeStyle = c ? '#b7cf78' : (isSculpted ? '#d8b46a' : '#859277');
+    ctx.fillStyle = c ? 'rgba(183,207,120,.06)' : (isSculpted ? 'rgba(216,180,106,.05)' : 'rgba(133,146,119,.035)');
+    ctx.lineWidth = c || isSculpted ? 1.0 : 0.75;
+
+    // Draw agent-segmented 8-direction organic contour polygon
+    ctx.beginPath();
+    for (let k = 0; k < 8; k++) {
+      const angle = (k / 8) * Math.PI * 2;
+      const rad = contour[k] + pulse * 2.2;
+      const px = locus.x + Math.cos(angle) * rad;
+      const py = locus.y + Math.sin(angle) * rad;
+      if (k === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
     }
-    if (signal.id === engine.agent.targetId && !signal.touched) {
-      ctx.globalAlpha = 0.4;
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    if (c) {
+      drawGlyphCanvas(c.glyph, locus.x, locus.y, 19 + locus.salience * 6, '#b7cf78', 0.8);
+    } else {
+      ctx.fillStyle = isSculpted ? '#e0b96c' : '#a6b198';
+      ctx.beginPath();
+      ctx.arc(locus.x, locus.y, 2.1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    if (locus.id === engine.agent.targetId) {
+      ctx.globalAlpha = 0.45;
       ctx.setLineDash([2, 4]);
-      ctx.beginPath(); ctx.arc(signal.x, signal.y, 18 + pulse * 3, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(locus.x, locus.y, 24 + pulse * 3, 0, Math.PI * 2);
+      ctx.stroke();
       ctx.setLineDash([]);
     }
     ctx.restore();
   }
 
-  function drawArtifact(artifact) {
-    const pulse = Math.sin(engine.tick * 0.025 + artifact.phase) * 3;
+  function drawStigmergicMarks() {
+    const marks = engine.agent.marks || [];
+    if (!marks.length) return;
     ctx.save();
-    ctx.strokeStyle = 'rgba(224,185,108,.17)';
-    ctx.lineWidth = 0.8;
-    ctx.beginPath(); ctx.arc(artifact.x, artifact.y, 28 + pulse, 0, Math.PI * 2); ctx.stroke();
-    ctx.setLineDash([2, 5]);
-    ctx.beginPath(); ctx.arc(artifact.x, artifact.y, 20 - pulse * 0.2, 0, Math.PI * 2); ctx.stroke();
+    for (const m of marks) {
+      const col = m.valence > 0.08 ? 'rgba(214,250,114,.42)' : m.valence < -0.08 ? 'rgba(231,132,112,.42)' : 'rgba(202,180,125,.36)';
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 0.9;
+      const dx = (m.vec?.[0] || 0) * 9;
+      const dy = (m.vec?.[1] || 0) * 9;
+      ctx.beginPath();
+      ctx.arc(m.x, m.y, 4.2, 0, Math.PI * 2);
+      ctx.moveTo(m.x - dx, m.y - dy);
+      ctx.lineTo(m.x + dx, m.y + dy);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawSculptedBridges() {
+    const arts = engine.artifacts;
+    if (arts.length < 2) return;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(224,185,108,.14)';
+    ctx.lineWidth = 0.85;
+    ctx.setLineDash([3, 5]);
+    for (let i = 0; i < arts.length; i++) {
+      for (let j = i + 1; j < arts.length; j++) {
+        const d = Math.hypot(arts[i].x - arts[j].x, arts[i].y - arts[j].y);
+        if (d < 155) {
+          ctx.beginPath();
+          ctx.moveTo(arts[i].x, arts[i].y);
+          ctx.lineTo(arts[j].x, arts[j].y);
+          ctx.stroke();
+        }
+      }
+    }
     ctx.setLineDash([]);
-    drawGlyphCanvas(artifact.glyph, artifact.x, artifact.y, 27, '#e0b96c', 0.88);
-    ctx.fillStyle = 'rgba(202,180,125,.65)';
+    ctx.restore();
+  }
+
+  function drawArtifact(artifact) {
+    const pulse = Math.sin(engine.tick * 0.025 + artifact.phase) * 2.8;
+    const strength = artifact.strength || 0.65;
+    ctx.save();
+    ctx.strokeStyle = `rgba(224,185,108,${(0.14 + strength * 0.16).toFixed(3)})`;
+    ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    ctx.arc(artifact.x, artifact.y, 25 + pulse, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([2, 5]);
+    ctx.beginPath();
+    ctx.arc(artifact.x, artifact.y, 18 - pulse * 0.2, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    drawGlyphCanvas(artifact.glyph, artifact.x, artifact.y, 25, '#e0b96c', 0.9);
+    ctx.fillStyle = 'rgba(202,180,125,.68)';
     ctx.font = '9px ' + monoFont;
     ctx.textAlign = 'center';
-    ctx.fillText(artifact.name, artifact.x, artifact.y + 43);
+    ctx.fillText(artifact.name, artifact.x, artifact.y + 40);
     ctx.restore();
   }
 
@@ -1959,9 +3195,9 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     const agent = engine.agent;
     if (agent.trail.length > 1) {
       ctx.save();
-      ctx.lineWidth = 0.7;
+      ctx.lineWidth = 0.8;
       for (let i = 1; i < agent.trail.length; i++) {
-        ctx.strokeStyle = `rgba(188,214,116,${(i / agent.trail.length) * 0.13})`;
+        ctx.strokeStyle = `rgba(188,214,116,${(i / agent.trail.length) * 0.15})`;
         ctx.beginPath();
         ctx.moveTo(agent.trail[i - 1][0], agent.trail[i - 1][1]);
         ctx.lineTo(agent.trail[i][0], agent.trail[i][1]);
@@ -1969,48 +3205,67 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
       }
       ctx.restore();
     }
-    ctx.save();
-    ctx.strokeStyle = 'rgba(170,193,115,.075)';
-    ctx.lineWidth = 0.7;
-    ctx.setLineDash([2, 7]);
-    ctx.beginPath(); ctx.arc(agent.x, agent.y, agent.senseRange, 0, Math.PI * 2); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.restore();
 
-    const target = engine.signalById(agent.targetId);
-    if (target) {
+    if (engine.canvasLens !== 'medium') {
       ctx.save();
-      ctx.strokeStyle = 'rgba(190,213,126,.10)';
-      ctx.setLineDash([2, 6]);
-      ctx.beginPath(); ctx.moveTo(agent.x, agent.y); ctx.lineTo(target.x, target.y); ctx.stroke();
+      ctx.strokeStyle = 'rgba(170,193,115,.075)';
+      ctx.lineWidth = 0.7;
+      ctx.setLineDash([2, 7]);
+      ctx.beginPath();
+      ctx.arc(agent.x, agent.y, agent.senseRange, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
       ctx.restore();
     }
+
+    const target = engine.locusById(agent.targetId);
+    if (target && engine.canvasLens !== 'medium') {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(190,213,126,.13)';
+      ctx.setLineDash([2, 6]);
+      ctx.beginPath();
+      ctx.moveTo(agent.x, agent.y);
+      ctx.lineTo(target.x, target.y);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     const glow = ctx.createRadialGradient(agent.x, agent.y, 0, agent.x, agent.y, 28);
-    glow.addColorStop(0, 'rgba(214,250,114,.24)');
+    glow.addColorStop(0, 'rgba(214,250,114,.25)');
     glow.addColorStop(1, 'rgba(214,250,114,0)');
     ctx.fillStyle = glow;
-    ctx.beginPath(); ctx.arc(agent.x, agent.y, 28, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath();
+    ctx.arc(agent.x, agent.y, 28, 0, Math.PI * 2);
+    ctx.fill();
 
     ctx.save();
     ctx.translate(agent.x, agent.y);
     ctx.rotate(engine.tick * 0.006);
     ctx.strokeStyle = '#d6fa72';
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(0, 0, 10, -0.4, 1.8); ctx.stroke();
-    ctx.beginPath(); ctx.arc(0, 0, 10, 2.7, 4.8); ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, 10, -0.4, 1.8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, 10, 2.7, 4.8);
+    ctx.stroke();
     ctx.restore();
 
     ctx.fillStyle = '#e7ffc0';
-    ctx.beginPath(); ctx.arc(agent.x, agent.y, 2.5, 0, Math.PI * 2); ctx.fill();
-    if (agent.selfName) {
-      ctx.fillStyle = 'rgba(210,229,170,.7)';
+    ctx.beginPath();
+    ctx.arc(agent.x, agent.y, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    const label = agent.ontologyMode === 'none' ? null : agent.selfName;
+    if (label) {
+      ctx.fillStyle = 'rgba(210,229,170,.72)';
       ctx.font = '9px ' + monoFont;
       ctx.textAlign = 'center';
-      ctx.fillText(agent.selfName, agent.x, agent.y - 20);
+      ctx.fillText(label, agent.x, agent.y - 20);
     }
   }
 
-  // ---------- Observer inspection (pure readout; never touches PRNG or agent state) ----------
+  // ---------- Observer Inspection (Zero PRNG or State Perturbation) ----------
   function findEntityAt(x, y) {
     const agent = engine.agent;
     if (!agent) return null;
@@ -2019,11 +3274,17 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     let bestDist = Infinity;
     for (const artifact of engine.artifacts) {
       const d = Math.hypot(artifact.x - x, artifact.y - y);
-      if (d <= 29 && d < bestDist) { bestDist = d; best = { kind: 'artifact', id: artifact.id, entity: artifact }; }
+      if (d <= 29 && d < bestDist) {
+        bestDist = d;
+        best = { kind: 'artifact', id: artifact.id, entity: artifact };
+      }
     }
-    for (const signal of engine.signals) {
-      const d = Math.hypot(signal.x - x, signal.y - y);
-      if (d <= 21 && d < bestDist) { bestDist = d; best = { kind: 'signal', id: signal.id, entity: signal }; }
+    for (const locus of engine.loci) {
+      const d = Math.hypot(locus.x - x, locus.y - y);
+      if (d <= 26 && d < bestDist) {
+        bestDist = d;
+        best = { kind: 'signal', id: locus.id, entity: locus };
+      }
     }
     return best;
   }
@@ -2037,7 +3298,7 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
       return item ? { kind: 'artifact', entity: item } : null;
     }
     if (inspectedTarget.kind === 'signal') {
-      const item = engine.signals.find((s) => s.id === inspectedTarget.id);
+      const item = engine.loci.find((s) => s.id === inspectedTarget.id);
       return item ? { kind: 'signal', entity: item } : null;
     }
     return null;
@@ -2064,24 +3325,31 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     const defaultSvg = '<svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="5" stroke="currentColor"/></svg>';
     if (kind === 'agent') {
       $('#inspector-glyph').innerHTML = agent.selfGlyph ? glyphSVG(agent.selfGlyph) : defaultSvg;
-      $('#inspector-title').textContent = agent.selfName || 'unnamed locus';
-      $('#inspector-kicker').textContent = 'Persistent embodied agent';
-      $('#inspector-meta').innerHTML = `Energy ${Math.round(agent.energy * 100)}% · ${agent.interactions} contacts<br>${agent.concepts.length} concepts · ${agent.beliefs.length} beliefs · ${engine.artifacts.length} active creations`;
+      $('#inspector-title').textContent = agent.ontologyMode === 'none'
+        ? 'ontology-free locus'
+        : (agent.selfName || 'pre-symbolic locus');
+      $('#inspector-kicker').textContent = `Embodied agent · ontology: ${agent.ontologyMode}`;
+      $('#inspector-meta').innerHTML = `Viability ${Math.round(agent.energy * 100)}% · ${agent.interactions} cycles · ${(agent.macros || []).length} operators<br>${agent.concepts.length} concepts · ${agent.beliefs.length} beliefs · ${engine.artifacts.length} sculpted structures`;
     } else if (kind === 'artifact') {
       const parents = entity.parents.map(engine.conceptById).filter(Boolean).map((c) => c.name).join(` ${agent.operators.join} `);
+      const macro = entity.macroId ? `μ${pad(entity.macroId, 2)}` : 'raw coupling';
       const vec = entity.features.map((v) => v.toFixed(2)).join(', ');
       $('#inspector-glyph').innerHTML = glyphSVG(entity.glyph) || defaultSvg;
       $('#inspector-title').textContent = entity.name;
-      $('#inspector-kicker').textContent = `Authored artifact #${pad(entity.id, 2)}`;
-      $('#inspector-meta').innerHTML = `Combined: ${esc(parents || '—')} · born T+${pad(entity.born)}<br>Vector [${esc(vec)}]`;
+      $('#inspector-kicker').textContent = `Sculpted structure #${pad(entity.id, 2)} · via ${macro}`;
+      $('#inspector-meta').innerHTML = `Context: ${esc(parents || 'ontology-free imprint')} · born T+${pad(entity.born)}<br>Medium state [${esc(vec)}]`;
     } else if (kind === 'signal') {
       const c = entity.conceptId ? engine.conceptById(entity.conceptId) : null;
       const vec = entity.features.map((v) => v.toFixed(2)).join(', ');
+      const deltaStr = Array.isArray(entity.causalDelta)
+        ? entity.causalDelta.map((v) => (v >= 0 ? `+${v.toFixed(2)}` : v.toFixed(2))).join(', ')
+        : 'unprobed';
       $('#inspector-glyph').innerHTML = c ? glyphSVG(c.glyph) : defaultSvg;
-      $('#inspector-title').textContent = c ? c.name : 'unclassified sensation';
-      $('#inspector-kicker').textContent = c ? `Assigned to symbol #${pad(c.id, 2)}` : `Unlabelled event #${pad(entity.id, 2)}`;
-      const valenceInfo = c ? `learned valence ${c.valence >= 0 ? '+' : ''}${c.valence.toFixed(2)}` : 'not yet perceived within sense range';
-      $('#inspector-meta').innerHTML = `${esc(valenceInfo)}<br>Raw 4D vector [${esc(vec)}]`;
+      $('#inspector-title').textContent = c ? c.name : `segmented locus #${pad(entity.id, 2)}`;
+      $('#inspector-kicker').textContent = c
+        ? `Compressed into symbol #${pad(c.id, 2)}`
+        : `Agent-segmented boundary · sculpted ${Math.round((entity.sculpted || 0) * 100)}%`;
+      $('#inspector-meta').innerHTML = `Medium [${esc(vec)}]<br>Observed Δ [${esc(deltaStr)}]`;
     }
   }
 
@@ -2095,16 +3363,26 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
 
   function renderWorld() {
     if (!engine.agent) return;
-    drawBackground();
+    const lens = engine.canvasLens;
+    drawSubstrateMedium(lens);
+
     for (const ripple of engine.ripples) {
       const progress = ripple.age / ripple.max;
       const colors = { positive: '214,250,114', negative: '231,132,112', artifact: '232,189,114', concept: '190,218,124', event: '135,148,119' };
       ctx.strokeStyle = `rgba(${colors[ripple.color] || colors.event},${(1 - progress) * 0.35})`;
       ctx.lineWidth = 0.8;
-      ctx.beginPath(); ctx.arc(ripple.x, ripple.y, 5 + progress * ripple.max, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(ripple.x, ripple.y, 5 + progress * ripple.max, 0, Math.PI * 2);
+      ctx.stroke();
     }
-    engine.signals.forEach(drawSignal);
-    engine.artifacts.forEach(drawArtifact);
+
+    if (lens !== 'medium') {
+      drawSculptedBridges();
+      drawStigmergicMarks();
+      engine.loci.forEach(drawSegmentedLocus);
+      engine.artifacts.forEach(drawArtifact);
+    }
+
     for (const p of engine.particles) {
       const colors = { positive: '#d6fa72', negative: '#e78470', artifact: '#e8bd72', concept: '#b8d37a' };
       ctx.globalAlpha = 1 - p.age / p.max;
@@ -2113,14 +3391,15 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     }
     ctx.globalAlpha = 1;
     drawAgent();
+
     const inspectedEntity = resolveInspectedEntity();
     if (inspectedEntity) {
       ctx.save();
-      ctx.strokeStyle = inspectedEntity.kind === 'artifact' ? 'rgba(232,189,114,.75)' : 'rgba(214,250,114,.75)';
+      ctx.strokeStyle = inspectedEntity.kind === 'artifact' ? 'rgba(232,189,114,.78)' : 'rgba(214,250,114,.78)';
       ctx.lineWidth = 1.1;
       ctx.setLineDash([3, 3]);
       ctx.beginPath();
-      ctx.arc(inspectedEntity.entity.x, inspectedEntity.entity.y, inspectedEntity.kind === 'artifact' ? 33 : 23, 0, Math.PI * 2);
+      ctx.arc(inspectedEntity.entity.x, inspectedEntity.entity.y, inspectedEntity.kind === 'artifact' ? 31 : 25, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
     }
@@ -2128,71 +3407,127 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
 
   function renderIdentity() {
     const agent = engine.agent;
+    const defaultSvg = '<svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="3" stroke="currentColor"/><circle cx="14" cy="14" r="10" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="2 3"/></svg>';
+
+    if (agent.ontologyMode === 'none') {
+      $('#identity-name').textContent = 'ontology-free';
+      $('#companion-agent-name').textContent = `ontology-free · ${(agent.macros || []).length} ops`;
+      $('#identity-sub').textContent = `Sub-symbolic causal mode · ${agent.causalTraces.length} delta traces`;
+      $('#identity-glyph').innerHTML = defaultSvg;
+      return;
+    }
+
     $('#identity-name').textContent = agent.selfName || 'unnamed';
-    $('#companion-agent-name').textContent = agent.selfName ? `${agent.selfName} · ${agent.concepts.length} concepts` : 'learning to notice';
-    $('#identity-sub').textContent = agent.selfName ? `Self-symbol authored at T+${pad(agent.selfBorn)}` : 'No self-symbol has formed';
-    $('#identity-glyph').innerHTML = agent.selfGlyph
-      ? glyphSVG(agent.selfGlyph)
-      : '<svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="3" stroke="currentColor"/><circle cx="14" cy="14" r="10" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="2 3"/></svg>';
+    $('#companion-agent-name').textContent = agent.selfName
+      ? `${agent.selfName} · ${agent.concepts.length} concepts`
+      : `pre-symbolic · ${(agent.macros || []).length} ops`;
+    $('#identity-sub').textContent = agent.selfName
+      ? `Self-symbol authored at T+${pad(agent.selfBorn)} (${agent.ontologyMode})`
+      : `Pre-symbolic · ${agent.causalTraces.length}/12 causal traces before compression`;
+    $('#identity-glyph').innerHTML = agent.selfGlyph ? glyphSVG(agent.selfGlyph) : defaultSvg;
+  }
+
+  function renderCausalCycle() {
+    const cyc = engine.agent.lastCycle;
+    const driveEl = $('#causal-drive');
+    if (!driveEl) return;
+    if (!cyc) {
+      driveEl.textContent = 'drive: sampling medium';
+      $('#causal-acc').textContent = 'acc —';
+      $('#causal-meta').textContent = 'Executing initial 8-tick motor coupling episode.';
+      $('#causal-deltas').innerHTML = 'pred Δ [ · ]<br>real Δ [ · ]';
+      return;
+    }
+    const fmt = (arr) => arr.map((v) => (v >= 0 ? `+${v.toFixed(2)}` : v.toFixed(2))).join(', ');
+    driveEl.textContent = `${cyc.drive} → ${cyc.proposalLabel}`;
+    $('#causal-acc').textContent = `acc ${Math.round(cyc.evaluation.accuracy * 100)}% · fit ${Math.round(cyc.evaluation.overall * 100)}%`;
+    $('#causal-meta').textContent = `${cyc.purposeSummary}. ${cyc.criticNote}.`;
+    $('#causal-deltas').innerHTML = `pred Δ [${esc(fmt(cyc.predictedDelta))}]<br>real Δ [${esc(fmt(cyc.actualDelta))}]`;
   }
 
   function renderMemories() {
     const recent = engine.agent.memories.slice(-5).reverse();
     $('#memory-list').innerHTML = recent.length
       ? recent.map((m) => {
-          const c = engine.conceptById(m.conceptId);
-          return `<div class="memory"><span class="memory-dot ${m.effect > 0.025 ? 'positive' : m.effect < -0.02 ? 'negative' : ''}"></span><span class="memory-name">${esc(c ? c.name : '?')}</span><span class="memory-meta">${m.effect >= 0 ? '+' : ''}${m.effect.toFixed(2)} · T+${pad(m.tick)}</span></div>`;
+          const c = m.conceptId ? engine.conceptById(m.conceptId) : null;
+          const label = c ? c.name : (m.label || 'Δ-cycle');
+          const accBadge = Number.isFinite(m.accuracy) ? ` · acc ${Math.round(m.accuracy * 100)}%` : '';
+          return `<div class="memory"><span class="memory-dot ${m.effect > 0.015 ? 'positive' : m.effect < -0.015 ? 'negative' : ''}"></span><span class="memory-name">${esc(label)}</span><span class="memory-meta">${m.effect >= 0 ? '+' : ''}${m.effect.toFixed(2)}${accBadge} · T+${pad(m.tick)}</span></div>`;
         }).join('')
       : '<div class="empty-panel">No episodes have been stored.</div>';
   }
 
   function renderLexicon() {
-    const concepts = engine.agent.concepts;
+    const agent = engine.agent;
+    if (agent.ontologyMode === 'none') {
+      $('#concept-list').innerHTML = '<div class="empty-panel"><svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="9" stroke="currentColor" stroke-dasharray="2 3"/></svg><br>Ontology mode is <strong>None</strong>.<br>The agent defines contours, operators, and canvas structures purely via continuous causal deltas without coining words.</div>';
+      return;
+    }
+    const concepts = agent.concepts;
     $('#concept-list').innerHTML = concepts.length
       ? concepts.map((c) => {
           const sign = c.valence > 0.04 ? 'positive' : c.valence < -0.04 ? 'negative' : '';
-          return `<article class="concept-card"><div class="concept-top">${glyphSVG(c.glyph, 'concept-glyph')}<div><div class="concept-name">${esc(c.name)}</div><div class="concept-id">SELF-AUTHORED SYMBOL ${pad(c.id, 2)}</div></div><div class="concept-valence ${sign}">${c.valence >= 0 ? '+' : ''}${c.valence.toFixed(2)}</div></div><div class="concept-bottom"><span>${c.seen} sensations · ${c.contacts} contacts</span><span>born T+${pad(c.born)}</span></div></article>`;
+          const deltaPreview = Array.isArray(c.causalPrototype)
+            ? `Δ[${c.causalPrototype.map((v) => (v >= 0 ? `+${v.toFixed(1)}` : v.toFixed(1))).join(',')}]`
+            : `${c.contacts} contacts`;
+          return `<article class="concept-card"><div class="concept-top">${glyphSVG(c.glyph, 'concept-glyph')}<div><div class="concept-name">${esc(c.name)}</div><div class="concept-id">CAUSAL SYMBOL ${pad(c.id, 2)} · ${esc(deltaPreview)}</div></div><div class="concept-valence ${sign}">${c.valence >= 0 ? '+' : ''}${c.valence.toFixed(2)}</div></div><div class="concept-bottom"><span>${c.seen} traces · ${c.contacts} cycles</span><span>born T+${pad(c.born)}</span></div></article>`;
         }).join('')
-      : '<div class="empty-panel"><svg viewBox="0 0 28 28" fill="none"><path d="M5 7h18M5 14h12M5 21h16" stroke="currentColor"/></svg><br>The symbol table is empty.<br>No word has been necessary yet.</div>';
+      : `<div class="empty-panel"><svg viewBox="0 0 28 28" fill="none"><path d="M5 7h18M5 14h12M5 21h16" stroke="currentColor"/></svg><br>Pre-symbolic phase (${agent.causalTraces.length}/12 causal traces).<br>Symbols emerge only when recurring causal deltas require compression.</div>`;
   }
 
   function renderLaws() {
     const agent = engine.agent;
-    $('#law-list').innerHTML = agent.beliefs.length
-      ? agent.beliefs.map((b) => {
-          const from = engine.conceptById(b.fromId);
-          const to = engine.conceptById(b.toId);
-          if (!from || !to) return '';
-          return `<article class="law-card"><div class="law-raw">${esc(from.name)} ${esc(agent.operators.sequence)} ${esc(to.name)}</div><div class="law-translation">“${esc(from.name)}” preceded “${esc(to.name)}” in ${b.count} remembered transitions.</div><div class="law-confidence"><span>${Math.round(b.confidence * 100)}%</span><div class="bar"><i style="width:${b.confidence * 100}%"></i></div><span>fallible</span></div></article>`;
-        }).join('')
-      : '<div class="empty-panel">No sequence has repeated enough<br>to become a belief.</div>';
+    const macroEl = $('#macro-list');
+    if (macroEl) {
+      const macros = agent.macros || [];
+      macroEl.innerHTML = macros.length
+        ? macros.map((m) => {
+            const cVec = m.gesture.coupling.map((v) => (v >= 0 ? `+${v.toFixed(1)}` : v.toFixed(1))).join(', ');
+            const dVec = m.meanDelta.map((v) => (v >= 0 ? `+${v.toFixed(2)}` : v.toFixed(2))).join(', ');
+            return `<article class="macro-card"><div><div class="macro-code">${esc(m.code || `μ${pad(m.id, 2)}`)}</div><div class="macro-vec">motor [${esc(cVec)}] ↦ Δ[${esc(dVec)}]</div></div><div class="macro-rel">${Math.round(m.reliability * 100)}% rel<br>${m.trials} trials</div></article>`;
+          }).join('')
+        : '<div class="empty-panel">No repeatable motor gesture has crystallized into a macro-operator yet.</div>';
+    }
+
+    $('#law-list').innerHTML = agent.ontologyMode === 'none'
+      ? '<div class="empty-panel">Linguistic beliefs are disabled in Ontology-Free mode.<br>Planning uses raw delta traces &amp; motor operators above.</div>'
+      : (agent.beliefs.length
+          ? agent.beliefs.map((b) => {
+              const from = engine.conceptById(b.fromId);
+              const to = engine.conceptById(b.toId);
+              if (!from || !to) return '';
+              const falsNote = b.falsifications ? ` · ${b.falsifications} falsifications` : '';
+              return `<article class="law-card"><div class="law-raw">${esc(from.name)} ${esc(agent.operators.sequence)} ${esc(to.name)}</div><div class="law-translation">“${esc(from.name)}” preceded “${esc(to.name)}” in ${b.count} causal cycles${esc(falsNote)}.</div><div class="law-confidence"><span>${Math.round(b.confidence * 100)}%</span><div class="bar"><i style="width:${b.confidence * 100}%"></i></div><span>critic-tested</span></div></article>`;
+            }).join('')
+          : '<div class="empty-panel">No causal transition has stabilized enough<br>to become a symbolic belief.</div>');
 
     $('#artifact-list').innerHTML = engine.artifacts.length
       ? engine.artifacts.map((a) => {
           const parents = a.parents.map(engine.conceptById).filter(Boolean).map((c) => c.name).join(` ${agent.operators.join} `);
-          return `<article class="artifact-card">${glyphSVG(a.glyph)}<div><div class="artifact-name">${esc(a.name)}</div><div class="artifact-parents">${esc(parents)} · born T+${pad(a.born)}</div></div></article>`;
+          const via = a.macroId ? `μ${pad(a.macroId, 2)}` : 'raw coupling';
+          return `<article class="artifact-card">${glyphSVG(a.glyph)}<div><div class="artifact-name">${esc(a.name)}</div><div class="artifact-parents">${esc(parents || via)} · born T+${pad(a.born)}</div></div></article>`;
         }).join('')
-      : '<div class="empty-panel">The agent has not yet combined<br>any of its own concepts.</div>';
+      : '<div class="empty-panel">The agent has not yet sculpted a persistent<br>slow-channel structure on the canvas.</div>';
   }
 
   function renderAll() {
     const agent = engine.agent;
     if (!agent) return;
-    $('#empty-state').classList.toggle('hidden', engine.totalEvents > 0 || engine.artifacts.length > 0);
+    $('#empty-state').classList.toggle('hidden', engine.loci.length > 0 || engine.artifacts.length > 0 || engine.tick > 15);
     $('#world-time').textContent = pad(engine.tick);
-    $('#event-count').textContent = pad(engine.totalEvents, 2);
+    $('#event-count').textContent = pad(engine.loci.length, 2);
     $('#stat-concepts').textContent = agent.concepts.length;
     $('#stat-memories').textContent = agent.memories.length;
     $('#stat-laws').textContent = agent.beliefs.length;
     const totalCreated = agent.totalArtifactsCreated || engine.artifacts.length;
     $('#stat-artifacts').textContent = totalCreated;
     $('#stat-artifacts').title = totalCreated > engine.artifacts.length
-      ? `${engine.artifacts.length} active in world (capped at ${Core.MAX_ARTIFACTS}) · ${totalCreated} authored total`
-      : `${engine.artifacts.length} active in world`;
+      ? `${engine.artifacts.length} active on canvas (capped at ${Core.MAX_ARTIFACTS}) · ${totalCreated} sculpted total`
+      : `${engine.artifacts.length} active on canvas`;
     $('#lexicon-count').textContent = agent.concepts.length;
-    $('#world-count').textContent = agent.beliefs.length + engine.artifacts.length;
+    $('#world-count').textContent = (agent.macros ? agent.macros.length : 0) + agent.beliefs.length + engine.artifacts.length;
     $('#intent-raw').textContent = agent.goal ? agent.goal.raw : '·';
-    $('#intent-description').textContent = agent.goal ? agent.goal.description : 'No preference has formed. The agent is only capable of noticing.';
+    $('#intent-description').textContent = agent.goal ? agent.goal.description : 'Sampling local 4-channel gradients before forming first purpose seed.';
     $('#energy-value').textContent = Math.round(agent.energy * 100) + '%';
     $('#energy-bar').style.width = agent.energy * 100 + '%';
     $('#novelty-value').textContent = Math.round(agent.novelty * 100) + '%';
@@ -2200,7 +3535,12 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     const coh = engine.coherence();
     $('#coherence-value').textContent = Math.round(coh * 100) + '%';
     $('#coherence-bar').style.width = coh * 100 + '%';
+
+    $$('.ont-mode').forEach((btn) => btn.classList.toggle('active', btn.dataset.ontmode === agent.ontologyMode));
+    $$('.lens-mode').forEach((btn) => btn.classList.toggle('active', btn.dataset.lens === engine.canvasLens));
+
     renderIdentity();
+    renderCausalCycle();
     renderMemories();
     renderInspector();
     if (activeTab === 'lexicon') renderLexicon();
@@ -2230,9 +3570,10 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
       previousTime = performance.now();
       inspectedTarget = null;
       syncSeedUI();
-      $('#empty-state').classList.toggle('hidden', engine.totalEvents > 0 || engine.artifacts.length > 0);
+      $('#empty-state').classList.toggle('hidden', engine.loci.length > 0 || engine.artifacts.length > 0 || engine.tick > 15);
       $$('.speed-button').forEach((button) => button.classList.toggle('active', Number(button.dataset.speed) === engine.speed));
       $$('.log-mode').forEach((button) => button.classList.toggle('active', button.dataset.logmode === engine.logMode));
+      $$('.lens-mode').forEach((button) => button.classList.toggle('active', button.dataset.lens === engine.canvasLens));
     },
     onOntologyImported: () => {
       inspectedTarget = null;
@@ -2318,6 +3659,20 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
   $$('.speed-button').forEach((button) => button.addEventListener('click', () => {
     engine.speed = Number(button.dataset.speed);
     $$('.speed-button').forEach((b) => b.classList.toggle('active', b === button));
+  }));
+
+  $$('.lens-mode').forEach((button) => button.addEventListener('click', () => {
+    engine.setCanvasLens(button.dataset.lens);
+    saveWorld(false);
+  }));
+
+  $$('.ont-mode').forEach((button) => button.addEventListener('click', () => {
+    const mode = button.dataset.ontmode;
+    if (mode === 'none' && engine.agent?.concepts.length > 0 && !confirm('Switch to strictly Ontology-Free mode? Existing words and beliefs in this run will be cleared so agency runs purely on continuous causal deltas.')) {
+      return;
+    }
+    engine.setOntologyMode(mode);
+    showToast(`Ontology mode: ${mode}.`);
   }));
 
   function triggerPerturb(at) {
@@ -2480,6 +3835,7 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     event.target.value = '';
   });
 
+  const lensOrder = ['combined', 'agent', 'medium'];
   window.addEventListener('pagehide', () => saveWorld(false));
   document.addEventListener('visibilitychange', () => { if (document.hidden) saveWorld(false); });
   document.addEventListener('keydown', (event) => {
@@ -2492,6 +3848,11 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     if (event.code === 'Escape' && inspectedTarget) { clearInspection(); return; }
     if (event.code === 'Space') { event.preventDefault(); toggleRunning(); }
     if (event.key.toLowerCase() === 'n') triggerPerturb();
+    if (event.key.toLowerCase() === 'l') {
+      const nextLens = lensOrder[(lensOrder.indexOf(engine.canvasLens) + 1) % lensOrder.length];
+      engine.setCanvasLens(nextLens);
+      showToast(`Canvas lens: ${nextLens}.`);
+    }
   });
 
   ['#brand-version', '#controls-version', '#footer-version'].forEach((selector) => {
@@ -2522,10 +3883,13 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
     window.__NUL_LAB__ = {
       step: () => engine.simulate(),
       steps: (count) => engine.steps(count),
-      resetWorld: (newSeed = true, explicitSeed = null) => engine.resetWorld(newSeed, explicitSeed),
+      resetWorld: (newSeed = true, explicitSeed = null, opts = {}) => engine.resetWorld(newSeed, explicitSeed, opts),
       perturb: (at) => triggerPerturb(at),
       inspectAt: (x, y) => inspectAt(x, y),
       clearInspection: () => clearInspection(),
+      setCanvasLens: (lens) => engine.setCanvasLens(lens),
+      setOntologyMode: (mode) => engine.setOntologyMode(mode),
+      sampleFieldAt: (x, y) => engine.sampleFieldAt(x, y),
       createSnapshot: () => engine.createSnapshot(),
       restoreSnapshot: (data) => engine.restoreSnapshot(data),
       validSnapshot: (data) => engine.validSnapshot(data),

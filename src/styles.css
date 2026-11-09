@@ -392,3 +392,106 @@ body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
 }
+
+/* SUBSTRATE/0.2 — Canvas lenses, ontology modes, causal cycle & discovered operators */
+.panel-right-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.lens-modes, .ont-modes {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.lens-mode, .ont-mode {
+  padding: 5px 9px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color .18s ease, background .18s ease;
+}
+.lens-mode:hover, .ont-mode:hover { color: var(--text); }
+.lens-mode.active, .ont-mode.active {
+  color: var(--signal);
+  background: rgba(214,250,114,.09);
+}
+.ont-mode-bar {
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+  background: rgba(13,15,12,.55);
+}
+.ont-mode-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.causal-card {
+  padding: 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: rgba(20,24,18,.52);
+  margin-bottom: 18px;
+}
+.causal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--signal);
+}
+.causal-badge {
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+.causal-meta {
+  margin-top: 7px;
+  font-size: 11.5px;
+  line-height: 1.52;
+  color: var(--muted);
+}
+.causal-deltas {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  line-height: 1.55;
+  color: var(--faint);
+}
+.macro-list { display: grid; gap: 9px; margin-bottom: 18px; }
+.macro-card {
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: rgba(20,24,18,.48);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.macro-code { font-family: var(--mono); font-size: 12px; color: var(--signal); }
+.macro-vec { font-family: var(--mono); font-size: 9.5px; color: var(--muted); margin-top: 3px; }
+.macro-rel { font-family: var(--mono); font-size: 10px; color: var(--amber); text-align: right; white-space: nowrap; }
+@media (max-width: 540px) {
+  .lens-mode, .ont-mode { padding: 4px 7px; font-size: 8px; letter-spacing: .08em; }
+  .ont-mode-label { display: none; }
+}

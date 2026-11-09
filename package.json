@@ -1,6 +1,6 @@
 {
   "name": "nul-desktop-companion",
-  "version": "0.1.3",
+  "version": "0.2.1",
   "private": true,
   "description": "An offline, non-LLM autonomous ontology lab and desktop companion.",
   "homepage": "https://github.com/tigersmith12/_NUL",
