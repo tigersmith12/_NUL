@@ -5,298 +5,401 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="NUL is a local, non-LLM artificial-life experiment in autonomous concept formation." />
   <title>NUL — A world before meaning</title>
-  <style>
-    :root {
-      --bg: #10120f;
-      --panel: #161914;
-      --panel-2: #1b1e18;
-      --line: #2b3026;
-      --line-soft: #23271f;
-      --text: #e9ecdf;
-      --muted: #969d8d;
-      --faint: #62695b;
-      --acid: #d6fa72;
-      --acid-dim: #a7c454;
-      --amber: #e8bd72;
-      --red: #e78470;
-      --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-      --serif: Iowan Old Style, Baskerville, "Times New Roman", serif;
-    }
+  <style id="nul-inline-styles">
+:root {
+  --bg: #10120f;
+  --panel: #161914;
+  --panel-2: #1b1e18;
+  --line: #2b3026;
+  --line-soft: #23271f;
+  --text: #e9ecdf;
+  --muted: #969d8d;
+  --faint: #62695b;
+  --acid: #d6fa72;
+  --acid-dim: #a7c454;
+  --amber: #e8bd72;
+  --red: #e78470;
+  --topbar-h: 72px;
+  --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --serif: Iowan Old Style, Baskerville, "Times New Roman", serif;
+}
 
-    * { box-sizing: border-box; }
-    html { color-scheme: dark; scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      min-width: 320px;
-      background:
-        radial-gradient(ellipse at 45% -15%, rgba(151, 177, 91, .07), transparent 42%),
-        var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      -webkit-font-smoothing: antialiased;
-    }
-    button { font: inherit; }
-    button, [role="button"] { -webkit-tap-highlight-color: transparent; }
-    button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
-    ::selection { color: #15180f; background: var(--acid); }
+* { box-sizing: border-box; }
+html { color-scheme: dark; scroll-behavior: smooth; scroll-padding-top: calc(var(--topbar-h) + 14px); }
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(ellipse at 45% -15%, rgba(151, 177, 91, .07), transparent 42%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; }
+button, [role="button"] { -webkit-tap-highlight-color: transparent; }
+button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
+::selection { color: #15180f; background: var(--acid); }
 
-    .shell { max-width: 1540px; margin: 0 auto; padding: 0 30px 32px; }
-    .topbar {
-      height: 76px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--line-soft);
-      gap: 20px;
-    }
-    .brand { display: flex; align-items: center; gap: 13px; min-width: 230px; }
-    .brand-mark { width: 29px; height: 29px; color: var(--acid); }
-    .brand-name { font: 700 19px/1 var(--mono); letter-spacing: .19em; }
-    .brand-sub { margin-top: 5px; color: var(--faint); font: 9px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
-    .top-status { display: flex; align-items: center; gap: 9px; color: var(--muted); font: 10px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--acid); box-shadow: 0 0 12px rgba(214, 250, 114, .55); }
-    .top-actions { display: flex; justify-content: flex-end; gap: 8px; min-width: 230px; }
-    .text-button, .icon-button {
-      border: 1px solid var(--line);
-      color: var(--muted);
-      background: transparent;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: color .18s, border-color .18s, background .18s;
-    }
-    .text-button { padding: 9px 13px; font: 10px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; }
-    .text-button:hover, .icon-button:hover { color: var(--text); border-color: #49503f; background: rgba(255,255,255,.025); }
+.shell { max-width: 1540px; margin: 0 auto; padding: 0 30px 32px; }
 
-    .intro { display: flex; justify-content: space-between; gap: 40px; align-items: flex-end; padding: 38px 0 28px; }
-    .eyebrow { color: var(--acid-dim); font: 10px/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 12px; }
-    h1 { margin: 0; font-weight: 450; font-size: clamp(31px, 3.1vw, 48px); line-height: 1.05; letter-spacing: -.04em; }
-    h1 em { font-family: var(--serif); font-weight: 400; color: var(--acid); }
-    .intro-copy { max-width: 600px; margin: 13px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
-    .constraints { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; max-width: 410px; padding-bottom: 3px; }
-    .constraint { border: 1px solid var(--line); border-radius: 100px; padding: 7px 10px; color: #a9b09e; font: 9px/1 var(--mono); letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; }
+/* Locked / sticky top bar in Lab & iframe views so controls and window actions never scroll away */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  height: var(--topbar-h);
+  margin: 0 -30px;
+  padding: 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(16, 18, 15, .93);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line-soft);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .28);
+  gap: 16px;
+}
+.brand { display: flex; align-items: center; gap: 13px; min-width: 210px; }
+.brand-mark { width: 29px; height: 29px; color: var(--acid); flex: 0 0 auto; }
+.brand-name { font: 700 19px/1 var(--mono); letter-spacing: .19em; }
+.brand-sub { margin-top: 5px; color: var(--faint); font: 9px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+.top-status { display: flex; align-items: center; gap: 9px; color: var(--muted); font: 10px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--acid); box-shadow: 0 0 12px rgba(214, 250, 114, .55); }
+.top-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 220px; }
+.text-button, .icon-button {
+  border: 1px solid var(--line);
+  color: var(--muted);
+  background: rgba(22, 25, 20, .72);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: color .18s, border-color .18s, background .18s;
+}
+.text-button { padding: 9px 12px; font: 10px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.text-button:hover, .icon-button:hover { color: var(--text); border-color: #49503f; background: rgba(255, 255, 255, .04); }
 
-    .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 356px; gap: 16px; align-items: start; }
-    .left-column { display: grid; gap: 16px; min-width: 0; }
-    .panel { border: 1px solid var(--line); border-radius: 9px; background: var(--panel); overflow: hidden; }
-    .panel-header { height: 47px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line-soft); gap: 12px; }
-    .panel-title { display: flex; align-items: center; gap: 9px; color: #bec4b5; font: 10px/1 var(--mono); letter-spacing: .11em; text-transform: uppercase; }
-    .panel-title .index { color: var(--faint); }
-    .run-state { display: inline-flex; align-items: center; gap: 7px; color: var(--acid-dim); font: 9px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
-    .run-state.paused { color: var(--amber); }
-    .run-state .status-dot { width: 5px; height: 5px; }
-    .paused .status-dot { background: var(--amber); box-shadow: none; }
+.intro { display: flex; justify-content: space-between; gap: 40px; align-items: flex-end; padding: 34px 0 26px; }
+.eyebrow { color: var(--acid-dim); font: 10px/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 12px; }
+h1 { margin: 0; font-weight: 450; font-size: clamp(31px, 3.1vw, 48px); line-height: 1.05; letter-spacing: -.04em; }
+h1 em { font-family: var(--serif); font-weight: 400; color: var(--acid); }
+.intro-copy { max-width: 600px; margin: 13px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.constraints { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; max-width: 410px; padding-bottom: 3px; }
+.constraint { border: 1px solid var(--line); border-radius: 100px; padding: 7px 10px; color: #a9b09e; font: 9px/1 var(--mono); letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; }
 
-    .canvas-wrap { position: relative; height: clamp(420px, 50vw, 570px); max-height: 570px; min-height: 420px; background: #0d0f0c; overflow: hidden; }
-    #world { display: block; width: 100%; height: 100%; cursor: crosshair; }
-    .world-readout { position: absolute; top: 16px; left: 17px; pointer-events: none; display: flex; gap: 17px; color: #596050; font: 9px/1 var(--mono); letter-spacing: .08em; }
-    .world-readout b { color: #89917e; font-weight: 400; }
-    .perturb-button {
-      position: absolute; top: 12px; right: 12px;
-      border: 1px solid #30362a; border-radius: 5px; background: rgba(20, 23, 17, .82);
-      color: #9ea692; padding: 8px 10px; cursor: pointer;
-      font: 9px/1 var(--mono); letter-spacing: .04em; text-transform: uppercase;
-      backdrop-filter: blur(8px); transition: .18s;
-    }
-    .perturb-button:hover { color: var(--acid); border-color: #59643f; }
-    .empty-state { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; transition: opacity 1s; }
-    .empty-state.hidden { opacity: 0; }
-    .empty-orbit { width: 44px; height: 44px; border: 1px solid #343a2d; border-radius: 50%; margin: 0 auto 19px; position: relative; animation: breathe 3s ease-in-out infinite; }
-    .empty-orbit::after { content: ""; position: absolute; width: 4px; height: 4px; border-radius: 50%; background: var(--acid); top: 19px; left: 19px; box-shadow: 0 0 13px var(--acid); }
-    @keyframes breathe { 50% { transform: scale(1.12); opacity: .55; } }
-    .empty-title { color: #b4bbaa; font: 12px/1.4 var(--mono); }
-    .empty-copy { color: #596050; font: 10px/1.6 var(--mono); margin-top: 7px; }
-    .canvas-foot { position: absolute; left: 17px; bottom: 14px; pointer-events: none; color: #4f5648; font: 8px/1 var(--mono); letter-spacing: .09em; text-transform: uppercase; }
-    .controls { min-height: 56px; display: flex; align-items: center; gap: 9px; padding: 9px 13px; border-top: 1px solid var(--line-soft); }
-    .control-button { height: 34px; border: 1px solid var(--line); border-radius: 5px; color: #b5bcab; background: #1a1d17; cursor: pointer; font: 10px/1 var(--mono); padding: 0 12px; transition: .18s; }
-    .control-button:hover { border-color: #4c5540; color: var(--text); }
-    .control-button:disabled { opacity: .38; cursor: not-allowed; }
-    .control-button:disabled:hover { border-color: var(--line); color: #b5bcab; }
-    .data-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 13px 0 4px; }
-    .save-summary { border: 1px solid var(--line); border-radius: 6px; background: #12150f; padding: 12px 13px; color: #929d85; font: 10px/1.6 var(--mono); }
-    .save-summary strong { color: var(--acid); font-weight: 400; }
-    .control-button.primary { background: var(--acid); color: #171b10; border-color: var(--acid); min-width: 78px; font-weight: 700; }
-    .control-button.primary:hover { background: #e1ff91; }
-    .speed-group { display: flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
-    .speed-button { width: 37px; height: 32px; border: 0; border-right: 1px solid var(--line); background: transparent; color: var(--faint); cursor: pointer; font: 9px/1 var(--mono); }
-    .speed-button:last-child { border-right: 0; }
-    .speed-button.active { color: var(--acid); background: #242a1c; }
-    .control-spacer { flex: 1; }
-    .seed-label { color: var(--faint); font: 9px/1 var(--mono); letter-spacing: .04em; }
-    .seed-label b { color: #939b88; font-weight: 400; }
+.workspace { display: grid; grid-template-columns: minmax(0, 1fr) 356px; gap: 16px; align-items: start; }
+.left-column { display: grid; gap: 16px; min-width: 0; }
+.panel { border: 1px solid var(--line); border-radius: 9px; background: var(--panel); overflow: hidden; }
+.panel-header { height: 47px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line-soft); gap: 12px; flex: 0 0 auto; }
+.panel-title { display: flex; align-items: center; gap: 9px; color: #bec4b5; font: 10px/1 var(--mono); letter-spacing: .11em; text-transform: uppercase; }
+.panel-title .index { color: var(--faint); }
+.run-state { display: inline-flex; align-items: center; gap: 7px; color: var(--acid-dim); font: 9px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.run-state.paused { color: var(--amber); }
+.run-state .status-dot { width: 5px; height: 5px; }
+.paused .status-dot { background: var(--amber); box-shadow: none; }
 
-    .transcript .panel-header { height: 45px; }
-    .log-modes { display: flex; gap: 2px; background: #10120e; padding: 3px; border-radius: 5px; }
-    .log-mode { border: 0; border-radius: 3px; background: transparent; color: var(--faint); padding: 5px 7px; cursor: pointer; font: 8px/1 var(--mono); text-transform: uppercase; }
-    .log-mode.active { color: #c4cbb9; background: #292e24; }
-    .log { height: 198px; overflow-y: auto; padding: 7px 16px 12px; scrollbar-width: thin; scrollbar-color: #343b2d transparent; }
-    .log-entry { display: grid; grid-template-columns: 48px 1fr; gap: 9px; padding: 10px 0; border-bottom: 1px solid #20241c; }
-    .log-entry:last-child { border-bottom: 0; }
-    @keyframes enter { from { opacity: 0; transform: translateY(4px); } }
-    .log-time { color: #555d4d; font: 9px/1.5 var(--mono); padding-top: 1px; }
-    .log-raw { color: var(--acid); font: 11px/1.5 var(--mono); word-break: break-word; }
-    .log-translation { color: #8e9684; font-size: 11px; line-height: 1.45; margin-top: 3px; }
-    .log-entry.system .log-raw { color: #747c6b; }
-    .log-entry.system .log-translation { color: #646c5d; }
-    .mode-agent .log-translation { display: none; }
-    .mode-observer .log-raw { display: none; }
-    .mode-observer .log-translation { margin-top: 0; color: #b0b7a6; }
+.canvas-wrap { position: relative; height: clamp(390px, 48vw, 560px); max-height: 560px; min-height: 360px; background: #0d0f0c; overflow: hidden; }
+#world { display: block; width: 100%; height: 100%; cursor: crosshair; }
+.world-readout { position: absolute; top: 16px; left: 17px; pointer-events: none; display: flex; align-items: center; gap: 17px; color: #596050; font: 9px/1 var(--mono); letter-spacing: .08em; }
+.world-readout b { color: #89917e; font-weight: 400; }
+.seed-badge {
+  pointer-events: auto; border: 0; background: transparent; padding: 3px 5px; margin: -3px -5px;
+  border-radius: 4px; color: inherit; font: inherit; letter-spacing: inherit; cursor: pointer; transition: .18s;
+}
+.seed-badge:hover { color: var(--acid-dim); background: rgba(214, 250, 114, .06); }
+.seed-badge:hover b { color: var(--acid); }
+.seed-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 11px 0 4px; }
+.seed-input {
+  width: 156px; height: 34px; border: 1px solid var(--line); border-radius: 5px;
+  background: #12150f; color: var(--text); padding: 0 10px; font: 11px/1 var(--mono);
+}
+.seed-input:focus { outline: 1px solid var(--acid); border-color: var(--acid-dim); }
+.entity-inspector {
+  position: absolute; right: 12px; bottom: 12px; width: min(286px, calc(100% - 24px));
+  border: 1px solid #39422f; border-radius: 7px; background: rgba(18, 21, 15, .93);
+  backdrop-filter: blur(8px); padding: 10px 11px; z-index: 4; box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+}
+.entity-inspector[hidden] { display: none; }
+.inspector-head { display: flex; align-items: center; gap: 8px; }
+.inspector-glyph { width: 24px; height: 24px; padding: 3px; border-radius: 4px; background: #1d2217; color: var(--acid); flex: 0 0 auto; display: grid; place-items: center; }
+.inspector-glyph svg { width: 18px; height: 18px; }
+.inspector-title { color: #e2e8d7; font: 11px/1.2 var(--mono); }
+.inspector-kicker { color: #67715c; font: 7px/1 var(--mono); letter-spacing: .11em; text-transform: uppercase; margin-top: 3px; }
+.inspector-close { margin-left: auto; border: 0; background: transparent; color: #78826c; cursor: pointer; padding: 2px 5px; font: 13px/1 var(--mono); border-radius: 3px; }
+.inspector-close:hover { color: var(--acid); background: rgba(255, 255, 255, .04); }
+.inspector-meta { margin-top: 8px; padding-top: 7px; border-top: 1px solid #252b1f; color: #929c86; font: 9px/1.55 var(--mono); }
+.inspector-note { margin-top: 5px; color: #596250; font: 7.5px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .06em; }
+.perturb-button {
+  position: absolute; top: 12px; right: 12px;
+  border: 1px solid #30362a; border-radius: 5px; background: rgba(20, 23, 17, .82);
+  color: #9ea692; padding: 8px 10px; cursor: pointer;
+  font: 9px/1 var(--mono); letter-spacing: .04em; text-transform: uppercase;
+  backdrop-filter: blur(8px); transition: .18s;
+}
+.perturb-button:hover { color: var(--acid); border-color: #59643f; }
+.empty-state { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; transition: opacity 1s; }
+.empty-state.hidden { opacity: 0; }
+.empty-orbit { width: 44px; height: 44px; border: 1px solid #343a2d; border-radius: 50%; margin: 0 auto 19px; position: relative; animation: breathe 3s ease-in-out infinite; }
+.empty-orbit::after { content: ""; position: absolute; width: 4px; height: 4px; border-radius: 50%; background: var(--acid); top: 19px; left: 19px; box-shadow: 0 0 13px var(--acid); }
+@keyframes breathe { 50% { transform: scale(1.12); opacity: .55; } }
+.empty-title { color: #b4bbaa; font: 12px/1.4 var(--mono); }
+.empty-copy { color: #596050; font: 10px/1.6 var(--mono); margin-top: 7px; }
+.canvas-foot { position: absolute; left: 17px; bottom: 14px; pointer-events: none; color: #4f5648; font: 8px/1 var(--mono); letter-spacing: .09em; text-transform: uppercase; }
+.controls { min-height: 56px; display: flex; flex-wrap: wrap; align-items: center; gap: 9px; padding: 9px 13px; border-top: 1px solid var(--line-soft); background: var(--panel); }
+.control-button { height: 34px; border: 1px solid var(--line); border-radius: 5px; color: #b5bcab; background: #1a1d17; cursor: pointer; font: 10px/1 var(--mono); padding: 0 12px; transition: .18s; }
+.control-button:hover { border-color: #4c5540; color: var(--text); }
+.control-button:disabled { opacity: .38; cursor: not-allowed; }
+.control-button:disabled:hover { border-color: var(--line); color: #b5bcab; }
+.data-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 13px 0 4px; }
+.save-summary { border: 1px solid var(--line); border-radius: 6px; background: #12150f; padding: 12px 13px; color: #929d85; font: 10px/1.6 var(--mono); }
+.save-summary strong { color: var(--acid); font-weight: 400; }
+.control-button.primary { background: var(--acid); color: #171b10; border-color: var(--acid); min-width: 78px; font-weight: 700; }
+.control-button.primary:hover { background: #e1ff91; }
+.speed-group { display: flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+.speed-button { width: 37px; height: 32px; border: 0; border-right: 1px solid var(--line); background: transparent; color: var(--faint); cursor: pointer; font: 9px/1 var(--mono); }
+.speed-button:last-child { border-right: 0; }
+.speed-button.active { color: var(--acid); background: #242a1c; }
+.control-spacer { flex: 1; }
+.seed-label { color: var(--faint); font: 9px/1 var(--mono); letter-spacing: .04em; }
+.seed-label b { color: #939b88; font-weight: 400; }
 
-    .mind-panel { min-height: 670px; display: flex; flex-direction: column; }
-    .identity { padding: 18px 17px 16px; display: flex; align-items: center; gap: 13px; }
-    .identity-glyph { width: 45px; height: 45px; display: grid; place-items: center; flex: 0 0 auto; border: 1px solid #39402f; border-radius: 7px; background: #11140e; color: var(--acid); }
-    .identity-glyph svg { width: 29px; height: 29px; }
-    .identity-label { color: var(--faint); font: 8px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
-    .identity-name { color: #e1e6d7; font: 16px/1.2 var(--mono); letter-spacing: .03em; }
-    .identity-sub { margin-top: 5px; color: #747d6a; font: 9px/1 var(--mono); }
-    .stats { display: grid; grid-template-columns: repeat(4, 1fr); margin: 0 16px 16px; border: 1px solid var(--line-soft); border-radius: 6px; }
-    .stat { padding: 11px 7px 10px; text-align: center; border-right: 1px solid var(--line-soft); }
-    .stat:last-child { border-right: 0; }
-    .stat-value { color: #dce2d2; font: 15px/1 var(--mono); }
-    .stat-label { margin-top: 6px; color: #5f6758; font: 7px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
-    .tabs { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); padding: 0 12px; }
-    .tab { position: relative; border: 0; background: transparent; color: #6f7866; height: 43px; cursor: pointer; font: 9px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
-    .tab.active { color: var(--acid); }
-    .tab.active::after { content: ""; position: absolute; height: 2px; left: 16px; right: 16px; bottom: -1px; background: var(--acid); }
-    .tab-count { opacity: .55; margin-left: 3px; }
-    .tab-content { min-height: 415px; max-height: 475px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #343b2d transparent; }
-    .tab-pane { padding: 16px; }
-    .section-kicker { color: #646d5b; font: 8px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; margin: 0 0 10px; }
-    .intent-card { border: 1px solid #31382a; border-radius: 6px; background: #1b2016; padding: 13px; margin-bottom: 19px; }
-    .intent-raw { color: var(--acid); font: 12px/1.5 var(--mono); min-height: 18px; word-break: break-word; }
-    .intent-description { margin-top: 6px; color: #959e8b; font-size: 11px; line-height: 1.5; }
-    .drive { margin-bottom: 13px; }
-    .drive-head { display: flex; justify-content: space-between; color: #909987; font: 9px/1 var(--mono); margin-bottom: 7px; }
-    .drive-head span:last-child { color: #626b5a; }
-    .bar { height: 3px; border-radius: 3px; background: #292e24; overflow: hidden; }
-    .bar > i { display: block; height: 100%; width: 0; border-radius: inherit; background: #a8bd68; transition: width .4s; }
-    .bar.energy > i { background: var(--acid); }
-    .observer-note { margin: 18px 0 0; padding-top: 13px; border-top: 1px solid var(--line-soft); color: #5f6758; font: 9px/1.55 var(--mono); }
-    .memory-list { display: grid; gap: 7px; }
-    .memory { display: flex; align-items: center; gap: 10px; padding: 8px 9px; background: #12150f; border: 1px solid #242920; border-radius: 5px; }
-    .memory-dot { width: 5px; height: 5px; border-radius: 50%; background: #8c9874; flex: 0 0 auto; }
-    .memory-dot.positive { background: var(--acid); }
-    .memory-dot.negative { background: var(--red); }
-    .memory-name { color: #b7c0ac; font: 10px/1 var(--mono); }
-    .memory-meta { margin-left: auto; color: #596250; font: 8px/1 var(--mono); }
-    .empty-panel { padding: 33px 12px; text-align: center; color: #5e6657; font: 10px/1.7 var(--mono); }
-    .empty-panel svg { width: 28px; height: 28px; color: #41483a; margin-bottom: 10px; }
-    .concept-list { display: grid; gap: 8px; }
-    .concept-card { border: 1px solid #292f24; border-radius: 6px; padding: 11px; background: #131610; }
-    .concept-top { display: flex; align-items: center; gap: 10px; }
-    .concept-glyph { width: 31px; height: 31px; padding: 5px; color: #b9d36f; background: #1d2217; border-radius: 4px; flex: 0 0 auto; }
-    .concept-name { color: #dce4d2; font: 12px/1 var(--mono); }
-    .concept-id { color: #5e6756; font: 8px/1 var(--mono); margin-top: 5px; }
-    .concept-valence { margin-left: auto; font: 9px/1 var(--mono); color: #7b8571; }
-    .concept-valence.positive { color: var(--acid-dim); }
-    .concept-valence.negative { color: var(--red); }
-    .concept-bottom { display: flex; justify-content: space-between; margin-top: 10px; color: #68715f; font: 8px/1 var(--mono); }
-    .law-list, .artifact-list { display: grid; gap: 8px; margin-bottom: 20px; }
-    .law-card { padding: 11px; border-left: 2px solid #566439; background: #13160f; border-radius: 0 5px 5px 0; }
-    .law-raw { color: #c3d695; font: 11px/1.5 var(--mono); }
-    .law-translation { color: #77816e; font-size: 10px; line-height: 1.5; margin: 5px 0 8px; }
-    .law-confidence { display: flex; align-items: center; gap: 8px; color: #59634f; font: 8px/1 var(--mono); }
-    .law-confidence .bar { flex: 1; }
-    .artifact-card { display: flex; align-items: center; gap: 10px; border: 1px solid #2a3023; border-radius: 5px; padding: 9px; }
-    .artifact-card svg { width: 28px; height: 28px; color: var(--amber); }
-    .artifact-name { color: #d6cba9; font: 11px/1 var(--mono); }
-    .artifact-parents { margin-top: 5px; color: #676657; font: 8px/1.3 var(--mono); }
-    .mind-footer { margin-top: auto; border-top: 1px solid var(--line-soft); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .local-note { color: #596150; font: 8px/1.4 var(--mono); }
-    .export-button { border: 0; background: transparent; color: #929d83; padding: 4px 0; cursor: pointer; white-space: nowrap; font: 9px/1 var(--mono); text-transform: uppercase; }
-    .export-button:hover { color: var(--acid); }
+.transcript .panel-header { height: 45px; }
+.log-modes { display: flex; gap: 2px; background: #10120e; padding: 3px; border-radius: 5px; }
+.log-mode { border: 0; border-radius: 3px; background: transparent; color: var(--faint); padding: 5px 7px; cursor: pointer; font: 8px/1 var(--mono); text-transform: uppercase; }
+.log-mode.active { color: #c4cbb9; background: #292e24; }
+.log { height: 198px; overflow-y: auto; padding: 7px 16px 12px; scrollbar-width: thin; scrollbar-color: #343b2d transparent; }
+.log-entry { display: grid; grid-template-columns: 48px 1fr; gap: 9px; padding: 10px 0; border-bottom: 1px solid #20241c; }
+.log-entry:last-child { border-bottom: 0; }
+@keyframes enter { from { opacity: 0; transform: translateY(4px); } }
+.log-time { color: #555d4d; font: 9px/1.5 var(--mono); padding-top: 1px; }
+.log-raw { color: var(--acid); font: 11px/1.5 var(--mono); word-break: break-word; }
+.log-translation { color: #8e9684; font-size: 11px; line-height: 1.45; margin-top: 3px; }
+.log-entry.system .log-raw { color: #747c6b; }
+.log-entry.system .log-translation { color: #646c5d; }
+.mode-agent .log-translation { display: none; }
+.mode-observer .log-raw { display: none; }
+.mode-observer .log-translation { margin-top: 0; color: #b0b7a6; }
 
-    .bootstrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-    .bootstrap-card { border: 1px solid var(--line-soft); border-radius: 7px; padding: 16px 18px; display: flex; align-items: center; gap: 18px; background: rgba(20,23,17,.55); }
-    .bootstrap-label { flex: 0 0 auto; color: #66705d; font: 8px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
-    .bootstrap-items { display: flex; flex-wrap: wrap; gap: 6px 15px; color: #9ba591; font: 10px/1.5 var(--mono); }
-    .bootstrap-card:last-child .bootstrap-items { color: #777f6e; }
-    .footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px 2px 0; color: #4f5748; font: 8px/1.5 var(--mono); letter-spacing: .04em; text-transform: uppercase; }
+/* Sticky Mind panel on desktop/iframe widths so inspection stays anchored while scrolling */
+.mind-panel {
+  position: sticky;
+  top: calc(var(--topbar-h) + 14px);
+  max-height: calc(100vh - var(--topbar-h) - 28px);
+  max-height: calc(100dvh - var(--topbar-h) - 28px);
+  display: flex;
+  flex-direction: column;
+}
+.identity { padding: 16px 17px 14px; display: flex; align-items: center; gap: 13px; flex: 0 0 auto; }
+.identity-glyph { width: 45px; height: 45px; display: grid; place-items: center; flex: 0 0 auto; border: 1px solid #39402f; border-radius: 7px; background: #11140e; color: var(--acid); }
+.identity-glyph svg { width: 29px; height: 29px; }
+.identity-label { color: var(--faint); font: 8px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+.identity-name { color: #e1e6d7; font: 16px/1.2 var(--mono); letter-spacing: .03em; }
+.identity-sub { margin-top: 5px; color: #747d6a; font: 9px/1 var(--mono); }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); margin: 0 16px 14px; border: 1px solid var(--line-soft); border-radius: 6px; flex: 0 0 auto; }
+.stat { padding: 10px 7px 9px; text-align: center; border-right: 1px solid var(--line-soft); }
+.stat:last-child { border-right: 0; }
+.stat-value { color: #dce2d2; font: 15px/1 var(--mono); }
+.stat-label { margin-top: 6px; color: #5f6758; font: 7px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); padding: 0 12px; flex: 0 0 auto; background: var(--panel); }
+.tab { position: relative; border: 0; background: transparent; color: #6f7866; height: 42px; cursor: pointer; font: 9px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.tab.active { color: var(--acid); }
+.tab.active::after { content: ""; position: absolute; height: 2px; left: 16px; right: 16px; bottom: -1px; background: var(--acid); }
+.tab-count { opacity: .55; margin-left: 3px; }
+.tab-content { flex: 1 1 auto; min-height: 240px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #343b2d transparent; }
+.tab-pane { padding: 16px; }
+.section-kicker { color: #646d5b; font: 8px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; margin: 0 0 10px; }
+.intent-card { border: 1px solid #31382a; border-radius: 6px; background: #1b2016; padding: 13px; margin-bottom: 19px; }
+.intent-raw { color: var(--acid); font: 12px/1.5 var(--mono); min-height: 18px; word-break: break-word; }
+.intent-description { margin-top: 6px; color: #959e8b; font-size: 11px; line-height: 1.5; }
+.drive { margin-bottom: 13px; }
+.drive-head { display: flex; justify-content: space-between; color: #909987; font: 9px/1 var(--mono); margin-bottom: 7px; }
+.drive-head span:last-child { color: #626b5a; }
+.bar { height: 3px; border-radius: 3px; background: #292e24; overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; border-radius: inherit; background: #a8bd68; transition: width .4s; }
+.bar.energy > i { background: var(--acid); }
+.observer-note { margin: 18px 0 0; padding-top: 13px; border-top: 1px solid var(--line-soft); color: #5f6758; font: 9px/1.55 var(--mono); }
+.memory-list { display: grid; gap: 7px; }
+.memory { display: flex; align-items: center; gap: 10px; padding: 8px 9px; background: #12150f; border: 1px solid #242920; border-radius: 5px; }
+.memory-dot { width: 5px; height: 5px; border-radius: 50%; background: #8c9874; flex: 0 0 auto; }
+.memory-dot.positive { background: var(--acid); }
+.memory-dot.negative { background: var(--red); }
+.memory-name { color: #b7c0ac; font: 10px/1 var(--mono); }
+.memory-meta { margin-left: auto; color: #596250; font: 8px/1 var(--mono); }
+.empty-panel { padding: 33px 12px; text-align: center; color: #5e6657; font: 10px/1.7 var(--mono); }
+.empty-panel svg { width: 28px; height: 28px; color: #41483a; margin-bottom: 10px; }
+.concept-list { display: grid; gap: 8px; }
+.concept-card { border: 1px solid #292f24; border-radius: 6px; padding: 11px; background: #131610; }
+.concept-top { display: flex; align-items: center; gap: 10px; }
+.concept-glyph { width: 31px; height: 31px; padding: 5px; color: #b9d36f; background: #1d2217; border-radius: 4px; flex: 0 0 auto; }
+.concept-name { color: #dce4d2; font: 12px/1 var(--mono); }
+.concept-id { color: #5e6756; font: 8px/1 var(--mono); margin-top: 5px; }
+.concept-valence { margin-left: auto; font: 9px/1 var(--mono); color: #7b8571; }
+.concept-valence.positive { color: var(--acid-dim); }
+.concept-valence.negative { color: var(--red); }
+.concept-bottom { display: flex; justify-content: space-between; margin-top: 10px; color: #68715f; font: 8px/1 var(--mono); }
+.law-list, .artifact-list { display: grid; gap: 8px; margin-bottom: 20px; }
+.law-card { padding: 11px; border-left: 2px solid #566439; background: #13160f; border-radius: 0 5px 5px 0; }
+.law-raw { color: #c3d695; font: 11px/1.5 var(--mono); }
+.law-translation { color: #77816e; font-size: 10px; line-height: 1.5; margin: 5px 0 8px; }
+.law-confidence { display: flex; align-items: center; gap: 8px; color: #59634f; font: 8px/1 var(--mono); }
+.law-confidence .bar { flex: 1; }
+.artifact-card { display: flex; align-items: center; gap: 10px; border: 1px solid #2a3023; border-radius: 5px; padding: 9px; }
+.artifact-card svg { width: 28px; height: 28px; color: var(--amber); }
+.artifact-name { color: #d6cba9; font: 11px/1 var(--mono); }
+.artifact-parents { margin-top: 5px; color: #676657; font: 8px/1.3 var(--mono); }
+.mind-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--line-soft);
+  padding: 11px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex: 0 0 auto;
+  background: var(--panel);
+}
+.local-note { color: #596150; font: 8px/1.4 var(--mono); }
+.ontology-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.export-button {
+  border: 0;
+  background: transparent;
+  color: #929d83;
+  padding: 4px 0;
+  cursor: pointer;
+  white-space: nowrap;
+  font: 9px/1 var(--mono);
+  text-transform: uppercase;
+  transition: color .18s;
+}
+.export-button:hover { color: var(--acid); }
+.ontology-divider { color: #394032; font: 9px/1 var(--mono); user-select: none; }
 
-    dialog { width: min(660px, calc(100vw - 32px)); max-height: calc(100vh - 48px); overflow-y: auto; border: 1px solid #3b4332; border-radius: 10px; background: #171a14; color: var(--text); padding: 0; box-shadow: 0 25px 90px #000a; }
-    dialog::backdrop { background: rgba(5,7,4,.78); backdrop-filter: blur(5px); }
-    .method-head { display: flex; justify-content: space-between; align-items: center; padding: 20px 23px; border-bottom: 1px solid var(--line); }
-    .method-head h2 { margin: 0; font-size: 18px; font-weight: 500; }
-    .close-button { border: 1px solid var(--line); border-radius: 4px; background: transparent; color: var(--muted); width: 29px; height: 29px; cursor: pointer; }
-    .method-body { padding: 23px; color: #a6ae9c; font-size: 12px; line-height: 1.7; }
-    .method-body h3 { color: #dbe2d2; font: 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; margin: 24px 0 9px; }
-    .method-body h3:first-child { margin-top: 0; }
-    .method-body p { margin: 0 0 11px; }
-    .method-body ul { margin: 0; padding-left: 19px; }
-    .method-body code { color: var(--acid); font: 11px/1.4 var(--mono); }
-    .method-callout { border-left: 2px solid var(--acid-dim); background: #1d2217; padding: 11px 13px; color: #b0b9a3; margin-top: 15px; }
-    .toast { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 15px); background: #272e20; color: #dbe5ce; border: 1px solid #465239; border-radius: 6px; padding: 11px 15px; opacity: 0; pointer-events: none; transition: .25s; font: 10px/1 var(--mono); z-index: 20; }
-    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+.bootstrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.bootstrap-card { border: 1px solid var(--line-soft); border-radius: 7px; padding: 16px 18px; display: flex; align-items: center; gap: 18px; background: rgba(20, 23, 17, .55); }
+.bootstrap-label { flex: 0 0 auto; color: #66705d; font: 8px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.bootstrap-items { display: flex; flex-wrap: wrap; gap: 6px 15px; color: #9ba591; font: 10px/1.5 var(--mono); }
+.bootstrap-card:last-child .bootstrap-items { color: #777f6e; }
+.footer { display: flex; justify-content: space-between; gap: 20px; padding: 22px 2px 0; color: #4f5748; font: 8px/1.5 var(--mono); letter-spacing: .04em; text-transform: uppercase; }
 
-    /* Desktop shell and compact companion mode */
-    .window-controls, .companion-bar { display: none; }
-    .desktop-runtime .topbar { -webkit-app-region: drag; }
-    .desktop-runtime button { -webkit-app-region: no-drag; }
-    .desktop-runtime:not(.companion-mode) .shell { min-height: 100vh; background: var(--bg); }
-    .desktop-runtime .window-controls { display: flex; gap: 4px; margin-left: 5px; padding-left: 9px; border-left: 1px solid var(--line); }
-    .window-button { width: 26px; height: 28px; border: 0; border-radius: 4px; background: transparent; color: #737d68; cursor: pointer; font: 13px/1 var(--mono); }
-    .window-button:hover { color: var(--acid); background: #252b1f; }
-    .companion-mode { background: transparent; overflow: hidden; }
-    .companion-mode .shell { max-width: none; height: 100vh; min-height: 0; padding: 0; background: transparent; }
-    .companion-mode .topbar, .companion-mode .intro, .companion-mode .transcript,
-    .companion-mode .mind-panel, .companion-mode .bootstrap, .companion-mode .footer { display: none; }
-    .companion-mode .workspace, .companion-mode .left-column { display: block; height: 100vh; }
-    .companion-mode .world-panel { height: 100vh; border-color: #3a4330; border-radius: 14px; background: rgba(18, 21, 15, .98); box-shadow: 0 18px 65px rgba(0,0,0,.45); }
-    .companion-mode .companion-bar { display: flex; height: 42px; align-items: center; gap: 8px; padding: 0 10px 0 13px; border-bottom: 1px solid var(--line-soft); -webkit-app-region: drag; user-select: none; }
-    .companion-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--acid); box-shadow: 0 0 10px rgba(214,250,114,.55); }
-    .companion-word { color: #dfe7d2; font: 700 10px/1 var(--mono); letter-spacing: .16em; }
-    .companion-agent { color: #707b64; font: 9px/1 var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .companion-spacer { flex: 1; }
-    .companion-bar button { border: 1px solid #343c2c; border-radius: 4px; background: #1b2016; color: #929e83; padding: 5px 7px; cursor: pointer; font: 8px/1 var(--mono); text-transform: uppercase; -webkit-app-region: no-drag; }
-    .companion-bar button:hover, .companion-bar button.active { color: var(--acid); border-color: #5d6b42; }
-    body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
-    .companion-mode .world-panel > .panel-header { display: none; }
-    .companion-mode .canvas-wrap { height: calc(100vh - 98px); min-height: 0; max-height: none; }
-    .companion-mode .controls { height: 56px; min-height: 56px; padding: 9px; }
-    .companion-mode .control-button.primary { min-width: 62px; }
-    .companion-mode #step-button, .companion-mode #reset-button, .companion-mode .seed-label { display: none; }
-    .companion-mode .canvas-foot { font-size: 6px; letter-spacing: .04em; opacity: .65; }
-    .companion-mode .world-readout { font-size: 8px; }
-    .companion-mode .empty-title { font-size: 10px; }
-    .companion-mode .empty-copy { max-width: 230px; font-size: 8px; }
+dialog {
+  width: min(660px, calc(100vw - 32px));
+  max-height: calc(100vh - 36px);
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
+  border: 1px solid #3b4332;
+  border-radius: 10px;
+  background: #171a14;
+  color: var(--text);
+  padding: 0;
+  box-shadow: 0 25px 90px #000a;
+}
+dialog::backdrop { background: rgba(5, 7, 4, .78); backdrop-filter: blur(5px); }
+.method-head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 23px;
+  background: rgba(23, 26, 20, .96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.method-head h2 { margin: 0; font-size: 18px; font-weight: 500; }
+.close-button { border: 1px solid var(--line); border-radius: 4px; background: transparent; color: var(--muted); width: 29px; height: 29px; cursor: pointer; flex: 0 0 auto; }
+.close-button:hover { color: var(--acid); border-color: #4c5540; }
+.method-body { padding: 22px 23px; color: #a6ae9c; font-size: 12px; line-height: 1.7; }
+.method-body h3 { color: #dbe2d2; font: 10px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; margin: 24px 0 9px; }
+.method-body h3:first-child { margin-top: 0; }
+.method-body p { margin: 0 0 11px; }
+.method-body ul { margin: 0; padding-left: 19px; }
+.method-body code { color: var(--acid); font: 11px/1.4 var(--mono); }
+.method-callout { border-left: 2px solid var(--acid-dim); background: #1d2217; padding: 11px 13px; color: #b0b9a3; margin-top: 15px; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 15px); background: #272e20; color: #dbe5ce; border: 1px solid #465239; border-radius: 6px; padding: 11px 15px; opacity: 0; pointer-events: none; transition: .25s; font: 10px/1 var(--mono); z-index: 60; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-    @media (max-width: 1050px) {
-      .workspace { grid-template-columns: minmax(0, 1fr) 320px; }
-      .top-status { display: none; }
-      .constraints { max-width: 310px; }
-      .canvas-wrap { height: 500px; }
-    }
-    @media (max-width: 820px) {
-      .shell { padding: 0 18px 24px; }
-      .intro { display: block; padding-top: 29px; }
-      .constraints { justify-content: flex-start; max-width: none; margin-top: 20px; }
-      .workspace { grid-template-columns: 1fr; }
-      .mind-panel { min-height: 0; }
-      .tab-content { max-height: none; min-height: 350px; }
-      .bootstrap { grid-template-columns: 1fr; }
-      .top-actions, .brand { min-width: auto; }
-      .canvas-wrap { height: 480px; }
-    }
-    @media (max-width: 500px) {
-      .shell { padding: 0 11px 20px; }
-      .topbar { height: 65px; }
-      .brand-sub { display: none; }
-      .top-actions .text-button:first-child, .top-actions #companion-button { display: none; }
-      .intro-copy { font-size: 12px; }
-      .canvas-wrap { min-height: 390px; height: 390px; }
-      .world-readout { gap: 9px; font-size: 8px; }
-      .perturb-button { top: 40px; }
-      .seed-label { display: none; }
-      .controls { gap: 6px; }
-      .control-button { padding: 0 9px; }
-      .bootstrap-card { display: block; }
-      .bootstrap-items { margin-top: 11px; }
-      .footer { display: block; }
-      .footer span { display: block; margin-top: 5px; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
-    }
+/* Desktop shell and compact companion mode */
+.window-controls, .companion-bar { display: none; }
+.desktop-runtime .topbar { -webkit-app-region: drag; }
+.desktop-runtime button, .desktop-runtime a, .desktop-runtime input { -webkit-app-region: no-drag; }
+.desktop-runtime:not(.companion-mode) .shell { min-height: 100vh; min-height: 100dvh; background: var(--bg); }
+.desktop-runtime .window-controls { display: flex; gap: 4px; margin-left: 5px; padding-left: 9px; border-left: 1px solid var(--line); }
+.window-button { width: 26px; height: 28px; border: 0; border-radius: 4px; background: transparent; color: #737d68; cursor: pointer; font: 13px/1 var(--mono); }
+.window-button:hover { color: var(--acid); background: #252b1f; }
+
+.companion-mode { background: transparent; overflow: hidden; }
+.companion-mode .shell { max-width: none; height: 100vh; height: 100dvh; min-height: 0; padding: 0; background: transparent; }
+.companion-mode .topbar, .companion-mode .intro, .companion-mode .transcript,
+.companion-mode .mind-panel, .companion-mode .bootstrap, .companion-mode .footer { display: none; }
+.companion-mode .workspace, .companion-mode .left-column { display: block; height: 100vh; height: 100dvh; }
+.companion-mode .world-panel { height: 100vh; height: 100dvh; border-color: #3a4330; border-radius: 14px; background: rgba(18, 21, 15, .98); box-shadow: 0 18px 65px rgba(0, 0, 0, .45); }
+.companion-mode .companion-bar { display: flex; height: 42px; align-items: center; gap: 8px; padding: 0 10px 0 13px; border-bottom: 1px solid var(--line-soft); -webkit-app-region: drag; user-select: none; }
+.companion-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--acid); box-shadow: 0 0 10px rgba(214, 250, 114, .55); }
+.companion-word { color: #dfe7d2; font: 700 10px/1 var(--mono); letter-spacing: .16em; }
+.companion-agent { color: #707b64; font: 9px/1 var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.companion-spacer { flex: 1; }
+.companion-bar button { border: 1px solid #343c2c; border-radius: 4px; background: #1b2016; color: #929e83; padding: 5px 7px; cursor: pointer; font: 8px/1 var(--mono); text-transform: uppercase; -webkit-app-region: no-drag; }
+.companion-bar button:hover, .companion-bar button.active { color: var(--acid); border-color: #5d6b42; }
+body:not(.desktop-runtime) .desktop-api-only { display: none !important; }
+.companion-mode .world-panel > .panel-header { display: none; }
+.companion-mode .canvas-wrap { height: calc(100vh - 98px); height: calc(100dvh - 98px); min-height: 0; max-height: none; }
+.companion-mode .controls { height: 56px; min-height: 56px; padding: 9px; flex-wrap: nowrap; }
+.companion-mode .control-button.primary { min-width: 62px; }
+.companion-mode #step-button, .companion-mode #reset-button, .companion-mode .seed-label { display: none; }
+.companion-mode .canvas-foot { font-size: 6px; letter-spacing: .04em; opacity: .65; }
+.companion-mode .world-readout { font-size: 8px; }
+.companion-mode .empty-title { font-size: 10px; }
+.companion-mode .empty-copy { max-width: 230px; font-size: 8px; }
+
+/* Short iframe / split-screen height optimization */
+@media (max-height: 760px) {
+  :root { --topbar-h: 60px; }
+  .intro { padding: 18px 0 14px; }
+  .canvas-wrap { min-height: 310px; height: clamp(310px, calc(100vh - 220px), 500px); height: clamp(310px, calc(100dvh - 220px), 500px); }
+}
+
+@media (max-width: 1050px) {
+  .workspace { grid-template-columns: minmax(0, 1fr) 320px; }
+  .top-status { display: none; }
+  .constraints { max-width: 310px; }
+}
+@media (max-width: 820px) {
+  .shell { padding: 0 18px 24px; }
+  .topbar { margin: 0 -18px; padding: 0 18px; }
+  .intro { display: block; padding-top: 24px; }
+  .constraints { justify-content: flex-start; max-width: none; margin-top: 18px; }
+  .workspace { grid-template-columns: 1fr; }
+  .mind-panel { position: static; max-height: none; min-height: 0; }
+  .tab-content { max-height: 440px; min-height: 280px; }
+  .bootstrap { grid-template-columns: 1fr; }
+  .top-actions, .brand { min-width: auto; }
+}
+@media (max-width: 540px) {
+  :root { --topbar-h: 62px; }
+  .shell { padding: 0 11px 20px; }
+  .topbar { margin: 0 -11px; padding: 0 11px; gap: 8px; }
+  .brand-sub { display: none; }
+  .top-actions { gap: 5px; }
+  .text-button { padding: 7px 8px; font-size: 9px; }
+  .top-actions #method-button { display: none; }
+  .intro-copy { font-size: 12px; }
+  .canvas-wrap { min-height: 340px; height: 360px; }
+  .world-readout { gap: 9px; font-size: 8px; }
+  .perturb-button { top: 40px; }
+  .seed-label { display: none; }
+  .controls { gap: 6px; }
+  .control-button { padding: 0 9px; }
+  .bootstrap-card { display: block; }
+  .bootstrap-items { margin-top: 11px; }
+  .footer { display: block; }
+  .footer span { display: block; margin-top: 5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+}
   </style>
 </head>
 <body>
@@ -308,7 +411,7 @@
           <circle cx="16" cy="16" r="3" fill="currentColor" />
           <path d="M16 0v7M16 25v7M0 16h7M25 16h7" stroke="currentColor" stroke-width=".8" />
         </svg>
-        <div><div class="brand-name">NUL</div><div class="brand-sub">Autonomous ontology lab · <span id="brand-version">v0.01.001</span></div></div>
+        <div><div class="brand-name">NUL</div><div class="brand-sub">Autonomous ontology lab · <span id="brand-version">v0.01.003</span></div></div>
       </div>
       <div class="top-status"><span class="status-dot"></span>Symbolic system · 0 model calls · offline</div>
       <div class="top-actions">
@@ -340,7 +443,7 @@
         <div class="left-column">
           <section class="panel world-panel" aria-label="World simulation">
             <div class="companion-bar">
-              <span class="companion-pulse"></span><span class="companion-word" id="companion-version-title" title="NUL v0.01.001· BOOTSTRAP/0.1">NUL</span><span class="companion-agent" id="companion-agent-name">unnamed</span>
+              <span class="companion-pulse"></span><span class="companion-word" id="companion-version-title" title="NUL v0.01.003· BOOTSTRAP/0.1">NUL</span><span class="companion-agent" id="companion-agent-name">unnamed</span>
               <span class="companion-spacer"></span>
               <button class="desktop-api-only" id="companion-pin" title="Toggle always-on-top">Pin</button>
               <button id="companion-expand" title="Return to the full lab">Lab</button>
@@ -352,14 +455,26 @@
             </div>
             <div class="canvas-wrap" id="canvas-wrap">
               <canvas id="world" aria-label="A dark world containing one autonomous agent and unlabelled perturbations"></canvas>
-              <div class="world-readout"><span>T+<b id="world-time">00000</b></span><span>EVENTS <b id="event-count">00</b></span><span>SEED <b id="seed-readout">—</b></span></div>
+              <div class="world-readout"><span>T+<b id="world-time">00000</b></span><span>EVENTS <b id="event-count">00</b></span><button type="button" class="seed-badge" id="seed-badge" title="Enter or copy world seed">SEED <b id="seed-readout">—</b></button></div>
               <button class="perturb-button" id="perturb-button" title="Add an unlabelled sensory event (N)">+ Perturb world</button>
               <div class="empty-state" id="empty-state">
                 <div class="empty-orbit"></div>
                 <div class="empty-title">Nothing has a name. Yet.</div>
                 <div class="empty-copy">The first sensation will arrive without an explanation.</div>
               </div>
-              <div class="canvas-foot">Observer rendering · shapes are not visible to the agent as categories</div>
+              <div class="entity-inspector" id="entity-inspector" hidden aria-live="polite">
+                <div class="inspector-head">
+                  <div class="inspector-glyph" id="inspector-glyph"></div>
+                  <div>
+                    <div class="inspector-title" id="inspector-title">—</div>
+                    <div class="inspector-kicker" id="inspector-kicker">Observer inspection</div>
+                  </div>
+                  <button type="button" class="inspector-close" id="inspector-close" aria-label="Close inspection">×</button>
+                </div>
+                <div class="inspector-meta" id="inspector-meta"></div>
+                <div class="inspector-note">Observer view only · zero effect on agent state</div>
+              </div>
+              <div class="canvas-foot">Observer rendering · click entity to inspect · click empty space or N to perturb</div>
             </div>
             <div class="controls">
               <button class="control-button primary" id="play-button">Pause</button>
@@ -371,7 +486,7 @@
                 <button class="speed-button" data-speed="8">8×</button>
               </div>
               <div class="control-spacer"></div>
-              <span class="seed-label">APP <b id="controls-version">v0.01.001</b> · RULESET <b>BOOTSTRAP/0.1</b></span>
+              <span class="seed-label">APP <b id="controls-version">v0.01.003</b> · RULESET <b>BOOTSTRAP/0.1</b></span>
               <button class="control-button" id="reset-button">Reset</button>
             </div>
           </section>
@@ -434,7 +549,15 @@
               <div class="artifact-list" id="artifact-list"></div>
             </div>
           </div>
-          <div class="mind-footer"><span class="local-note"><span id="save-indicator">Autosave ready.</span><br>No data leaves your browser.</span><button class="export-button" id="export-button">Export ontology ↗</button></div>
+          <div class="mind-footer">
+            <span class="local-note"><span id="save-indicator">Autosave ready.</span><br>No data leaves your browser.</span>
+            <div class="ontology-actions">
+              <button class="export-button" id="import-ontology-button" title="Import an exported ontology into this world">Import ontology ↙</button>
+              <span class="ontology-divider" aria-hidden="true">·</span>
+              <button class="export-button" id="export-button" title="Download the agent's concepts, beliefs, and symbols as JSON">Export ontology ↗</button>
+              <input type="file" id="import-ontology-file" accept="application/json,.json" hidden />
+            </div>
+          </div>
         </aside>
       </section>
 
@@ -442,7 +565,7 @@
         <div class="bootstrap-card"><div class="bootstrap-label">Given by design</div><div class="bootstrap-items"><span>time</span><span>a body</span><span>4-number sensations</span><span>memory</span><span>energy</span><span>move / attend / combine</span></div></div>
         <div class="bootstrap-card"><div class="bootstrap-label">Not given</div><div class="bootstrap-items"><span>object names</span><span>categories</span><span>a dictionary</span><span>semantic values</span><span>world laws</span><span>a final objective</span></div></div>
       </section>
-      <footer class="footer"><span>NUL <span id="footer-version">v0.01.001</span> / bootstrap 0.1 / deterministic seeded simulation</span><span>Space: pause · N: perturb · Ctrl/⌘+Shift+C: companion · Not a consciousness claim</span></footer>
+      <footer class="footer"><span>NUL <span id="footer-version">v0.01.003</span> / bootstrap 0.1 / deterministic seeded simulation</span><span>Space: pause · N: perturb · Ctrl/⌘+Shift+C: companion · Not a consciousness claim</span></footer>
     </main>
   </div>
 
@@ -464,8 +587,8 @@
       <p>The green transcript is the agent’s local symbol stream. The gray text is an <strong>observer translation supplied by the program</strong>. Roman-letter names are a display convenience; the underlying concepts are numerical prototypes. Generated glyphs are the agent’s more native notation.</p>
       <h3>What drives it?</h3>
       <p>Energy regulation, novelty-weighted attention, similarity clustering, and action selection are engineered. The particular concepts, names, preferences, inferred relationships, artifacts, and sequence of intents are produced during the run. There is no hidden list of objects waiting to be unlocked.</p>
-      <h3>Persistence</h3>
-      <p>The complete world autosaves to browser-local storage every 120 ticks, on pause, and when the page closes. <strong>Saves</strong> provides manual restoration and portable JSON snapshots. Snapshots include the PRNG position and active world state, so imported runs continue deterministically. Ontology exports are readable summaries; world snapshots are resumable saves.</p>
+      <h3>Persistence &amp; ontology portability</h3>
+      <p>The complete world autosaves to browser-local storage every 120 ticks, on pause, and when the page closes. <strong>Saves</strong> provides manual restoration and portable JSON snapshots. Snapshots include the PRNG position and active world state, so imported runs continue deterministically. <strong>Export / Import ontology</strong> transfers the agent’s learned prototypes, symbols, beliefs, and operators into any world seed without overwriting the world’s physics or PRNG.</p>
       <h3>A note on early AI</h3>
       <p>Logic Theorist (1956), General Problem Solver (1959), and ELIZA (1966) demonstrated remarkable symbolic methods in constrained settings. They generally manipulated representations supplied by their authors; they did not autonomously define an open-ended world from raw experience. NUL borrows the transparent, local, symbolic spirit without claiming to reproduce those systems.</p>
       <div class="method-callout">This is an experiment in representation and agency, not evidence of consciousness, understanding, or general intelligence. Export the ontology to inspect the actual state rather than trusting the narrative alone.</div>
@@ -482,849 +605,1953 @@
         <button class="control-button primary" id="save-now-button">Save now</button>
         <button class="control-button" id="restore-button">Restore autosave</button>
       </div>
-      <h3>Portable snapshot</h3>
-      <p>Download a complete, resumable world—including its random-generator state—or import one later. This is different from <strong>Export ontology</strong>, which is a readable summary of the agent’s mind.</p>
+      <h3>Portable snapshot (complete world)</h3>
+      <p>Download a complete, resumable world—including its random-generator state—or import one later to resume deterministically.</p>
       <div class="data-actions">
         <button class="control-button" id="download-snapshot-button">Download world snapshot</button>
         <button class="control-button" id="import-snapshot-button">Import snapshot</button>
         <input type="file" id="import-file" accept="application/json,.json" hidden />
+      </div>
+      <h3>Portable ontology (agent mind)</h3>
+      <p>Export or transplant the agent’s learned concepts, glyphs, valences, sequence beliefs, and operators into the current world without replacing its seed or PRNG.</p>
+      <div class="data-actions">
+        <button class="control-button" id="save-export-ontology-button">Export ontology</button>
+        <button class="control-button" id="save-import-ontology-button">Import ontology</button>
+      </div>
+      <h3>Deterministic world seed</h3>
+      <p>Replay or share a specific initial world by entering an integer seed (<code>1</code>–<code>2147483647</code>).</p>
+      <div class="seed-row">
+        <input type="number" class="seed-input" id="seed-input" min="1" max="2147483647" step="1" aria-label="World seed" />
+        <button class="control-button" id="apply-seed-button">Load seed</button>
+        <button class="control-button" id="copy-seed-button">Copy seed</button>
       </div>
       <div class="method-callout">Browser storage is local to this browser and site. Clearing site data removes the autosave, and it does not synchronize across devices. Keep a downloaded snapshot for a durable backup. If storage is blocked by an embedded preview, use snapshots instead.</div>
     </div>
   </dialog>
   <div class="toast" id="toast"></div>
 
-  <script>
-    (() => {
-      'use strict';
+  <script id="nul-inline-engine">
+/**
+ * NUL Core Simulation, Persistence & Ontology Engine
+ * Zero external dependencies, zero DOM requirements, deterministic seeded PRNG.
+ * Works identically in Browser (<script src="src/engine.js">), Electron, and Node.js.
+ */
+(function (root, factory) {
+  const api = factory();
+  root.NULCore = api;
+  if (typeof module === 'object' && module.exports) {
+    module.exports = api;
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : window, function () {
+  'use strict';
 
-      // ---------- Utilities: no model, network, or external dependencies ----------
-      const $ = (selector) => document.querySelector(selector);
-      const $$ = (selector) => [...document.querySelectorAll(selector)];
-      const clamp = (n, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, n));
-      const pad = (n, length = 5) => String(n).padStart(length, '0');
-      const distance = (a, b) => Math.sqrt(a.reduce((sum, value, i) => sum + (value - b[i]) ** 2, 0) / a.length);
-      const esc = (value) => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-      const APP_VERSION = '0.01.001';
-      const RULESET_VERSION = 'BOOTSTRAP/0.1';
-      const STORAGE_KEY = 'nul.world.autosave.v1';
-      const SAVE_FORMAT = 'nul-resumable-world';
-      const SAVE_VERSION = 1;
-      let rng = () => 0.5;
-      function mulberry32(initialSeed) {
-        let state = initialSeed >>> 0;
-        const random = function() {
-          let t = state = (state + 0x6D2B79F5) >>> 0;
-          t = Math.imul(t ^ t >>> 15, t | 1);
-          t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-          return ((t ^ t >>> 14) >>> 0) / 4294967296;
-        };
-        random.getState = () => state;
-        random.setState = value => { state = value >>> 0; };
-        return random;
-      }
-      const randomBetween = (a, b) => a + rng() * (b - a);
-      const pick = (array) => array[Math.floor(rng() * array.length)];
+  const APP_VERSION = '0.01.003';
+  const RULESET_VERSION = 'BOOTSTRAP/0.1';
+  const STORAGE_KEY = 'nul.world.autosave.v1';
+  const SAVE_FORMAT = 'nul-resumable-world';
+  const SAVE_VERSION = 1;
+  const ONTOLOGY_FORMAT = 'nul-ontology';
+  const ONTOLOGY_VERSION = 1;
 
-      const canvas = $('#world');
-      const ctx = canvas.getContext('2d');
-      const wrap = $('#canvas-wrap');
-      let width = 800, height = 520, dpr = 1;
-      let running = true, speed = 1, activeTab = 'mind', logMode = 'dual';
-      let accumulator = 0, previousTime = performance.now(), uiClock = 0;
-      let seed = 0, tick = 0, totalEvents = 0, nextSpawn = 12;
-      let signals = [], artifacts = [], particles = [], ripples = [], featureHistory = [];
-      let agent = null, logs = [], toastTimer = null;
+  const MAX_CONCEPTS = 8;
+  const MAX_ARTIFACTS = 24;
+  const MAX_MEMORIES = 100;
+  const MAX_LOGS = 70;
+  const MAX_TRAIL = 65;
+  const MAX_FEATURE_HISTORY = 24;
+  const MAX_SIGNALS = 18;
+  const MAX_PARTICLES = 160;
+  const MAX_RIPPLES = 40;
 
-      function freshAgent() {
-        return {
-          x: width / 2, y: height / 2, vx: 0, vy: 0, heading: 0,
-          energy: .72, senseRange: 146, concepts: [], memories: [], beliefs: [], artifacts: [],
-          selfName: null, selfGlyph: null, selfBorn: null, interactions: 0, targetId: null, goal: null,
-          lastConceptId: null, lastInteractionTick: -999, lastArtifactTick: -150,
-          lastGoalKey: '', usedNames: new Set(), relationCounts: {}, trail: [],
-          operators: { is: pick(['::', '≔', '↦']), sequence: pick(['›', '⇝', '⊸']), join: pick(['⊕', '⋈', '∧']), create: pick(['≪', '✣', '∴']) },
-          novelty: 0
-        };
-      }
+  const clamp = (n, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, n));
+  const pad = (n, length = 5) => String(n).padStart(length, '0');
+  const esc = (value) => String(value).replace(/[&<>'"]/g, (c) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+  }[c]));
 
-      function resizeCanvas() {
-        const rect = wrap.getBoundingClientRect();
-        const oldWidth = width, oldHeight = height;
-        width = Math.max(280, rect.width); height = Math.max(300, rect.height);
-        dpr = Math.min(window.devicePixelRatio || 1, 2);
-        canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
-        canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        if (agent && oldWidth && oldHeight) {
-          const sx = width / oldWidth, sy = height / oldHeight;
-          agent.x *= sx; agent.y *= sy;
-          signals.forEach(s => { s.x *= sx; s.y *= sy; });
-          artifacts.forEach(a => { a.x *= sx; a.y *= sy; });
-          particles.forEach(p => { p.x *= sx; p.y *= sy; });
-          ripples.forEach(r => { r.x *= sx; r.y *= sy; });
-          agent.trail.forEach(point => { point[0] *= sx; point[1] *= sy; });
-        }
-      }
+  // Allocation-free RMS feature distance (bit-for-bit identical to reduce/sqrt).
+  function distance(a, b) {
+    let sum = 0;
+    const len = a.length;
+    for (let i = 0; i < len; i++) {
+      const diff = a[i] - b[i];
+      sum += diff * diff;
+    }
+    return Math.sqrt(sum / len);
+  }
 
-      function makeGlyph() {
-        const points = [4, 14, 24];
-        const count = 4 + Math.floor(rng() * 3);
-        const coords = [];
-        for (let i = 0; i < count; i++) coords.push([pick(points), pick(points)]);
-        let path = `M${coords[0][0]} ${coords[0][1]}`;
-        coords.slice(1).forEach(p => path += ` L${p[0]} ${p[1]}`);
-        if (rng() > .52) path += ` L${coords[0][0]} ${coords[0][1]}`;
-        return { path, dot: rng() > .45 ? [pick(points), pick(points)] : null };
-      }
-      function safeGlyph(glyph) {
-        if (!glyph || typeof glyph.path !== 'string') return null;
-        const path = /^[ML0-9 ]+$/.test(glyph.path) ? glyph.path : 'M4 4 L24 24';
-        const dot = Array.isArray(glyph.dot) && glyph.dot.length === 2 && glyph.dot.every(n => Number.isFinite(n))
-          ? glyph.dot.map(n => clamp(n, 0, 28)) : null;
-        return { path, dot };
-      }
-      function glyphSVG(glyph, className = '') {
-        const safe = safeGlyph(glyph);
-        if (!safe) return '';
-        const dot = safe.dot ? `<circle cx="${safe.dot[0]}" cy="${safe.dot[1]}" r="1.6" fill="currentColor"/>` : '';
-        return `<svg class="${esc(className)}" viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="${safe.path}" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>${dot}</svg>`;
-      }
-      function makeName() {
-        const consonants = ['m','n','s','t','r','l','k','v','z','p','h','d','sh','th'];
-        const vowels = ['a','e','i','o','u','ae','ia','eo'];
-        let name = '';
-        do {
-          const syllables = 2 + (rng() > .72 ? 1 : 0);
-          name = '';
-          for (let i = 0; i < syllables; i++) name += pick(consonants) + pick(vowels);
-          name = name.replace(/([a-z])\1+/g, '$1');
-        } while (agent && agent.usedNames.has(name));
-        if (agent) agent.usedNames.add(name);
-        return name;
-      }
+  function mulberry32(initialSeed) {
+    let state = initialSeed >>> 0;
+    const random = function () {
+      let t = state = (state + 0x6D2B79F5) >>> 0;
+      t = Math.imul(t ^ t >>> 15, t | 1);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+    random.getState = () => state;
+    random.setState = (value) => { state = value >>> 0; };
+    return random;
+  }
 
-      function addLog(raw, translation, kind = 'agent') {
-        logs.push({ tick, raw, translation, kind });
-        if (logs.length > 70) logs.shift();
-        renderLog();
+  function safeGlyph(glyph) {
+    if (!glyph || typeof glyph.path !== 'string') return null;
+    const path = /^[ML0-9 ]+$/.test(glyph.path) ? glyph.path : 'M4 4 L24 24';
+    const dot = Array.isArray(glyph.dot) && glyph.dot.length === 2 && glyph.dot.every((n) => Number.isFinite(n))
+      ? glyph.dot.map((n) => clamp(n, 0, 28))
+      : null;
+    return { path, dot };
+  }
+
+  // Deterministic fallback glyph derived from a symbol string without touching world PRNG.
+  function deterministicGlyphFromText(text) {
+    const str = String(text || 'nul');
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619) >>> 0;
+    }
+    const pts = [4, 14, 24];
+    const next = () => {
+      h = (Math.imul(h, 1664525) + 1013904223) >>> 0;
+      return h;
+    };
+    const coords = [];
+    const count = 4 + (next() % 3);
+    for (let i = 0; i < count; i++) {
+      coords.push([pts[next() % 3], pts[next() % 3]]);
+    }
+    let path = `M${coords[0][0]} ${coords[0][1]}`;
+    for (let i = 1; i < coords.length; i++) path += ` L${coords[i][0]} ${coords[i][1]}`;
+    if ((next() % 100) > 52) path += ` L${coords[0][0]} ${coords[0][1]}`;
+    const dot = (next() % 100) > 45 ? [pts[next() % 3], pts[next() % 3]] : null;
+    return { path, dot };
+  }
+
+  function glyphSVG(glyph, className = '') {
+    const safe = safeGlyph(glyph);
+    if (!safe) return '';
+    const dot = safe.dot ? `<circle cx="${safe.dot[0]}" cy="${safe.dot[1]}" r="1.6" fill="currentColor"/>` : '';
+    return `<svg class="${esc(className)}" viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="${safe.path}" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>${dot}</svg>`;
+  }
+
+  function validSnapshot(data) {
+    const finite = Number.isFinite;
+    const vector = (value) => Array.isArray(value) && value.length === 4 && value.every(finite);
+    const point = (value) => Boolean(value && finite(value.x) && finite(value.y));
+    const numbers = (object, keys) => keys.every((key) => finite(object[key]));
+    if (!data || data.format !== SAVE_FORMAT || data.version !== SAVE_VERSION ||
+      !Number.isInteger(data.seed) || !finite(data.rngState) || !Number.isInteger(data.tick) || data.tick < 0 ||
+      !Number.isInteger(data.totalEvents) || !finite(data.nextSpawn) ||
+      !data.world || !finite(data.world.width) || data.world.width <= 0 || !finite(data.world.height) || data.world.height <= 0 ||
+      !data.agent || !point(data.agent) || !Array.isArray(data.agent.usedNames) ||
+      !data.agent.relationCounts || !data.agent.operators ||
+      !['signals', 'artifacts', 'particles', 'ripples', 'featureHistory', 'logs'].every((key) => Array.isArray(data[key]))) return false;
+    const a = data.agent;
+    return a.usedNames.every((name) => typeof name === 'string') &&
+      numbers(a, ['vx', 'vy', 'energy', 'senseRange', 'interactions', 'lastInteractionTick', 'lastArtifactTick', 'novelty']) &&
+      Array.isArray(a.concepts) && Array.isArray(a.memories) && Array.isArray(a.beliefs) && Array.isArray(a.trail) &&
+      Object.values(a.operators).every((value) => typeof value === 'string') &&
+      a.concepts.every((c) => typeof c.name === 'string' && vector(c.prototype) && numbers(c, ['id', 'born', 'seen', 'contacts', 'valence', 'totalEffect', 'examples'])) &&
+      a.memories.every((m) => numbers(m, ['tick', 'conceptId', 'signalId', 'effect', 'energyAfter'])) &&
+      a.beliefs.every((b) => typeof b.key === 'string' && numbers(b, ['fromId', 'toId', 'count', 'born', 'confidence'])) &&
+      a.trail.every((p) => Array.isArray(p) && p.length === 2 && p.every(finite)) &&
+      data.signals.every((s) => point(s) && vector(s.features) && numbers(s, ['id', 'vx', 'vy', 'effect', 'born', 'life', 'phase'])) &&
+      data.artifacts.every((item) => point(item) && vector(item.features) && Array.isArray(item.parents) && numbers(item, ['id', 'born', 'phase'])) &&
+      data.particles.every((p) => point(p) && numbers(p, ['vx', 'vy', 'age', 'max'])) &&
+      data.ripples.every((r) => point(r) && numbers(r, ['age', 'max'])) &&
+      data.featureHistory.every(vector) &&
+      data.logs.every((entry) => finite(entry.tick) && typeof entry.raw === 'string' && typeof entry.translation === 'string');
+  }
+
+  function validateOntology(data) {
+    const finite = Number.isFinite;
+    const vector = (value) => Array.isArray(value) && value.length === 4 && value.every((n) => finite(n) && n >= -0.01 && n <= 1.01);
+    if (!data || typeof data !== 'object') {
+      return { valid: false, reason: 'This is not a valid NUL ontology JSON file.' };
+    }
+    if (data.format === SAVE_FORMAT) {
+      return {
+        valid: false,
+        reason: 'This file is a complete world snapshot, not an ontology export. Use "Import snapshot" in Saves instead.'
+      };
+    }
+    if (data.format !== undefined && data.format !== ONTOLOGY_FORMAT) {
+      return { valid: false, reason: `Unsupported ontology format "${String(data.format)}".` };
+    }
+    if (data.version !== undefined && data.version !== ONTOLOGY_VERSION) {
+      return { valid: false, reason: `Unsupported ontology schema version "${String(data.version)}".` };
+    }
+
+    const a = data.agent;
+    if (!a || typeof a !== 'object' || !Array.isArray(a.concepts) || !Array.isArray(a.beliefs)) {
+      return { valid: false, reason: 'Ontology JSON is missing agent.concepts or agent.beliefs.' };
+    }
+    if (a.concepts.length > MAX_CONCEPTS) {
+      return { valid: false, reason: `Ontology exceeds MAX_CONCEPTS (${MAX_CONCEPTS}).` };
+    }
+
+    const conceptIds = new Set();
+    const conceptNames = new Set();
+    for (const c of a.concepts) {
+      if (!c || typeof c.name !== 'string' || !c.name.trim() || c.name.length > 32 ||
+        !Number.isInteger(c.id) || c.id < 1 || !vector(c.prototype) ||
+        !['born', 'seen', 'contacts', 'valence', 'totalEffect', 'examples'].every((k) => finite(c[k]))) {
+        return { valid: false, reason: 'One or more ontology concepts have invalid structure or non-finite values.' };
       }
-      function renderLog() {
-        const log = $('#log');
-        const atBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 35;
-        log.className = `log mode-${logMode}`;
-        log.innerHTML = logs.map(entry => `<div class="log-entry ${entry.kind === 'system' ? 'system' : ''}"><div class="log-time">T+${pad(entry.tick)}</div><div><div class="log-raw">${esc(entry.raw)}</div><div class="log-translation">${esc(entry.translation)}</div></div></div>`).join('');
-        if (atBottom || logs.length < 4) log.scrollTop = log.scrollHeight;
+      if (conceptIds.has(c.id) || conceptNames.has(c.name)) {
+        return { valid: false, reason: 'Ontology contains duplicate concept IDs or symbol names.' };
       }
+      conceptIds.add(c.id);
+      conceptNames.add(c.name);
+    }
 
-      function resetWorld(newSeed = true) {
-        if (newSeed) seed = (crypto.getRandomValues(new Uint32Array(1))[0] % 900000) + 100000;
-        rng = mulberry32(seed);
-        tick = 0; totalEvents = 0; nextSpawn = 14; accumulator = 0;
-        signals = []; artifacts = []; particles = []; ripples = []; featureHistory = []; logs = [];
-        agent = freshAgent();
-        running = true;
-        $('#empty-state').classList.remove('hidden');
-        $('#seed-readout').textContent = seed;
-        addLog('·', 'No symbols. No observations. The world has not yet been differentiated.', 'system');
-        updateControls(); renderAll();
-        saveWorld(false);
+    for (const b of a.beliefs) {
+      if (!b || typeof b.key !== 'string' || !Number.isInteger(b.fromId) || !Number.isInteger(b.toId) ||
+        b.fromId === b.toId || !conceptIds.has(b.fromId) || !conceptIds.has(b.toId) ||
+        !['count', 'born', 'confidence'].every((k) => finite(b[k])) || b.count < 1) {
+        return { valid: false, reason: 'One or more ontology beliefs reference missing concepts or invalid counts.' };
       }
+    }
 
-      // ---------- Complete, resumable persistence ----------
-      function createSnapshot() {
-        return {
-          format: SAVE_FORMAT, version: SAVE_VERSION, appVersion: APP_VERSION, savedAt: new Date().toISOString(),
-          seed, rngState: rng.getState(), tick, totalEvents, nextSpawn,
-          world: { width, height },
-          signals, artifacts, particles, ripples, featureHistory, logs,
-          agent: { ...agent, usedNames: [...agent.usedNames] },
-          ui: { running, speed, logMode }
-        };
+    const ops = a.generatedOperators || a.operators;
+    if (ops !== undefined) {
+      if (!ops || typeof ops !== 'object' ||
+        !['is', 'sequence', 'join', 'create'].every((k) => typeof ops[k] === 'string' && ops[k].trim().length > 0 && ops[k].length <= 6)) {
+        return { valid: false, reason: 'Ontology generatedOperators must include non-empty is, sequence, join, and create symbols.' };
       }
+    }
 
-      function validSnapshot(data) {
-        const finite = Number.isFinite;
-        const vector = value => Array.isArray(value) && value.length === 4 && value.every(finite);
-        const point = value => value && finite(value.x) && finite(value.y);
-        const numbers = (object, keys) => keys.every(key => finite(object[key]));
-        if (!data || data.format !== SAVE_FORMAT || data.version !== SAVE_VERSION ||
-          !Number.isInteger(data.seed) || !finite(data.rngState) || !Number.isInteger(data.tick) || data.tick < 0 ||
-          !Number.isInteger(data.totalEvents) || !finite(data.nextSpawn) ||
-          !data.world || !finite(data.world.width) || data.world.width <= 0 || !finite(data.world.height) || data.world.height <= 0 ||
-          !data.agent || !point(data.agent) || !Array.isArray(data.agent.usedNames) ||
-          !data.agent.relationCounts || !data.agent.operators ||
-          !['signals', 'artifacts', 'particles', 'ripples', 'featureHistory', 'logs'].every(key => Array.isArray(data[key]))) return false;
-        const a = data.agent;
-        return a.usedNames.every(name => typeof name === 'string') &&
-          numbers(a, ['vx', 'vy', 'energy', 'senseRange', 'interactions', 'lastInteractionTick', 'lastArtifactTick', 'novelty']) &&
-          Array.isArray(a.concepts) && Array.isArray(a.memories) && Array.isArray(a.beliefs) && Array.isArray(a.trail) &&
-          Object.values(a.operators).every(value => typeof value === 'string') &&
-          a.concepts.every(c => typeof c.name === 'string' && vector(c.prototype) && numbers(c, ['id', 'born', 'seen', 'contacts', 'valence', 'totalEffect', 'examples'])) &&
-          a.memories.every(m => numbers(m, ['tick', 'conceptId', 'signalId', 'effect', 'energyAfter'])) &&
-          a.beliefs.every(b => typeof b.key === 'string' && numbers(b, ['fromId', 'toId', 'count', 'born', 'confidence'])) &&
-          a.trail.every(p => Array.isArray(p) && p.length === 2 && p.every(finite)) &&
-          data.signals.every(s => point(s) && vector(s.features) && numbers(s, ['id', 'vx', 'vy', 'effect', 'born', 'life', 'phase'])) &&
-          data.artifacts.every(item => point(item) && vector(item.features) && Array.isArray(item.parents) && numbers(item, ['id', 'born', 'phase'])) &&
-          data.particles.every(p => point(p) && numbers(p, ['vx', 'vy', 'age', 'max'])) &&
-          data.ripples.every(r => point(r) && numbers(r, ['age', 'max'])) &&
-          data.featureHistory.every(vector) &&
-          data.logs.every(entry => finite(entry.tick) && typeof entry.raw === 'string' && typeof entry.translation === 'string');
+    if (a.selfSymbol !== undefined && a.selfSymbol !== null && (typeof a.selfSymbol !== 'string' || a.selfSymbol.length > 32)) {
+      return { valid: false, reason: 'Invalid agent selfSymbol in ontology JSON.' };
+    }
+
+    return { valid: true };
+  }
+
+  function validOntology(data) {
+    return validateOntology(data).valid;
+  }
+
+  function defaultRandomSeed() {
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      return (crypto.getRandomValues(new Uint32Array(1))[0] % 900000) + 100000;
+    }
+    return (Math.floor(Math.random() * 900000) + 100000);
+  }
+
+  function createEngine(options = {}) {
+    let width = Math.max(280, Number(options.width) || 800);
+    let height = Math.max(300, Number(options.height) || 520);
+    let running = true;
+    let speed = 1;
+    let logMode = 'dual';
+    let seed = 0;
+    let tick = 0;
+    let totalEvents = 0;
+    let nextSpawn = 12;
+    let signals = [];
+    let artifacts = [];
+    let particles = [];
+    let ripples = [];
+    let featureHistory = [];
+    let agent = null;
+    let logs = [];
+    let rng = () => 0.5;
+
+    const hooks = {
+      onLog: options.onLog || null,
+      onIdentity: options.onIdentity || null,
+      onRender: options.onRender || null,
+      onAutosave: options.onAutosave || null,
+      onControls: options.onControls || null,
+      onWorldReset: options.onWorldReset || null,
+      onSnapshotRestored: options.onSnapshotRestored || null,
+      onOntologyImported: options.onOntologyImported || null
+    };
+
+    const randomBetween = (a, b) => a + rng() * (b - a);
+    const pick = (array) => array[Math.floor(rng() * array.length)];
+
+    function freshAgent() {
+      return {
+        x: width / 2, y: height / 2, vx: 0, vy: 0, heading: 0,
+        energy: 0.72, senseRange: 146, concepts: [], memories: [], beliefs: [], artifacts,
+        totalArtifactsCreated: 0,
+        selfName: null, selfGlyph: null, selfBorn: null, interactions: 0, targetId: null, goal: null,
+        lastConceptId: null, lastInteractionTick: -999, lastArtifactTick: -150,
+        lastGoalKey: '', usedNames: new Set(), relationCounts: {}, trail: [],
+        operators: {
+          is: pick(['::', '≔', '↦']),
+          sequence: pick(['›', '⇝', '⊸']),
+          join: pick(['⊕', '⋈', '∧']),
+          create: pick(['≪', '✣', '∴'])
+        },
+        novelty: 0
+      };
+    }
+
+    function pruneUnusedNames() {
+      if (!agent) return;
+      const active = new Set();
+      if (agent.selfName) active.add(agent.selfName);
+      for (const c of agent.concepts) active.add(c.name);
+      for (const a of artifacts) active.add(a.name);
+      const ordered = new Set();
+      for (const existing of agent.usedNames) {
+        if (active.has(existing)) ordered.add(existing);
       }
+      for (const req of active) ordered.add(req);
+      agent.usedNames = ordered;
+    }
 
-      function restoreSnapshot(data) {
-        if (!validSnapshot(data)) throw new Error('This is not a valid NUL world snapshot.');
-        seed = data.seed; rng = mulberry32(seed); rng.setState(data.rngState);
-        tick = data.tick; totalEvents = data.totalEvents; nextSpawn = data.nextSpawn;
-        signals = data.signals; artifacts = data.artifacts; particles = data.particles;
-        ripples = data.ripples; featureHistory = data.featureHistory; logs = data.logs;
-        agent = data.agent; agent.usedNames = new Set(data.agent.usedNames); agent.artifacts = artifacts;
-
-        // Preserve relative positions if the world was saved at another viewport size.
-        const sx = width / data.world.width, sy = height / data.world.height;
-        const scalePoint = object => {
-          if (object && Number.isFinite(object.x) && Number.isFinite(object.y)) { object.x *= sx; object.y *= sy; }
-        };
-        [agent, ...signals, ...artifacts, ...particles, ...ripples].forEach(scalePoint);
-        agent.trail.forEach(point => {
-          if (Array.isArray(point) && Number.isFinite(point[0]) && Number.isFinite(point[1])) { point[0] *= sx; point[1] *= sy; }
-        });
-
-        running = data.ui ? data.ui.running !== false : true;
-        speed = data.ui && [1, 2, 4, 8].includes(data.ui.speed) ? data.ui.speed : 1;
-        logMode = data.ui && ['dual', 'agent', 'observer'].includes(data.ui.logMode) ? data.ui.logMode : 'dual';
-        accumulator = 0; previousTime = performance.now();
-        $('#seed-readout').textContent = seed;
-        $('#empty-state').classList.toggle('hidden', totalEvents > 0 || artifacts.length > 0);
-        $$('.speed-button').forEach(button => button.classList.toggle('active', Number(button.dataset.speed) === speed));
-        $$('.log-mode').forEach(button => button.classList.toggle('active', button.dataset.logmode === logMode));
-        renderLog(); updateControls(); renderAll();
-        return true;
+    function setDimensions(nextWidth, nextHeight) {
+      const oldWidth = width;
+      const oldHeight = height;
+      width = Math.max(280, Number(nextWidth) || width);
+      height = Math.max(300, Number(nextHeight) || height);
+      if (agent && oldWidth && oldHeight && (oldWidth !== width || oldHeight !== height)) {
+        const sx = width / oldWidth;
+        const sy = height / oldHeight;
+        agent.x *= sx; agent.y *= sy;
+        for (const s of signals) { s.x *= sx; s.y *= sy; }
+        for (const a of artifacts) { a.x *= sx; a.y *= sy; }
+        for (const p of particles) { p.x *= sx; p.y *= sy; }
+        for (const r of ripples) { r.x *= sx; r.y *= sy; }
+        for (const point of agent.trail) { point[0] *= sx; point[1] *= sy; }
       }
+      return { width, height };
+    }
 
-      function saveWorld(notify = false) {
-        if (!agent || !rng.getState) return false;
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(createSnapshot()));
-          $('#save-indicator').textContent = `Autosaved locally · T+${pad(tick)}`;
-          if (notify) showToast(`World saved in this browser at T+${pad(tick)}.`);
-          return true;
-        } catch (error) {
-          $('#save-indicator').textContent = 'Storage blocked · use snapshots';
-          if (notify) showToast('Browser storage is unavailable. Download a snapshot instead.');
-          return false;
-        }
-      }
+    function makeGlyph() {
+      const points = [4, 14, 24];
+      const count = 4 + Math.floor(rng() * 3);
+      const coords = [];
+      for (let i = 0; i < count; i++) coords.push([pick(points), pick(points)]);
+      let path = `M${coords[0][0]} ${coords[0][1]}`;
+      coords.slice(1).forEach((p) => { path += ` L${p[0]} ${p[1]}`; });
+      if (rng() > 0.52) path += ` L${coords[0][0]} ${coords[0][1]}`;
+      return { path, dot: rng() > 0.45 ? [pick(points), pick(points)] : null };
+    }
 
-      function updateSaveUI() {
-        const restoreButton = $('#restore-button');
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          restoreButton.disabled = !raw;
-          if (!raw) {
-            $('#save-summary').textContent = 'No browser autosave exists yet.';
-            return;
-          }
-          const data = JSON.parse(raw);
-          if (!validSnapshot(data)) throw new Error('Invalid save');
-          const when = new Date(data.savedAt).toLocaleString();
-          $('#save-summary').innerHTML = `<strong>T+${pad(data.tick)}</strong> · seed ${esc(data.seed)}<br>${esc(data.agent.concepts.length)} concepts · ${esc(data.artifacts.length)} artifacts<br>Saved ${esc(when)}`;
-        } catch (error) {
-          restoreButton.disabled = true;
-          $('#save-summary').textContent = 'Browser storage is unavailable or the autosave is invalid. Portable snapshots still work.';
-        }
-      }
+    function makeName() {
+      const consonants = ['m', 'n', 's', 't', 'r', 'l', 'k', 'v', 'z', 'p', 'h', 'd', 'sh', 'th'];
+      const vowels = ['a', 'e', 'i', 'o', 'u', 'ae', 'ia', 'eo'];
+      let name = '';
+      do {
+        const syllables = 2 + (rng() > 0.72 ? 1 : 0);
+        name = '';
+        for (let i = 0; i < syllables; i++) name += pick(consonants) + pick(vowels);
+        name = name.replace(/([a-z])\1+/g, '$1');
+      } while (agent && agent.usedNames.has(name));
+      if (agent) agent.usedNames.add(name);
+      return name;
+    }
 
-      async function downloadJSON(data, filename, successMessage) {
-        try {
-          const contents = JSON.stringify(data, null, 2);
-          if (window.nulDesktop?.saveJSON) {
-            const result = await window.nulDesktop.saveJSON({ contents, suggestedName: filename });
-            if (result.saved) showToast(successMessage);
-            return;
-          }
-          const blob = new Blob([contents], { type: 'application/json' });
-          const link = document.createElement('a');
-          link.href = URL.createObjectURL(blob); link.download = filename; link.click();
-          setTimeout(() => URL.revokeObjectURL(link.href), 1000);
-          showToast(successMessage);
-        } catch (error) { showToast('The file could not be saved.'); }
-      }
+    function addLog(raw, translation, kind = 'agent') {
+      logs.push({ tick, raw, translation, kind });
+      if (logs.length > MAX_LOGS) logs.shift();
+      if (hooks.onLog) hooks.onLog(logs);
+    }
 
-      function downloadSnapshot() {
-        downloadJSON(createSnapshot(), `nul-world-${seed}-t${tick}.json`, 'Complete world snapshot downloaded.');
-      }
+    function conceptById(id) {
+      return agent ? agent.concepts.find((c) => c.id === id) : undefined;
+    }
 
-      function spawnSignal(options = {}) {
+    function signalById(id) {
+      return signals.find((s) => s.id === id);
+    }
+
+    function burst(x, y, color, count) {
+      for (let i = 0; i < count; i++) {
         const angle = randomBetween(0, Math.PI * 2);
-        const radius = options.near ? randomBetween(55, 120) : randomBetween(75, 175);
-        const x = options.x ?? clamp(agent.x + Math.cos(angle) * radius, 30, width - 30);
-        const y = options.y ?? clamp(agent.y + Math.sin(angle) * radius, 55, height - 35);
-        let features;
-        if (options.novel || featureHistory.length === 0 || rng() < .31) {
-          features = [rng(), rng(), rng(), rng()];
-        } else {
-          const parent = pick(featureHistory);
-          features = parent.map(v => clamp(v + randomBetween(-.105, .105), .02, .98));
+        const velocity = randomBetween(0.2, 1.25);
+        particles.push({
+          x, y,
+          vx: Math.cos(angle) * velocity,
+          vy: Math.sin(angle) * velocity,
+          age: 0,
+          max: randomBetween(25, 70),
+          color
+        });
+      }
+      if (particles.length > MAX_PARTICLES) particles.splice(0, particles.length - MAX_PARTICLES);
+    }
+
+    function spawnSignal(opts = {}) {
+      const angle = randomBetween(0, Math.PI * 2);
+      const radius = opts.near ? randomBetween(55, 120) : randomBetween(75, 175);
+      const x = opts.x ?? clamp(agent.x + Math.cos(angle) * radius, 30, width - 30);
+      const y = opts.y ?? clamp(agent.y + Math.sin(angle) * radius, 55, height - 35);
+      let features;
+      if (opts.novel || featureHistory.length === 0 || rng() < 0.31) {
+        features = [rng(), rng(), rng(), rng()];
+      } else {
+        const parent = pick(featureHistory);
+        features = parent.map((v) => clamp(v + randomBetween(-0.105, 0.105), 0.02, 0.98));
+      }
+      const signal = {
+        id: ++totalEvents,
+        x, y,
+        vx: randomBetween(-0.075, 0.075),
+        vy: randomBetween(-0.075, 0.075),
+        features,
+        effect: randomBetween(-0.085, 0.135),
+        born: tick,
+        life: tick + Math.floor(randomBetween(250, 480)),
+        phase: randomBetween(0, Math.PI * 2),
+        conceptId: null,
+        touched: false,
+        manual: Boolean(opts.manual)
+      };
+      signals.push(signal);
+      if (signals.length > MAX_SIGNALS) signals.shift();
+      featureHistory.push(features.slice());
+      if (featureHistory.length > MAX_FEATURE_HISTORY) featureHistory.shift();
+      ripples.push({ x, y, age: 0, max: 48, color: 'event' });
+      if (ripples.length > MAX_RIPPLES) ripples.shift();
+      return signal;
+    }
+
+    function classify(signal) {
+      let nearest = null;
+      let nearestDistance = Infinity;
+      for (const concept of agent.concepts) {
+        const d = distance(signal.features, concept.prototype);
+        if (d < nearestDistance) {
+          nearestDistance = d;
+          nearest = concept;
         }
-        const signal = {
-          id: ++totalEvents, x, y, vx: randomBetween(-.075, .075), vy: randomBetween(-.075, .075),
-          features, effect: randomBetween(-.085, .135), born: tick,
-          life: tick + Math.floor(randomBetween(250, 480)), phase: randomBetween(0, Math.PI * 2),
-          conceptId: null, touched: false, manual: !!options.manual
+      }
+      const threshold = 0.27;
+      if (!nearest || (nearestDistance > threshold && agent.concepts.length < MAX_CONCEPTS)) {
+        const index = agent.concepts.length + 1;
+        const concept = {
+          id: index,
+          name: makeName(),
+          glyph: makeGlyph(),
+          prototype: signal.features.slice(),
+          born: tick,
+          seen: 0,
+          contacts: 0,
+          valence: 0,
+          totalEffect: 0,
+          examples: 1
         };
-        signals.push(signal);
-        featureHistory.push(features.slice());
-        if (featureHistory.length > 24) featureHistory.shift();
-        $('#empty-state').classList.add('hidden');
-        ripples.push({ x, y, age: 0, max: 48, color: 'event' });
-        return signal;
+        agent.concepts.push(concept);
+        nearest = concept;
+        nearestDistance = 0;
+        addLog(
+          `${concept.name} ${agent.operators.is} [${signal.features.map((v) => Math.round(v * 9)).join('·')}]`,
+          `A sensation is differentiated from the void. Its new symbol is “${concept.name}.”`
+        );
+        burst(signal.x, signal.y, 'concept', 13);
+      } else {
+        nearest.examples++;
+        const rate = Math.min(0.22, 1 / (nearest.examples + 2));
+        nearest.prototype = nearest.prototype.map((v, i) => v + (signal.features[i] - v) * rate);
       }
+      nearest.seen++;
+      signal.conceptId = nearest.id;
+      agent.novelty = clamp(nearestDistance / 0.5);
+      return nearest;
+    }
 
-      function classify(signal) {
-        let nearest = null, nearestDistance = Infinity;
-        for (const concept of agent.concepts) {
-          const d = distance(signal.features, concept.prototype);
-          if (d < nearestDistance) { nearestDistance = d; nearest = concept; }
-        }
-        const threshold = .27;
-        if (!nearest || (nearestDistance > threshold && agent.concepts.length < 8)) {
-          const index = agent.concepts.length + 1;
-          const concept = {
-            id: index, name: makeName(), glyph: makeGlyph(), prototype: signal.features.slice(),
-            born: tick, seen: 0, contacts: 0, valence: 0, totalEffect: 0, examples: 1
-          };
-          agent.concepts.push(concept);
-          nearest = concept; nearestDistance = 0;
-          addLog(`${concept.name} ${agent.operators.is} [${signal.features.map(v => Math.round(v * 9)).join('·')}]`, `A sensation is differentiated from the void. Its new symbol is “${concept.name}.”`);
-          burst(signal.x, signal.y, 'concept', 13);
-        } else {
-          nearest.examples++;
-          const rate = Math.min(.22, 1 / (nearest.examples + 2));
-          nearest.prototype = nearest.prototype.map((v, i) => v + (signal.features[i] - v) * rate);
-        }
-        nearest.seen++;
-        signal.conceptId = nearest.id;
-        agent.novelty = clamp(nearestDistance / .5);
-        return nearest;
+    function setGoal(type, concept, description) {
+      const key = type + ':' + (concept ? concept.id : 0);
+      const rawName = concept ? concept.name : '?';
+      agent.goal = {
+        type,
+        conceptId: concept ? concept.id : null,
+        raw: `${rawName} ${agent.operators.sequence} ${type === 'restore' ? '+' : type === 'wait' ? '·' : '?'}`,
+        description,
+        key
+      };
+      if (agent.lastGoalKey && agent.lastGoalKey !== key && type === 'restore') {
+        addLog(agent.goal.raw, description);
       }
+      agent.lastGoalKey = key;
+    }
 
-      function conceptById(id) { return agent.concepts.find(c => c.id === id); }
-      function signalById(id) { return signals.find(s => s.id === id); }
-
-      function chooseGoal() {
-        const available = signals.filter(s => !s.touched && tick - s.born > 3);
-        if (!available.length) {
-          agent.targetId = null;
-          setGoal('wait', null, 'Attend to whatever arrives next; no object is preferred.');
-          return;
-        }
-        let best = null, bestUtility = -Infinity, bestNovelty = 0;
-        for (const signal of available) {
-          const concept = signal.conceptId ? conceptById(signal.conceptId) : null;
-          const d = Math.hypot(signal.x - agent.x, signal.y - agent.y);
-          let nearestPrototypeDistance = 1;
-          if (agent.concepts.length) nearestPrototypeDistance = Math.min(...agent.concepts.map(c => distance(signal.features, c.prototype)));
-          const novelty = concept ? clamp(1 / (1 + concept.seen * .17)) : clamp(nearestPrototypeDistance * 2.2);
-          const valence = concept ? concept.valence : 0;
-          const need = (1 - agent.energy) * Math.max(0, valence) * 1.4;
-          const aversion = valence < -.18 && agent.energy < .65 ? valence * 1.2 : valence * .25;
-          const utility = novelty * .62 + aversion + need - d / 700 + rng() * .08;
-          if (utility > bestUtility) { best = signal; bestUtility = utility; bestNovelty = novelty; }
-        }
-        agent.targetId = best.id;
-        agent.novelty = bestNovelty;
-        const concept = best.conceptId ? conceptById(best.conceptId) : null;
-        if (concept && concept.valence > .18 && agent.energy < .52) {
-          setGoal('restore', concept, `Attend to “${concept.name}”; past contact with this self-named pattern restored energy.`);
-        } else if (concept && concept.seen > 4 && bestNovelty < .3) {
-          setGoal('revisit', concept, `Revisit “${concept.name}” and test whether its stored value remains stable.`);
-        } else if (concept) {
-          setGoal('inspect', concept, `Inspect the pattern currently associated with “${concept.name}.”`);
-        } else {
-          setGoal('unknown', null, 'Approach a sensation that does not yet belong to a named concept.');
-        }
-      }
-
-      function setGoal(type, concept, description) {
-        const key = type + ':' + (concept ? concept.id : 0);
-        const rawName = concept ? concept.name : '?';
-        agent.goal = { type, conceptId: concept ? concept.id : null, raw: `${rawName} ${agent.operators.sequence} ${type === 'restore' ? '+' : type === 'wait' ? '·' : '?'}`, description, key };
-        if (agent.lastGoalKey && agent.lastGoalKey !== key && type === 'restore') {
-          addLog(agent.goal.raw, description);
-        }
-        agent.lastGoalKey = key;
-      }
-
-      function perceive() {
-        for (const signal of signals) {
-          if (signal.conceptId || signal.touched) continue;
-          const d = Math.hypot(signal.x - agent.x, signal.y - agent.y);
-          if (d < agent.senseRange) classify(signal);
-        }
-      }
-
-      function interact(signal) {
-        if (signal.touched) return;
-        signal.touched = true;
-        signal.life = Math.min(signal.life, tick + 32);
-        const concept = signal.conceptId || classify(signal).id;
-        const c = conceptById(concept);
-        agent.interactions++;
-        agent.energy = clamp(agent.energy + signal.effect, .05, 1);
-        c.contacts++;
-        c.totalEffect += signal.effect;
-        c.valence = clamp(c.totalEffect / (c.contacts * .09), -1, 1);
-        const episode = { tick, conceptId: c.id, signalId: signal.id, effect: signal.effect, energyAfter: agent.energy };
-        agent.memories.push(episode);
-        if (agent.memories.length > 100) agent.memories.shift();
-        ripples.push({ x: signal.x, y: signal.y, age: 0, max: 58, color: signal.effect >= 0 ? 'positive' : 'negative' });
-        burst(signal.x, signal.y, signal.effect >= 0 ? 'positive' : 'negative', 8);
-
-        if (agent.lastConceptId && agent.lastConceptId !== c.id && tick - agent.lastInteractionTick < 100) {
-          learnSequence(agent.lastConceptId, c.id);
-        }
-        agent.lastConceptId = c.id; agent.lastInteractionTick = tick;
-
-        if (c.contacts === 2) {
-          const sign = c.valence >= 0 ? '+' : '−';
-          addLog(`${c.name} ${agent.operators.is} ${sign}${Math.abs(c.valence).toFixed(2)}`, `Repeated contact gives “${c.name}” a ${c.valence >= 0 ? 'positive' : 'negative'} association. The category now carries a learned preference.`);
-        }
-        if (!agent.selfName && agent.interactions >= 4) {
-          agent.selfName = makeName(); agent.selfGlyph = makeGlyph(); agent.selfBorn = tick;
-          addLog(`${agent.selfName} ${agent.operators.is} [${agent.memories.length}]`, `One locus persists across ${agent.memories.length} episodes. The agent assigns that recurring locus the self-symbol “${agent.selfName}.”`);
-          renderIdentity();
-        }
-        if (agent.concepts.length >= 2 && agent.interactions >= 8 && tick - agent.lastArtifactTick > 115 && agent.energy > .42) {
-          authorArtifact();
-        }
+    function chooseGoal() {
+      const available = signals.filter((s) => !s.touched && tick - s.born > 3);
+      if (!available.length) {
         agent.targetId = null;
-        chooseGoal();
+        setGoal('wait', null, 'Attend to whatever arrives next; no object is preferred.');
+        return;
       }
-
-      function learnSequence(fromId, toId) {
-        const key = `${fromId}>${toId}`;
-        agent.relationCounts[key] = (agent.relationCounts[key] || 0) + 1;
-        const count = agent.relationCounts[key];
-        if (count === 2 && !agent.beliefs.some(b => b.key === key)) {
-          const from = conceptById(fromId), to = conceptById(toId);
-          agent.beliefs.push({ key, fromId, toId, count, born: tick, confidence: .52 });
-          addLog(`${from.name} ${agent.operators.sequence} ${to.name}`, `A candidate regularity is recorded: encounters with “${from.name}” have preceded “${to.name}.” It is a belief, not a guaranteed law.`);
-        } else if (count > 2) {
-          const belief = agent.beliefs.find(b => b.key === key);
-          if (belief) { belief.count = count; belief.confidence = clamp(.42 + Math.log(count) * .18, 0, .94); }
-        }
-      }
-
-      function authorArtifact() {
-        const candidates = [...agent.concepts].sort((a, b) => (b.contacts + b.valence * 2) - (a.contacts + a.valence * 2));
-        const a = candidates[0];
-        const b = candidates.find(c => c.id !== a.id) || candidates[1];
-        if (!a || !b) return;
-        const name = makeName();
-        const artifact = {
-          id: agent.artifacts.length + 1, name, glyph: makeGlyph(), parents: [a.id, b.id],
-          x: clamp(agent.x + randomBetween(-60, 60), 35, width - 35),
-          y: clamp(agent.y + randomBetween(-60, 60), 55, height - 35),
-          born: tick, phase: randomBetween(0, Math.PI * 2),
-          features: a.prototype.map((v, i) => clamp((v + b.prototype[i]) / 2 + randomBetween(-.08, .08)))
-        };
-        agent.artifacts.push(artifact); artifacts.push(artifact);
-        agent.lastArtifactTick = tick; agent.energy = clamp(agent.energy - .08);
-        featureHistory.push(artifact.features.slice());
-        addLog(`${agent.selfName || '·'} ${agent.operators.create} ${name} ${agent.operators.is} ${a.name} ${agent.operators.join} ${b.name}`, `Two self-named patterns, “${a.name}” and “${b.name},” are combined. The resulting persistent artifact is named “${name}.”`);
-        ripples.push({ x: artifact.x, y: artifact.y, age: 0, max: 90, color: 'artifact' });
-        burst(artifact.x, artifact.y, 'artifact', 22);
-      }
-
-      function burst(x, y, color, count) {
-        for (let i = 0; i < count; i++) {
-          const angle = randomBetween(0, Math.PI * 2), velocity = randomBetween(.2, 1.25);
-          particles.push({ x, y, vx: Math.cos(angle) * velocity, vy: Math.sin(angle) * velocity, age: 0, max: randomBetween(25, 70), color });
-        }
-      }
-
-      function simulate() {
-        tick++;
-        agent.energy = clamp(agent.energy - .00055, .05, 1);
-        if (tick >= nextSpawn && signals.length < 9) {
-          spawnSignal(); nextSpawn = tick + Math.floor(randomBetween(20, 34));
-        }
-        if (tick % 4 === 0) perceive();
-        if (tick % 30 === 0 || (!agent.targetId && !agent.goal)) chooseGoal();
-
-        for (const signal of signals) {
-          signal.x += signal.vx; signal.y += signal.vy;
-          if (signal.x < 20 || signal.x > width - 20) signal.vx *= -1;
-          if (signal.y < 35 || signal.y > height - 20) signal.vy *= -1;
-        }
-        signals = signals.filter(s => tick < s.life);
-
-        let target = signalById(agent.targetId);
-        if (!target || target.touched) {
-          if (tick % 15 === 0 || !target) chooseGoal();
-          target = signalById(agent.targetId);
-        }
-        if (target) {
-          const dx = target.x - agent.x, dy = target.y - agent.y;
-          const d = Math.max(.001, Math.hypot(dx, dy));
-          agent.heading = Math.atan2(dy, dx);
-          if (d > 19) {
-            const velocity = 1.5 + agent.energy * 1.05;
-            agent.vx += ((dx / d) * velocity - agent.vx) * .13;
-            agent.vy += ((dy / d) * velocity - agent.vy) * .13;
-          } else {
-            agent.vx *= .75; agent.vy *= .75;
-            interact(target);
+      let best = null;
+      let bestUtility = -Infinity;
+      let bestNovelty = 0;
+      for (const signal of available) {
+        const concept = signal.conceptId ? conceptById(signal.conceptId) : null;
+        const d = Math.hypot(signal.x - agent.x, signal.y - agent.y);
+        let nearestPrototypeDistance = 1;
+        if (agent.concepts.length) {
+          for (const c of agent.concepts) {
+            const pd = distance(signal.features, c.prototype);
+            if (pd < nearestPrototypeDistance) nearestPrototypeDistance = pd;
           }
+        }
+        const novelty = concept ? clamp(1 / (1 + concept.seen * 0.17)) : clamp(nearestPrototypeDistance * 2.2);
+        const valence = concept ? concept.valence : 0;
+        const need = (1 - agent.energy) * Math.max(0, valence) * 1.4;
+        const aversion = valence < -0.18 && agent.energy < 0.65 ? valence * 1.2 : valence * 0.25;
+        const utility = novelty * 0.62 + aversion + need - d / 700 + rng() * 0.08;
+        if (utility > bestUtility) {
+          best = signal;
+          bestUtility = utility;
+          bestNovelty = novelty;
+        }
+      }
+      agent.targetId = best.id;
+      agent.novelty = bestNovelty;
+      const concept = best.conceptId ? conceptById(best.conceptId) : null;
+      if (concept && concept.valence > 0.18 && agent.energy < 0.52) {
+        setGoal('restore', concept, `Attend to “${concept.name}”; past contact with this self-named pattern restored energy.`);
+      } else if (concept && concept.seen > 4 && bestNovelty < 0.3) {
+        setGoal('revisit', concept, `Revisit “${concept.name}” and test whether its stored value remains stable.`);
+      } else if (concept) {
+        setGoal('inspect', concept, `Inspect the pattern currently associated with “${concept.name}.”`);
+      } else {
+        setGoal('unknown', null, 'Approach a sensation that does not yet belong to a named concept.');
+      }
+    }
+
+    function perceive() {
+      for (const signal of signals) {
+        if (signal.conceptId || signal.touched) continue;
+        const d = Math.hypot(signal.x - agent.x, signal.y - agent.y);
+        if (d < agent.senseRange) classify(signal);
+      }
+    }
+
+    function learnSequence(fromId, toId) {
+      const key = `${fromId}>${toId}`;
+      agent.relationCounts[key] = (agent.relationCounts[key] || 0) + 1;
+      const count = agent.relationCounts[key];
+      if (count === 2 && !agent.beliefs.some((b) => b.key === key)) {
+        const from = conceptById(fromId);
+        const to = conceptById(toId);
+        agent.beliefs.push({ key, fromId, toId, count, born: tick, confidence: 0.52 });
+        addLog(
+          `${from.name} ${agent.operators.sequence} ${to.name}`,
+          `A candidate regularity is recorded: encounters with “${from.name}” have preceded “${to.name}.” It is a belief, not a guaranteed law.`
+        );
+      } else if (count > 2) {
+        const belief = agent.beliefs.find((b) => b.key === key);
+        if (belief) {
+          belief.count = count;
+          belief.confidence = clamp(0.42 + Math.log(count) * 0.18, 0, 0.94);
+        }
+      }
+    }
+
+    function authorArtifact() {
+      const candidates = [...agent.concepts].sort((a, b) => (b.contacts + b.valence * 2) - (a.contacts + a.valence * 2));
+      const a = candidates[0];
+      const b = candidates.find((c) => c.id !== a.id) || candidates[1];
+      if (!a || !b) return;
+      const name = makeName();
+      agent.totalArtifactsCreated = (agent.totalArtifactsCreated || artifacts.length) + 1;
+      const artifact = {
+        id: agent.totalArtifactsCreated,
+        name,
+        glyph: makeGlyph(),
+        parents: [a.id, b.id],
+        x: clamp(agent.x + randomBetween(-60, 60), 35, width - 35),
+        y: clamp(agent.y + randomBetween(-60, 60), 55, height - 35),
+        born: tick,
+        phase: randomBetween(0, Math.PI * 2),
+        features: a.prototype.map((v, i) => clamp((v + b.prototype[i]) / 2 + randomBetween(-0.08, 0.08)))
+      };
+      artifacts.push(artifact);
+      if (agent.artifacts !== artifacts) agent.artifacts = artifacts;
+      if (artifacts.length > MAX_ARTIFACTS) {
+        artifacts.shift();
+        pruneUnusedNames();
+      }
+      agent.lastArtifactTick = tick;
+      agent.energy = clamp(agent.energy - 0.08);
+      featureHistory.push(artifact.features.slice());
+      if (featureHistory.length > MAX_FEATURE_HISTORY) featureHistory.shift();
+      addLog(
+        `${agent.selfName || '·'} ${agent.operators.create} ${name} ${agent.operators.is} ${a.name} ${agent.operators.join} ${b.name}`,
+        `Two self-named patterns, “${a.name}” and “${b.name},” are combined. The resulting persistent artifact is named “${name}.”`
+      );
+      ripples.push({ x: artifact.x, y: artifact.y, age: 0, max: 90, color: 'artifact' });
+      if (ripples.length > MAX_RIPPLES) ripples.shift();
+      burst(artifact.x, artifact.y, 'artifact', 22);
+    }
+
+    function interact(signal) {
+      if (signal.touched) return;
+      signal.touched = true;
+      signal.life = Math.min(signal.life, tick + 32);
+      const concept = signal.conceptId || classify(signal).id;
+      const c = conceptById(concept);
+      agent.interactions++;
+      agent.energy = clamp(agent.energy + signal.effect, 0.05, 1);
+      c.contacts++;
+      c.totalEffect += signal.effect;
+      c.valence = clamp(c.totalEffect / (c.contacts * 0.09), -1, 1);
+      const episode = { tick, conceptId: c.id, signalId: signal.id, effect: signal.effect, energyAfter: agent.energy };
+      agent.memories.push(episode);
+      if (agent.memories.length > MAX_MEMORIES) agent.memories.shift();
+      ripples.push({ x: signal.x, y: signal.y, age: 0, max: 58, color: signal.effect >= 0 ? 'positive' : 'negative' });
+      if (ripples.length > MAX_RIPPLES) ripples.shift();
+      burst(signal.x, signal.y, signal.effect >= 0 ? 'positive' : 'negative', 8);
+
+      if (agent.lastConceptId && agent.lastConceptId !== c.id && tick - agent.lastInteractionTick < 100) {
+        learnSequence(agent.lastConceptId, c.id);
+      }
+      agent.lastConceptId = c.id;
+      agent.lastInteractionTick = tick;
+
+      if (c.contacts === 2) {
+        const sign = c.valence >= 0 ? '+' : '−';
+        addLog(
+          `${c.name} ${agent.operators.is} ${sign}${Math.abs(c.valence).toFixed(2)}`,
+          `Repeated contact gives “${c.name}” a ${c.valence >= 0 ? 'positive' : 'negative'} association. The category now carries a learned preference.`
+        );
+      }
+      if (!agent.selfName && agent.interactions >= 4) {
+        agent.selfName = makeName();
+        agent.selfGlyph = makeGlyph();
+        agent.selfBorn = tick;
+        addLog(
+          `${agent.selfName} ${agent.operators.is} [${agent.memories.length}]`,
+          `One locus persists across ${agent.memories.length} episodes. The agent assigns that recurring locus the self-symbol “${agent.selfName}.”`
+        );
+        if (hooks.onIdentity) hooks.onIdentity();
+      }
+      if (agent.concepts.length >= 2 && agent.interactions >= 8 && tick - agent.lastArtifactTick > 115 && agent.energy > 0.42) {
+        authorArtifact();
+      }
+      agent.targetId = null;
+      chooseGoal();
+    }
+
+    function simulate() {
+      tick++;
+      agent.energy = clamp(agent.energy - 0.00055, 0.05, 1);
+      if (tick >= nextSpawn && signals.length < 9) {
+        spawnSignal();
+        nextSpawn = tick + Math.floor(randomBetween(20, 34));
+      }
+      if (tick % 4 === 0) perceive();
+      if (tick % 30 === 0 || (!agent.targetId && !agent.goal)) chooseGoal();
+
+      for (const signal of signals) {
+        signal.x += signal.vx;
+        signal.y += signal.vy;
+        if (signal.x < 20 || signal.x > width - 20) signal.vx *= -1;
+        if (signal.y < 35 || signal.y > height - 20) signal.vy *= -1;
+      }
+      signals = signals.filter((s) => tick < s.life);
+
+      let target = signalById(agent.targetId);
+      if (!target || target.touched) {
+        if (tick % 15 === 0 || !target) chooseGoal();
+        target = signalById(agent.targetId);
+      }
+      if (target) {
+        const dx = target.x - agent.x;
+        const dy = target.y - agent.y;
+        const d = Math.max(0.001, Math.hypot(dx, dy));
+        agent.heading = Math.atan2(dy, dx);
+        if (d > 19) {
+          const velocity = 1.5 + agent.energy * 1.05;
+          agent.vx += ((dx / d) * velocity - agent.vx) * 0.13;
+          agent.vy += ((dy / d) * velocity - agent.vy) * 0.13;
         } else {
-          const angle = tick * .008 + (seed % 100) * .1;
-          agent.vx += (Math.cos(angle) * .48 - agent.vx) * .03;
-          agent.vy += (Math.sin(angle * .83) * .48 - agent.vy) * .03;
+          agent.vx *= 0.75;
+          agent.vy *= 0.75;
+          interact(target);
         }
-        agent.x += agent.vx; agent.y += agent.vy;
-        if (agent.x < 22 || agent.x > width - 22) { agent.vx *= -.7; agent.x = clamp(agent.x, 22, width - 22); }
-        if (agent.y < 45 || agent.y > height - 25) { agent.vy *= -.7; agent.y = clamp(agent.y, 45, height - 25); }
-        if (tick % 3 === 0) {
-          agent.trail.push([agent.x, agent.y]);
-          if (agent.trail.length > 65) agent.trail.shift();
+      } else {
+        const angle = tick * 0.008 + (seed % 100) * 0.1;
+        agent.vx += (Math.cos(angle) * 0.48 - agent.vx) * 0.03;
+        agent.vy += (Math.sin(angle * 0.83) * 0.48 - agent.vy) * 0.03;
+      }
+      agent.x += agent.vx;
+      agent.y += agent.vy;
+      if (agent.x < 22 || agent.x > width - 22) {
+        agent.vx *= -0.7;
+        agent.x = clamp(agent.x, 22, width - 22);
+      }
+      if (agent.y < 45 || agent.y > height - 25) {
+        agent.vy *= -0.7;
+        agent.y = clamp(agent.y, 45, height - 25);
+      }
+      if (tick % 3 === 0) {
+        agent.trail.push([agent.x, agent.y]);
+        if (agent.trail.length > MAX_TRAIL) agent.trail.shift();
+      }
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.97;
+        p.vy *= 0.97;
+        p.age++;
+      }
+      particles = particles.filter((p) => p.age < p.max);
+      for (const r of ripples) r.age++;
+      ripples = ripples.filter((r) => r.age < r.max);
+
+      if (tick % 12 === 0 && hooks.onRender) hooks.onRender();
+      if (tick % 120 === 0 && hooks.onAutosave) hooks.onAutosave(false);
+    }
+
+    function resetWorld(newSeed = true, explicitSeed = null) {
+      if (Number.isInteger(explicitSeed) && explicitSeed >= 1 && explicitSeed <= 2147483647) {
+        seed = explicitSeed;
+      } else if (newSeed) {
+        seed = defaultRandomSeed();
+      }
+      rng = mulberry32(seed);
+      tick = 0;
+      totalEvents = 0;
+      nextSpawn = 14;
+      signals = [];
+      artifacts = [];
+      particles = [];
+      ripples = [];
+      featureHistory = [];
+      logs = [];
+      agent = freshAgent();
+      running = true;
+      addLog('·', 'No symbols. No observations. The world has not yet been differentiated.', 'system');
+      if (hooks.onWorldReset) hooks.onWorldReset();
+      if (hooks.onControls) hooks.onControls();
+      if (hooks.onRender) hooks.onRender();
+      if (hooks.onAutosave) hooks.onAutosave(false);
+    }
+
+    function perturb(at) {
+      const sig = spawnSignal({
+        x: at ? at.x : undefined,
+        y: at ? at.y : undefined,
+        novel: true,
+        manual: true,
+        near: true
+      });
+      if (hooks.onRender) hooks.onRender();
+      if (hooks.onAutosave) hooks.onAutosave(false);
+      return sig;
+    }
+
+    function coherence() {
+      if (!agent || !agent.concepts.length) return 0;
+      return agent.concepts.reduce((sum, c) => sum + clamp(c.contacts / 5), 0) / agent.concepts.length;
+    }
+
+    function createSnapshot() {
+      return {
+        format: SAVE_FORMAT,
+        version: SAVE_VERSION,
+        appVersion: APP_VERSION,
+        savedAt: new Date().toISOString(),
+        seed,
+        rngState: rng.getState(),
+        tick,
+        totalEvents,
+        nextSpawn,
+        world: { width, height },
+        signals,
+        artifacts,
+        particles,
+        ripples,
+        featureHistory,
+        logs,
+        agent: { ...agent, usedNames: [...agent.usedNames] },
+        ui: { running, speed, logMode }
+      };
+    }
+
+    function restoreSnapshot(data) {
+      if (!validSnapshot(data)) throw new Error('This is not a valid NUL world snapshot.');
+      seed = data.seed;
+      rng = mulberry32(seed);
+      rng.setState(data.rngState);
+      tick = data.tick;
+      totalEvents = data.totalEvents;
+      nextSpawn = data.nextSpawn;
+
+      const seenArtifactIds = new Set();
+      const dedupedArtifacts = [];
+      for (const item of data.artifacts) {
+        if (!seenArtifactIds.has(item.id)) {
+          seenArtifactIds.add(item.id);
+          dedupedArtifacts.push(item);
         }
-        particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vx *= .97; p.vy *= .97; p.age++; });
-        particles = particles.filter(p => p.age < p.max);
-        ripples.forEach(r => r.age++);
-        ripples = ripples.filter(r => r.age < r.max);
-
-        if (tick % 12 === 0) renderAll();
-        if (tick % 120 === 0) saveWorld(false);
       }
+      while (dedupedArtifacts.length > MAX_ARTIFACTS) dedupedArtifacts.shift();
 
-      // ---------- Observer rendering ----------
-      function drawGlyphCanvas(glyph, x, y, size, color, alpha = 1) {
-        const safe = safeGlyph(glyph);
-        if (!safe) return;
-        ctx.save(); ctx.translate(x - size / 2, y - size / 2); ctx.scale(size / 28, size / 28);
-        ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.1;
-        const path = new Path2D(safe.path); ctx.stroke(path);
-        if (safe.dot) { ctx.beginPath(); ctx.arc(safe.dot[0], safe.dot[1], 1.5, 0, Math.PI * 2); ctx.fill(); }
-        ctx.restore();
-      }
+      signals = data.signals.slice(-MAX_SIGNALS);
+      artifacts = dedupedArtifacts;
+      particles = data.particles.slice(-MAX_PARTICLES);
+      ripples = data.ripples.slice(-MAX_RIPPLES);
+      featureHistory = data.featureHistory.slice(-MAX_FEATURE_HISTORY);
+      logs = data.logs.slice(-MAX_LOGS);
+      agent = data.agent;
+      agent.usedNames = new Set(data.agent.usedNames);
+      agent.artifacts = artifacts;
+      const maxArtifactId = artifacts.reduce((max, item) => Math.max(max, item.id), 0);
+      agent.totalArtifactsCreated = Number.isFinite(data.agent.totalArtifactsCreated)
+        ? Math.max(data.agent.totalArtifactsCreated, maxArtifactId, artifacts.length)
+        : Math.max(maxArtifactId, artifacts.length);
+      pruneUnusedNames();
 
-      function drawBackground() {
-        ctx.fillStyle = '#0d0f0c'; ctx.fillRect(0, 0, width, height);
-        const gradient = ctx.createRadialGradient(agent ? agent.x : width / 2, agent ? agent.y : height / 2, 0, width / 2, height / 2, Math.max(width, height) * .7);
-        gradient.addColorStop(0, 'rgba(47,56,35,.10)'); gradient.addColorStop(1, 'rgba(7,9,6,0)');
-        ctx.fillStyle = gradient; ctx.fillRect(0, 0, width, height);
-        // Sparse deterministic observer grid, intentionally not an object in the agent's ontology.
-        ctx.strokeStyle = 'rgba(128,143,104,.035)'; ctx.lineWidth = 1;
-        const spacing = 80;
-        for (let x = spacing; x < width; x += spacing) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke(); }
-        for (let y = spacing; y < height; y += spacing) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke(); }
-      }
-
-      function drawSignal(signal) {
-        const c = signal.conceptId ? conceptById(signal.conceptId) : null;
-        const pulse = (Math.sin(tick * .075 + signal.phase) + 1) / 2;
-        const size = 2.6 + signal.features[1] * 3.4;
-        const alpha = signal.touched ? clamp((signal.life - tick) / 32) : .55 + pulse * .35;
-        ctx.save(); ctx.globalAlpha = alpha;
-        ctx.strokeStyle = c ? '#b5ca79' : '#89957a';
-        ctx.fillStyle = c ? '#d6fa72' : '#a6b198';
-        ctx.lineWidth = .8;
-        if (c) drawGlyphCanvas(c.glyph, signal.x, signal.y, 20 + signal.features[0] * 7, '#a9c466', alpha * .7);
-        else {
-          ctx.beginPath(); ctx.arc(signal.x, signal.y, 6 + pulse * 3, 0, Math.PI * 2); ctx.stroke();
-          ctx.beginPath(); ctx.arc(signal.x, signal.y, size * .5, 0, Math.PI * 2); ctx.fill();
+      const sx = width / data.world.width;
+      const sy = height / data.world.height;
+      const scalePoint = (object) => {
+        if (object && Number.isFinite(object.x) && Number.isFinite(object.y)) {
+          object.x *= sx;
+          object.y *= sy;
         }
-        if (signal.id === agent.targetId && !signal.touched) {
-          ctx.globalAlpha = .4; ctx.setLineDash([2, 4]); ctx.beginPath(); ctx.arc(signal.x, signal.y, 18 + pulse * 3, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+      };
+      [agent, ...signals, ...artifacts, ...particles, ...ripples].forEach(scalePoint);
+      agent.trail.forEach((point) => {
+        if (Array.isArray(point) && Number.isFinite(point[0]) && Number.isFinite(point[1])) {
+          point[0] *= sx;
+          point[1] *= sy;
         }
-        ctx.restore();
-      }
+      });
 
-      function drawArtifact(artifact) {
-        const pulse = Math.sin(tick * .025 + artifact.phase) * 3;
-        ctx.save();
-        ctx.strokeStyle = 'rgba(224,185,108,.17)'; ctx.lineWidth = .8;
-        ctx.beginPath(); ctx.arc(artifact.x, artifact.y, 28 + pulse, 0, Math.PI * 2); ctx.stroke();
-        ctx.setLineDash([2, 5]); ctx.beginPath(); ctx.arc(artifact.x, artifact.y, 20 - pulse * .2, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
-        drawGlyphCanvas(artifact.glyph, artifact.x, artifact.y, 27, '#e0b96c', .88);
-        ctx.fillStyle = 'rgba(202,180,125,.65)'; ctx.font = '9px ' + getComputedStyle(document.documentElement).getPropertyValue('--mono');
-        ctx.textAlign = 'center'; ctx.fillText(artifact.name, artifact.x, artifact.y + 43);
-        ctx.restore();
-      }
+      running = data.ui ? data.ui.running !== false : true;
+      speed = data.ui && [1, 2, 4, 8].includes(data.ui.speed) ? data.ui.speed : 1;
+      logMode = data.ui && ['dual', 'agent', 'observer'].includes(data.ui.logMode) ? data.ui.logMode : 'dual';
 
-      function drawAgent() {
-        // Memory trail.
-        if (agent.trail.length > 1) {
-          ctx.save(); ctx.lineWidth = .7;
-          for (let i = 1; i < agent.trail.length; i++) {
-            ctx.strokeStyle = `rgba(188,214,116,${(i / agent.trail.length) * .13})`;
-            ctx.beginPath(); ctx.moveTo(...agent.trail[i - 1]); ctx.lineTo(...agent.trail[i]); ctx.stroke();
+      if (hooks.onSnapshotRestored) hooks.onSnapshotRestored();
+      if (hooks.onLog) hooks.onLog(logs);
+      if (hooks.onControls) hooks.onControls();
+      if (hooks.onRender) hooks.onRender();
+      return true;
+    }
+
+    function exportOntology() {
+      return {
+        format: ONTOLOGY_FORMAT,
+        version: ONTOLOGY_VERSION,
+        experiment: `NUL v${APP_VERSION} / bootstrap 0.1`,
+        appVersion: APP_VERSION,
+        ruleset: RULESET_VERSION,
+        exportedAt: new Date().toISOString(),
+        architecture: 'Non-LLM symbolic artificial life; seeded rules + vector similarity + episodic memory',
+        seed,
+        tick,
+        observerNote: 'Names and categories below were generated during this run. Observer metadata is not supplied to the agent.',
+        agent: {
+          selfSymbol: agent.selfName,
+          selfGlyph: agent.selfGlyph ? safeGlyph(agent.selfGlyph) : null,
+          selfBorn: agent.selfBorn,
+          energy: agent.energy,
+          currentIntent: agent.goal,
+          concepts: agent.concepts.map((c) => ({
+            ...c,
+            glyph: safeGlyph(c.glyph) || deterministicGlyphFromText(c.name),
+            prototype: c.prototype.slice()
+          })),
+          beliefs: agent.beliefs.map((b) => ({ ...b })),
+          relationCounts: { ...agent.relationCounts },
+          artifacts: artifacts.map((a) => ({
+            ...a,
+            glyph: safeGlyph(a.glyph) || deterministicGlyphFromText(a.name),
+            parents: a.parents.slice(),
+            features: a.features.slice()
+          })),
+          episodicMemory: agent.memories.map((m) => ({ ...m })),
+          generatedOperators: { ...agent.operators }
+        },
+        unclassifiedEvents: signals
+          .filter((s) => !s.conceptId)
+          .map((s) => ({ id: s.id, born: s.born, features: s.features.slice() }))
+      };
+    }
+
+    // Transplants an exported ontology (mind) into the current world without altering world PRNG.
+    function importOntology(data) {
+      const check = validateOntology(data);
+      if (!check.valid) throw new Error(check.reason);
+
+      const src = data.agent;
+      const importedConcepts = src.concepts
+        .slice(0, MAX_CONCEPTS)
+        .map((c, idx) => ({
+          id: idx + 1,
+          name: c.name.trim(),
+          glyph: safeGlyph(c.glyph) || deterministicGlyphFromText(c.name),
+          prototype: c.prototype.map((v) => clamp(Number(v), 0, 1)),
+          born: Math.max(0, Math.round(c.born)),
+          seen: Math.max(0, Math.round(c.seen)),
+          contacts: Math.max(0, Math.round(c.contacts)),
+          valence: clamp(Number(c.valence), -1, 1),
+          totalEffect: Number(c.totalEffect),
+          examples: Math.max(1, Math.round(c.examples))
+        }));
+
+      const idMap = new Map();
+      src.concepts.slice(0, MAX_CONCEPTS).forEach((orig, idx) => {
+        idMap.set(orig.id, idx + 1);
+      });
+
+      const importedBeliefs = [];
+      const importedRelations = {};
+      if (src.relationCounts && typeof src.relationCounts === 'object') {
+        for (const [rawKey, rawVal] of Object.entries(src.relationCounts)) {
+          const m = rawKey.match(/^(\d+)>(\d+)$/);
+          if (m && Number.isFinite(rawVal) && rawVal > 0) {
+            const fromMapped = idMap.get(Number(m[1]));
+            const toMapped = idMap.get(Number(m[2]));
+            if (fromMapped && toMapped && fromMapped !== toMapped) {
+              importedRelations[`${fromMapped}>${toMapped}`] = Math.round(rawVal);
+            }
           }
-          ctx.restore();
-        }
-        // Sensor boundary belongs to the observer view.
-        ctx.save(); ctx.strokeStyle = 'rgba(170,193,115,.075)'; ctx.lineWidth = .7; ctx.setLineDash([2, 7]);
-        ctx.beginPath(); ctx.arc(agent.x, agent.y, agent.senseRange, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
-        const target = signalById(agent.targetId);
-        if (target) {
-          ctx.save(); ctx.strokeStyle = 'rgba(190,213,126,.10)'; ctx.setLineDash([2, 6]); ctx.beginPath(); ctx.moveTo(agent.x, agent.y); ctx.lineTo(target.x, target.y); ctx.stroke(); ctx.restore();
-        }
-        const glow = ctx.createRadialGradient(agent.x, agent.y, 0, agent.x, agent.y, 28);
-        glow.addColorStop(0, 'rgba(214,250,114,.24)'); glow.addColorStop(1, 'rgba(214,250,114,0)');
-        ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(agent.x, agent.y, 28, 0, Math.PI * 2); ctx.fill();
-        ctx.save(); ctx.translate(agent.x, agent.y); ctx.rotate(tick * .006);
-        ctx.strokeStyle = '#d6fa72'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(0, 0, 10, -.4, 1.8); ctx.stroke();
-        ctx.beginPath(); ctx.arc(0, 0, 10, 2.7, 4.8); ctx.stroke(); ctx.restore();
-        ctx.fillStyle = '#e7ffc0'; ctx.beginPath(); ctx.arc(agent.x, agent.y, 2.5, 0, Math.PI * 2); ctx.fill();
-        if (agent.selfName) {
-          ctx.fillStyle = 'rgba(210,229,170,.7)'; ctx.font = '9px ' + getComputedStyle(document.documentElement).getPropertyValue('--mono');
-          ctx.textAlign = 'center'; ctx.fillText(agent.selfName, agent.x, agent.y - 20);
         }
       }
 
-      function renderWorld() {
-        if (!agent) return;
-        drawBackground();
-        for (const ripple of ripples) {
-          const progress = ripple.age / ripple.max;
-          const colors = { positive: '214,250,114', negative: '231,132,112', artifact: '232,189,114', concept: '190,218,124', event: '135,148,119' };
-          ctx.strokeStyle = `rgba(${colors[ripple.color] || colors.event},${(1 - progress) * .35})`; ctx.lineWidth = .8;
-          ctx.beginPath(); ctx.arc(ripple.x, ripple.y, 5 + progress * ripple.max, 0, Math.PI * 2); ctx.stroke();
-        }
-        signals.forEach(drawSignal);
-        artifacts.forEach(drawArtifact);
-        for (const p of particles) {
-          const colors = { positive: '#d6fa72', negative: '#e78470', artifact: '#e8bd72', concept: '#b8d37a' };
-          ctx.globalAlpha = 1 - p.age / p.max; ctx.fillStyle = colors[p.color] || '#a9b598';
-          ctx.fillRect(p.x, p.y, 1.2, 1.2);
-        }
-        ctx.globalAlpha = 1;
-        drawAgent();
+      for (const b of src.beliefs) {
+        const fromId = idMap.get(b.fromId);
+        const toId = idMap.get(b.toId);
+        if (!fromId || !toId || fromId === toId) continue;
+        const key = `${fromId}>${toId}`;
+        if (importedBeliefs.some((existing) => existing.key === key)) continue;
+        const count = Math.max(2, Math.round(b.count));
+        importedRelations[key] = Math.max(importedRelations[key] || 0, count);
+        importedBeliefs.push({
+          key,
+          fromId,
+          toId,
+          count,
+          born: Math.max(0, Math.round(b.born)),
+          confidence: clamp(Number(b.confidence), 0, 0.99)
+        });
       }
 
-      function coherence() {
-        if (!agent.concepts.length) return 0;
-        return agent.concepts.reduce((sum, c) => sum + clamp(c.contacts / 5), 0) / agent.concepts.length;
+      const ops = src.generatedOperators || src.operators;
+      if (ops) {
+        agent.operators = {
+          is: ops.is,
+          sequence: ops.sequence,
+          join: ops.join,
+          create: ops.create
+        };
       }
-      function renderIdentity() {
-        $('#identity-name').textContent = agent.selfName || 'unnamed';
-        $('#companion-agent-name').textContent = agent.selfName ? `${agent.selfName} · ${agent.concepts.length} concepts` : 'learning to notice';
-        $('#identity-sub').textContent = agent.selfName ? `Self-symbol authored at T+${pad(agent.selfBorn)}` : 'No self-symbol has formed';
-        $('#identity-glyph').innerHTML = agent.selfGlyph ? glyphSVG(agent.selfGlyph) : '<svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="3" stroke="currentColor"/><circle cx="14" cy="14" r="10" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="2 3"/></svg>';
+
+      if (typeof src.selfSymbol === 'string' && src.selfSymbol.trim()) {
+        agent.selfName = src.selfSymbol.trim();
+        agent.selfGlyph = safeGlyph(src.selfGlyph) || deterministicGlyphFromText(agent.selfName);
+        agent.selfBorn = Number.isFinite(src.selfBorn) ? Math.max(0, Math.round(src.selfBorn)) : tick;
       }
-      function renderAll() {
-        if (!agent) return;
-        $('#world-time').textContent = pad(tick);
-        $('#event-count').textContent = pad(totalEvents, 2);
-        $('#stat-concepts').textContent = agent.concepts.length;
-        $('#stat-memories').textContent = agent.memories.length;
-        $('#stat-laws').textContent = agent.beliefs.length;
-        $('#stat-artifacts').textContent = agent.artifacts.length;
-        $('#lexicon-count').textContent = agent.concepts.length;
-        $('#world-count').textContent = agent.beliefs.length + agent.artifacts.length;
-        $('#intent-raw').textContent = agent.goal ? agent.goal.raw : '·';
-        $('#intent-description').textContent = agent.goal ? agent.goal.description : 'No preference has formed. The agent is only capable of noticing.';
-        $('#energy-value').textContent = Math.round(agent.energy * 100) + '%';
-        $('#energy-bar').style.width = agent.energy * 100 + '%';
-        $('#novelty-value').textContent = Math.round(agent.novelty * 100) + '%';
-        $('#novelty-bar').style.width = agent.novelty * 100 + '%';
-        const coh = coherence();
-        $('#coherence-value').textContent = Math.round(coh * 100) + '%';
-        $('#coherence-bar').style.width = coh * 100 + '%';
-        renderIdentity(); renderMemories();
-        if (activeTab === 'lexicon') renderLexicon();
-        if (activeTab === 'laws') renderLaws();
+
+      agent.concepts = importedConcepts;
+      agent.beliefs = importedBeliefs;
+      agent.relationCounts = importedRelations;
+      agent.memories = [];
+      agent.lastConceptId = null;
+      agent.targetId = null;
+      agent.goal = null;
+      agent.lastGoalKey = '';
+
+      // Re-associate active signals in this world against the imported prototypes (zero PRNG calls).
+      for (const signal of signals) {
+        signal.conceptId = null;
+        if (signal.touched || !importedConcepts.length) continue;
+        let nearest = null;
+        let nearestDist = Infinity;
+        for (const c of importedConcepts) {
+          const d = distance(signal.features, c.prototype);
+          if (d < nearestDist) {
+            nearestDist = d;
+            nearest = c;
+          }
+        }
+        if (nearest && nearestDist <= 0.27) {
+          signal.conceptId = nearest.id;
+        }
       }
-      function renderMemories() {
-        const recent = agent.memories.slice(-5).reverse();
-        $('#memory-list').innerHTML = recent.length ? recent.map(m => {
-          const c = conceptById(m.conceptId);
-          return `<div class="memory"><span class="memory-dot ${m.effect > .025 ? 'positive' : m.effect < -.02 ? 'negative' : ''}"></span><span class="memory-name">${esc(c ? c.name : '?')}</span><span class="memory-meta">${m.effect >= 0 ? '+' : ''}${m.effect.toFixed(2)} · T+${pad(m.tick)}</span></div>`;
-        }).join('') : '<div class="empty-panel">No episodes have been stored.</div>';
+
+      pruneUnusedNames();
+      addLog(
+        `${agent.selfName || '·'} ${agent.operators.is} {${importedConcepts.length}/${importedBeliefs.length}}`,
+        `Imported ontology into world ${seed}: ${importedConcepts.length} concepts and ${importedBeliefs.length} beliefs active.`,
+        'system'
+      );
+
+      if (hooks.onOntologyImported) hooks.onOntologyImported();
+      if (hooks.onIdentity) hooks.onIdentity();
+      if (hooks.onRender) hooks.onRender();
+      if (hooks.onAutosave) hooks.onAutosave(false);
+      return { concepts: importedConcepts.length, beliefs: importedBeliefs.length, selfName: agent.selfName };
+    }
+
+    return {
+      constants: {
+        APP_VERSION,
+        RULESET_VERSION,
+        STORAGE_KEY,
+        SAVE_FORMAT,
+        SAVE_VERSION,
+        ONTOLOGY_FORMAT,
+        ONTOLOGY_VERSION,
+        MAX_CONCEPTS,
+        MAX_ARTIFACTS,
+        MAX_MEMORIES,
+        MAX_LOGS,
+        MAX_TRAIL,
+        MAX_FEATURE_HISTORY,
+        MAX_SIGNALS,
+        MAX_PARTICLES,
+        MAX_RIPPLES
+      },
+      get width() { return width; },
+      get height() { return height; },
+      get running() { return running; },
+      set running(val) { running = Boolean(val); },
+      get speed() { return speed; },
+      set speed(val) { if ([1, 2, 4, 8].includes(Number(val))) speed = Number(val); },
+      get logMode() { return logMode; },
+      set logMode(val) { if (['dual', 'agent', 'observer'].includes(val)) logMode = val; },
+      get seed() { return seed; },
+      get tick() { return tick; },
+      get totalEvents() { return totalEvents; },
+      get nextSpawn() { return nextSpawn; },
+      get rngState() { return rng.getState ? rng.getState() : null; },
+      get signals() { return signals; },
+      get artifacts() { return artifacts; },
+      get particles() { return particles; },
+      get ripples() { return ripples; },
+      get featureHistory() { return featureHistory; },
+      get agent() { return agent; },
+      get logs() { return logs; },
+      setHooks: (nextHooks) => Object.assign(hooks, nextHooks),
+      setDimensions,
+      resetWorld,
+      simulate,
+      steps: (count) => { for (let i = 0; i < count; i++) simulate(); },
+      perturb,
+      conceptById,
+      signalById,
+      coherence,
+      createSnapshot,
+      validSnapshot,
+      restoreSnapshot,
+      exportOntology,
+      validateOntology,
+      validOntology,
+      importOntology,
+      getState: () => ({
+        seed,
+        tick,
+        totalEvents,
+        nextSpawn,
+        rngState: rng.getState ? rng.getState() : null,
+        width,
+        height,
+        running,
+        speed,
+        counts: {
+          concepts: agent.concepts.length,
+          memories: agent.memories.length,
+          beliefs: agent.beliefs.length,
+          artifacts: artifacts.length,
+          totalArtifactsCreated: agent.totalArtifactsCreated || artifacts.length,
+          usedNames: agent.usedNames.size,
+          relationKeys: Object.keys(agent.relationCounts).length,
+          signals: signals.length,
+          particles: particles.length,
+          ripples: ripples.length,
+          logs: logs.length,
+          trail: agent.trail.length,
+          featureHistory: featureHistory.length
+        }
+      })
+    };
+  }
+
+  return {
+    APP_VERSION,
+    RULESET_VERSION,
+    STORAGE_KEY,
+    SAVE_FORMAT,
+    SAVE_VERSION,
+    ONTOLOGY_FORMAT,
+    ONTOLOGY_VERSION,
+    MAX_CONCEPTS,
+    MAX_ARTIFACTS,
+    MAX_MEMORIES,
+    MAX_LOGS,
+    MAX_TRAIL,
+    MAX_FEATURE_HISTORY,
+    MAX_SIGNALS,
+    MAX_PARTICLES,
+    MAX_RIPPLES,
+    clamp,
+    pad,
+    esc,
+    distance,
+    mulberry32,
+    safeGlyph,
+    glyphSVG,
+    validSnapshot,
+    validateOntology,
+    validOntology,
+    createEngine
+  };
+});
+  </script>
+  <script id="nul-inline-app">
+/**
+ * NUL Browser & Desktop Companion UI Controller
+ * Connects `NULCore` (`src/engine.js`) to Canvas 2D rendering, sticky Lab/Companion
+ * layouts, local storage autosave, portable snapshots, and portable ontology import/export.
+ */
+(() => {
+  'use strict';
+
+  const Core = window.NULCore;
+  if (!Core) throw new Error('NULCore (src/engine.js) must be loaded before src/app.js.');
+
+  const {
+    APP_VERSION,
+    RULESET_VERSION,
+    STORAGE_KEY,
+    clamp,
+    pad,
+    esc,
+    safeGlyph,
+    glyphSVG,
+    createEngine
+  } = Core;
+
+  const $ = (selector) => document.querySelector(selector);
+  const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+  const canvas = $('#world');
+  const ctx = canvas.getContext('2d');
+  const wrap = $('#canvas-wrap');
+
+  let dpr = 1;
+  let monoFont = 'monospace';
+  let activeTab = 'mind';
+  let accumulator = 0;
+  let previousTime = performance.now();
+  let toastTimer = null;
+  let inspectedTarget = null;
+
+  const engine = createEngine({ width: 800, height: 520 });
+
+  function refreshMonoFont() {
+    try {
+      const val = getComputedStyle(document.documentElement).getPropertyValue('--mono').trim();
+      monoFont = val || 'monospace';
+    } catch {
+      monoFont = 'monospace';
+    }
+  }
+
+  function resizeCanvas() {
+    const rect = wrap._mockWidth && wrap._mockHeight
+      ? { width: wrap._mockWidth, height: wrap._mockHeight }
+      : wrap.getBoundingClientRect();
+    const { width, height } = engine.setDimensions(rect.width, rect.height);
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    refreshMonoFont();
+  }
+
+  function showToast(message) {
+    const toast = $('#toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2300);
+  }
+
+  function renderLog() {
+    const log = $('#log');
+    const atBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 35;
+    log.className = `log mode-${engine.logMode}`;
+    log.innerHTML = engine.logs.map((entry) => (
+      `<div class="log-entry ${entry.kind === 'system' ? 'system' : ''}">` +
+      `<div class="log-time">T+${pad(entry.tick)}</div>` +
+      `<div><div class="log-raw">${esc(entry.raw)}</div><div class="log-translation">${esc(entry.translation)}</div></div>` +
+      `</div>`
+    )).join('');
+    if (atBottom || engine.logs.length < 4) log.scrollTop = log.scrollHeight;
+  }
+
+  function updateControls() {
+    $('#play-button').textContent = engine.running ? 'Pause' : 'Resume';
+    $('#run-label').textContent = engine.running ? 'Running' : 'Suspended';
+    $('#run-state').classList.toggle('paused', !engine.running);
+  }
+
+  function saveWorld(notify = false) {
+    if (!engine.agent || engine.rngState === null) return false;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(engine.createSnapshot()));
+      $('#save-indicator').textContent = `Autosaved locally · T+${pad(engine.tick)}`;
+      if (notify) showToast(`World saved in this browser at T+${pad(engine.tick)}.`);
+      return true;
+    } catch {
+      $('#save-indicator').textContent = 'Storage blocked · use snapshots';
+      if (notify) showToast('Browser storage is unavailable. Download a snapshot instead.');
+      return false;
+    }
+  }
+
+  function updateSaveUI() {
+    const restoreButton = $('#restore-button');
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      restoreButton.disabled = !raw;
+      if (!raw) {
+        $('#save-summary').textContent = 'No browser autosave exists yet.';
+        return;
       }
-      function renderLexicon() {
-        $('#concept-list').innerHTML = agent.concepts.length ? agent.concepts.map(c => {
-          const sign = c.valence > .04 ? 'positive' : c.valence < -.04 ? 'negative' : '';
+      const data = JSON.parse(raw);
+      if (!engine.validSnapshot(data)) throw new Error('Invalid save');
+      const when = new Date(data.savedAt).toLocaleString();
+      $('#save-summary').innerHTML = `<strong>T+${pad(data.tick)}</strong> · seed ${esc(data.seed)}<br>${esc(data.agent.concepts.length)} concepts · ${esc(data.artifacts.length)} artifacts<br>Saved ${esc(when)}`;
+    } catch {
+      restoreButton.disabled = true;
+      $('#save-summary').textContent = 'Browser storage is unavailable or the autosave is invalid. Portable snapshots still work.';
+    }
+  }
+
+  async function downloadJSON(data, filename, successMessage) {
+    try {
+      const contents = JSON.stringify(data, null, 2);
+      if (window.nulDesktop?.saveJSON) {
+        const result = await window.nulDesktop.saveJSON({ contents, suggestedName: filename });
+        if (result.saved) showToast(successMessage);
+        return;
+      }
+      const blob = new Blob([contents], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      showToast(successMessage);
+    } catch {
+      showToast('The file could not be saved.');
+    }
+  }
+
+  function downloadSnapshot() {
+    downloadJSON(
+      engine.createSnapshot(),
+      `nul-world-${engine.seed}-t${engine.tick}.json`,
+      'Complete world snapshot downloaded.'
+    );
+  }
+
+  function downloadOntology() {
+    downloadJSON(
+      engine.exportOntology(),
+      `nul-ontology-${engine.seed}-t${engine.tick}.json`,
+      'Ontology exported as JSON.'
+    );
+  }
+
+  // ---------- Observer rendering ----------
+  function drawGlyphCanvas(glyph, x, y, size, color, alpha = 1) {
+    const safe = safeGlyph(glyph);
+    if (!safe) return;
+    ctx.save();
+    ctx.translate(x - size / 2, y - size / 2);
+    ctx.scale(size / 28, size / 28);
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 1.1;
+    const path = new Path2D(safe.path);
+    ctx.stroke(path);
+    if (safe.dot) {
+      ctx.beginPath();
+      ctx.arc(safe.dot[0], safe.dot[1], 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawBackground() {
+    const { width, height, agent } = engine;
+    ctx.fillStyle = '#0d0f0c';
+    ctx.fillRect(0, 0, width, height);
+    const gradient = ctx.createRadialGradient(
+      agent ? agent.x : width / 2,
+      agent ? agent.y : height / 2,
+      0,
+      width / 2,
+      height / 2,
+      Math.max(width, height) * 0.7
+    );
+    gradient.addColorStop(0, 'rgba(47,56,35,.10)');
+    gradient.addColorStop(1, 'rgba(7,9,6,0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.strokeStyle = 'rgba(128,143,104,.035)';
+    ctx.lineWidth = 1;
+    const spacing = 80;
+    for (let x = spacing; x < width; x += spacing) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+    }
+    for (let y = spacing; y < height; y += spacing) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+    }
+  }
+
+  function drawSignal(signal) {
+    const c = signal.conceptId ? engine.conceptById(signal.conceptId) : null;
+    const pulse = (Math.sin(engine.tick * 0.075 + signal.phase) + 1) / 2;
+    const size = 2.6 + signal.features[1] * 3.4;
+    const alpha = signal.touched ? clamp((signal.life - engine.tick) / 32) : 0.55 + pulse * 0.35;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = c ? '#b5ca79' : '#89957a';
+    ctx.fillStyle = c ? '#d6fa72' : '#a6b198';
+    ctx.lineWidth = 0.8;
+    if (c) {
+      drawGlyphCanvas(c.glyph, signal.x, signal.y, 20 + signal.features[0] * 7, '#a9c466', alpha * 0.7);
+    } else {
+      ctx.beginPath(); ctx.arc(signal.x, signal.y, 6 + pulse * 3, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(signal.x, signal.y, size * 0.5, 0, Math.PI * 2); ctx.fill();
+    }
+    if (signal.id === engine.agent.targetId && !signal.touched) {
+      ctx.globalAlpha = 0.4;
+      ctx.setLineDash([2, 4]);
+      ctx.beginPath(); ctx.arc(signal.x, signal.y, 18 + pulse * 3, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.restore();
+  }
+
+  function drawArtifact(artifact) {
+    const pulse = Math.sin(engine.tick * 0.025 + artifact.phase) * 3;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(224,185,108,.17)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.arc(artifact.x, artifact.y, 28 + pulse, 0, Math.PI * 2); ctx.stroke();
+    ctx.setLineDash([2, 5]);
+    ctx.beginPath(); ctx.arc(artifact.x, artifact.y, 20 - pulse * 0.2, 0, Math.PI * 2); ctx.stroke();
+    ctx.setLineDash([]);
+    drawGlyphCanvas(artifact.glyph, artifact.x, artifact.y, 27, '#e0b96c', 0.88);
+    ctx.fillStyle = 'rgba(202,180,125,.65)';
+    ctx.font = '9px ' + monoFont;
+    ctx.textAlign = 'center';
+    ctx.fillText(artifact.name, artifact.x, artifact.y + 43);
+    ctx.restore();
+  }
+
+  function drawAgent() {
+    const agent = engine.agent;
+    if (agent.trail.length > 1) {
+      ctx.save();
+      ctx.lineWidth = 0.7;
+      for (let i = 1; i < agent.trail.length; i++) {
+        ctx.strokeStyle = `rgba(188,214,116,${(i / agent.trail.length) * 0.13})`;
+        ctx.beginPath();
+        ctx.moveTo(agent.trail[i - 1][0], agent.trail[i - 1][1]);
+        ctx.lineTo(agent.trail[i][0], agent.trail[i][1]);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.strokeStyle = 'rgba(170,193,115,.075)';
+    ctx.lineWidth = 0.7;
+    ctx.setLineDash([2, 7]);
+    ctx.beginPath(); ctx.arc(agent.x, agent.y, agent.senseRange, 0, Math.PI * 2); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    const target = engine.signalById(agent.targetId);
+    if (target) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(190,213,126,.10)';
+      ctx.setLineDash([2, 6]);
+      ctx.beginPath(); ctx.moveTo(agent.x, agent.y); ctx.lineTo(target.x, target.y); ctx.stroke();
+      ctx.restore();
+    }
+    const glow = ctx.createRadialGradient(agent.x, agent.y, 0, agent.x, agent.y, 28);
+    glow.addColorStop(0, 'rgba(214,250,114,.24)');
+    glow.addColorStop(1, 'rgba(214,250,114,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(agent.x, agent.y, 28, 0, Math.PI * 2); ctx.fill();
+
+    ctx.save();
+    ctx.translate(agent.x, agent.y);
+    ctx.rotate(engine.tick * 0.006);
+    ctx.strokeStyle = '#d6fa72';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(0, 0, 10, -0.4, 1.8); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, 10, 2.7, 4.8); ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle = '#e7ffc0';
+    ctx.beginPath(); ctx.arc(agent.x, agent.y, 2.5, 0, Math.PI * 2); ctx.fill();
+    if (agent.selfName) {
+      ctx.fillStyle = 'rgba(210,229,170,.7)';
+      ctx.font = '9px ' + monoFont;
+      ctx.textAlign = 'center';
+      ctx.fillText(agent.selfName, agent.x, agent.y - 20);
+    }
+  }
+
+  // ---------- Observer inspection (pure readout; never touches PRNG or agent state) ----------
+  function findEntityAt(x, y) {
+    const agent = engine.agent;
+    if (!agent) return null;
+    if (Math.hypot(agent.x - x, agent.y - y) <= 22) return { kind: 'agent', id: 0, entity: agent };
+    let best = null;
+    let bestDist = Infinity;
+    for (const artifact of engine.artifacts) {
+      const d = Math.hypot(artifact.x - x, artifact.y - y);
+      if (d <= 29 && d < bestDist) { bestDist = d; best = { kind: 'artifact', id: artifact.id, entity: artifact }; }
+    }
+    for (const signal of engine.signals) {
+      const d = Math.hypot(signal.x - x, signal.y - y);
+      if (d <= 21 && d < bestDist) { bestDist = d; best = { kind: 'signal', id: signal.id, entity: signal }; }
+    }
+    return best;
+  }
+
+  function resolveInspectedEntity() {
+    const agent = engine.agent;
+    if (!inspectedTarget || !agent) return null;
+    if (inspectedTarget.kind === 'agent') return { kind: 'agent', entity: agent };
+    if (inspectedTarget.kind === 'artifact') {
+      const item = engine.artifacts.find((a) => a.id === inspectedTarget.id);
+      return item ? { kind: 'artifact', entity: item } : null;
+    }
+    if (inspectedTarget.kind === 'signal') {
+      const item = engine.signals.find((s) => s.id === inspectedTarget.id);
+      return item ? { kind: 'signal', entity: item } : null;
+    }
+    return null;
+  }
+
+  function clearInspection() {
+    inspectedTarget = null;
+    const box = $('#entity-inspector');
+    if (box) box.hidden = true;
+  }
+
+  function renderInspector() {
+    const box = $('#entity-inspector');
+    if (!box) return;
+    const resolved = resolveInspectedEntity();
+    if (!resolved) {
+      inspectedTarget = null;
+      box.hidden = true;
+      return;
+    }
+    box.hidden = false;
+    const { kind, entity } = resolved;
+    const agent = engine.agent;
+    const defaultSvg = '<svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="5" stroke="currentColor"/></svg>';
+    if (kind === 'agent') {
+      $('#inspector-glyph').innerHTML = agent.selfGlyph ? glyphSVG(agent.selfGlyph) : defaultSvg;
+      $('#inspector-title').textContent = agent.selfName || 'unnamed locus';
+      $('#inspector-kicker').textContent = 'Persistent embodied agent';
+      $('#inspector-meta').innerHTML = `Energy ${Math.round(agent.energy * 100)}% · ${agent.interactions} contacts<br>${agent.concepts.length} concepts · ${agent.beliefs.length} beliefs · ${engine.artifacts.length} active creations`;
+    } else if (kind === 'artifact') {
+      const parents = entity.parents.map(engine.conceptById).filter(Boolean).map((c) => c.name).join(` ${agent.operators.join} `);
+      const vec = entity.features.map((v) => v.toFixed(2)).join(', ');
+      $('#inspector-glyph').innerHTML = glyphSVG(entity.glyph) || defaultSvg;
+      $('#inspector-title').textContent = entity.name;
+      $('#inspector-kicker').textContent = `Authored artifact #${pad(entity.id, 2)}`;
+      $('#inspector-meta').innerHTML = `Combined: ${esc(parents || '—')} · born T+${pad(entity.born)}<br>Vector [${esc(vec)}]`;
+    } else if (kind === 'signal') {
+      const c = entity.conceptId ? engine.conceptById(entity.conceptId) : null;
+      const vec = entity.features.map((v) => v.toFixed(2)).join(', ');
+      $('#inspector-glyph').innerHTML = c ? glyphSVG(c.glyph) : defaultSvg;
+      $('#inspector-title').textContent = c ? c.name : 'unclassified sensation';
+      $('#inspector-kicker').textContent = c ? `Assigned to symbol #${pad(c.id, 2)}` : `Unlabelled event #${pad(entity.id, 2)}`;
+      const valenceInfo = c ? `learned valence ${c.valence >= 0 ? '+' : ''}${c.valence.toFixed(2)}` : 'not yet perceived within sense range';
+      $('#inspector-meta').innerHTML = `${esc(valenceInfo)}<br>Raw 4D vector [${esc(vec)}]`;
+    }
+  }
+
+  function inspectAt(x, y) {
+    const hit = findEntityAt(x, y);
+    if (!hit) return null;
+    inspectedTarget = { kind: hit.kind, id: hit.id };
+    renderInspector();
+    return hit;
+  }
+
+  function renderWorld() {
+    if (!engine.agent) return;
+    drawBackground();
+    for (const ripple of engine.ripples) {
+      const progress = ripple.age / ripple.max;
+      const colors = { positive: '214,250,114', negative: '231,132,112', artifact: '232,189,114', concept: '190,218,124', event: '135,148,119' };
+      ctx.strokeStyle = `rgba(${colors[ripple.color] || colors.event},${(1 - progress) * 0.35})`;
+      ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.arc(ripple.x, ripple.y, 5 + progress * ripple.max, 0, Math.PI * 2); ctx.stroke();
+    }
+    engine.signals.forEach(drawSignal);
+    engine.artifacts.forEach(drawArtifact);
+    for (const p of engine.particles) {
+      const colors = { positive: '#d6fa72', negative: '#e78470', artifact: '#e8bd72', concept: '#b8d37a' };
+      ctx.globalAlpha = 1 - p.age / p.max;
+      ctx.fillStyle = colors[p.color] || '#a9b598';
+      ctx.fillRect(p.x, p.y, 1.2, 1.2);
+    }
+    ctx.globalAlpha = 1;
+    drawAgent();
+    const inspectedEntity = resolveInspectedEntity();
+    if (inspectedEntity) {
+      ctx.save();
+      ctx.strokeStyle = inspectedEntity.kind === 'artifact' ? 'rgba(232,189,114,.75)' : 'rgba(214,250,114,.75)';
+      ctx.lineWidth = 1.1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.arc(inspectedEntity.entity.x, inspectedEntity.entity.y, inspectedEntity.kind === 'artifact' ? 33 : 23, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function renderIdentity() {
+    const agent = engine.agent;
+    $('#identity-name').textContent = agent.selfName || 'unnamed';
+    $('#companion-agent-name').textContent = agent.selfName ? `${agent.selfName} · ${agent.concepts.length} concepts` : 'learning to notice';
+    $('#identity-sub').textContent = agent.selfName ? `Self-symbol authored at T+${pad(agent.selfBorn)}` : 'No self-symbol has formed';
+    $('#identity-glyph').innerHTML = agent.selfGlyph
+      ? glyphSVG(agent.selfGlyph)
+      : '<svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="3" stroke="currentColor"/><circle cx="14" cy="14" r="10" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="2 3"/></svg>';
+  }
+
+  function renderMemories() {
+    const recent = engine.agent.memories.slice(-5).reverse();
+    $('#memory-list').innerHTML = recent.length
+      ? recent.map((m) => {
+          const c = engine.conceptById(m.conceptId);
+          return `<div class="memory"><span class="memory-dot ${m.effect > 0.025 ? 'positive' : m.effect < -0.02 ? 'negative' : ''}"></span><span class="memory-name">${esc(c ? c.name : '?')}</span><span class="memory-meta">${m.effect >= 0 ? '+' : ''}${m.effect.toFixed(2)} · T+${pad(m.tick)}</span></div>`;
+        }).join('')
+      : '<div class="empty-panel">No episodes have been stored.</div>';
+  }
+
+  function renderLexicon() {
+    const concepts = engine.agent.concepts;
+    $('#concept-list').innerHTML = concepts.length
+      ? concepts.map((c) => {
+          const sign = c.valence > 0.04 ? 'positive' : c.valence < -0.04 ? 'negative' : '';
           return `<article class="concept-card"><div class="concept-top">${glyphSVG(c.glyph, 'concept-glyph')}<div><div class="concept-name">${esc(c.name)}</div><div class="concept-id">SELF-AUTHORED SYMBOL ${pad(c.id, 2)}</div></div><div class="concept-valence ${sign}">${c.valence >= 0 ? '+' : ''}${c.valence.toFixed(2)}</div></div><div class="concept-bottom"><span>${c.seen} sensations · ${c.contacts} contacts</span><span>born T+${pad(c.born)}</span></div></article>`;
-        }).join('') : '<div class="empty-panel"><svg viewBox="0 0 28 28" fill="none"><path d="M5 7h18M5 14h12M5 21h16" stroke="currentColor"/></svg><br>The symbol table is empty.<br>No word has been necessary yet.</div>';
-      }
-      function renderLaws() {
-        $('#law-list').innerHTML = agent.beliefs.length ? agent.beliefs.map(b => {
-          const from = conceptById(b.fromId), to = conceptById(b.toId);
+        }).join('')
+      : '<div class="empty-panel"><svg viewBox="0 0 28 28" fill="none"><path d="M5 7h18M5 14h12M5 21h16" stroke="currentColor"/></svg><br>The symbol table is empty.<br>No word has been necessary yet.</div>';
+  }
+
+  function renderLaws() {
+    const agent = engine.agent;
+    $('#law-list').innerHTML = agent.beliefs.length
+      ? agent.beliefs.map((b) => {
+          const from = engine.conceptById(b.fromId);
+          const to = engine.conceptById(b.toId);
           if (!from || !to) return '';
           return `<article class="law-card"><div class="law-raw">${esc(from.name)} ${esc(agent.operators.sequence)} ${esc(to.name)}</div><div class="law-translation">“${esc(from.name)}” preceded “${esc(to.name)}” in ${b.count} remembered transitions.</div><div class="law-confidence"><span>${Math.round(b.confidence * 100)}%</span><div class="bar"><i style="width:${b.confidence * 100}%"></i></div><span>fallible</span></div></article>`;
-        }).join('') : '<div class="empty-panel">No sequence has repeated enough<br>to become a belief.</div>';
-        $('#artifact-list').innerHTML = agent.artifacts.length ? agent.artifacts.map(a => {
-          const parents = a.parents.map(conceptById).filter(Boolean).map(c => c.name).join(` ${agent.operators.join} `);
+        }).join('')
+      : '<div class="empty-panel">No sequence has repeated enough<br>to become a belief.</div>';
+
+    $('#artifact-list').innerHTML = engine.artifacts.length
+      ? engine.artifacts.map((a) => {
+          const parents = a.parents.map(engine.conceptById).filter(Boolean).map((c) => c.name).join(` ${agent.operators.join} `);
           return `<article class="artifact-card">${glyphSVG(a.glyph)}<div><div class="artifact-name">${esc(a.name)}</div><div class="artifact-parents">${esc(parents)} · born T+${pad(a.born)}</div></div></article>`;
-        }).join('') : '<div class="empty-panel">The agent has not yet combined<br>any of its own concepts.</div>';
-      }
-      function updateControls() {
-        $('#play-button').textContent = running ? 'Pause' : 'Resume';
-        $('#run-label').textContent = running ? 'Running' : 'Suspended';
-        $('#run-state').classList.toggle('paused', !running);
-      }
-      function showToast(message) {
-        const toast = $('#toast'); toast.textContent = message; toast.classList.add('show');
-        clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 2100);
-      }
+        }).join('')
+      : '<div class="empty-panel">The agent has not yet combined<br>any of its own concepts.</div>';
+  }
 
-      function frame(now) {
-        const elapsed = Math.min(80, now - previousTime); previousTime = now;
-        if (running) {
-          accumulator += elapsed * speed;
-          const tickDuration = 1000 / 12;
-          let safety = 0;
-          while (accumulator >= tickDuration && safety < 30) { simulate(); accumulator -= tickDuration; safety++; }
-        }
-        renderWorld();
-        requestAnimationFrame(frame);
-      }
+  function renderAll() {
+    const agent = engine.agent;
+    if (!agent) return;
+    $('#empty-state').classList.toggle('hidden', engine.totalEvents > 0 || engine.artifacts.length > 0);
+    $('#world-time').textContent = pad(engine.tick);
+    $('#event-count').textContent = pad(engine.totalEvents, 2);
+    $('#stat-concepts').textContent = agent.concepts.length;
+    $('#stat-memories').textContent = agent.memories.length;
+    $('#stat-laws').textContent = agent.beliefs.length;
+    const totalCreated = agent.totalArtifactsCreated || engine.artifacts.length;
+    $('#stat-artifacts').textContent = totalCreated;
+    $('#stat-artifacts').title = totalCreated > engine.artifacts.length
+      ? `${engine.artifacts.length} active in world (capped at ${Core.MAX_ARTIFACTS}) · ${totalCreated} authored total`
+      : `${engine.artifacts.length} active in world`;
+    $('#lexicon-count').textContent = agent.concepts.length;
+    $('#world-count').textContent = agent.beliefs.length + engine.artifacts.length;
+    $('#intent-raw').textContent = agent.goal ? agent.goal.raw : '·';
+    $('#intent-description').textContent = agent.goal ? agent.goal.description : 'No preference has formed. The agent is only capable of noticing.';
+    $('#energy-value').textContent = Math.round(agent.energy * 100) + '%';
+    $('#energy-bar').style.width = agent.energy * 100 + '%';
+    $('#novelty-value').textContent = Math.round(agent.novelty * 100) + '%';
+    $('#novelty-bar').style.width = agent.novelty * 100 + '%';
+    const coh = engine.coherence();
+    $('#coherence-value').textContent = Math.round(coh * 100) + '%';
+    $('#coherence-bar').style.width = coh * 100 + '%';
+    renderIdentity();
+    renderMemories();
+    renderInspector();
+    if (activeTab === 'lexicon') renderLexicon();
+    if (activeTab === 'laws') renderLaws();
+  }
 
-      // ---------- Controls ----------
-      let desktopMode = 'lab', desktopPinned = true;
-      function applyDesktopMode(next) {
-        desktopMode = next.mode === 'companion' ? 'companion' : 'lab';
-        desktopPinned = next.pinned !== false;
-        document.body.classList.toggle('companion-mode', desktopMode === 'companion');
-        $('#companion-pin').classList.toggle('active', desktopPinned);
-        $('#companion-pin').textContent = desktopPinned ? 'Pinned' : 'Pin';
-        $('#companion-pin').setAttribute('aria-pressed', String(desktopPinned));
-        $('#companion-button').textContent = desktopMode === 'companion' ? 'Lab view' : 'Companion';
-        setTimeout(() => { resizeCanvas(); renderAll(); saveWorld(false); }, 120);
-      }
-      async function requestMode(nextMode) {
-        if (window.nulDesktop?.setMode) applyDesktopMode(await window.nulDesktop.setMode(nextMode));
-        else applyDesktopMode({ mode: nextMode, pinned: desktopPinned });
-      }
-      if (window.nulDesktop?.isDesktop) {
-        document.body.classList.add('desktop-runtime');
-        window.nulDesktop.onModeChanged(applyDesktopMode);
-      }
-      $('#companion-button').addEventListener('click', () => requestMode(desktopMode === 'companion' ? 'lab' : 'companion'));
-      $('#companion-expand').addEventListener('click', () => requestMode('lab'));
-      $('#companion-pin').addEventListener('click', async () => {
-        if (window.nulDesktop?.setPinned) applyDesktopMode(await window.nulDesktop.setPinned(!desktopPinned));
-      });
-      $('#companion-hide').addEventListener('click', () => window.nulDesktop?.windowControl('hide'));
-      $('#window-minimize').addEventListener('click', () => window.nulDesktop?.windowControl('minimize'));
-      $('#window-maximize').addEventListener('click', () => window.nulDesktop?.windowControl('maximize'));
-      $('#window-hide').addEventListener('click', () => window.nulDesktop?.windowControl('hide'));
+  function syncSeedUI() {
+    $('#seed-readout').textContent = engine.seed;
+    const seedInput = $('#seed-input');
+    if (seedInput) seedInput.value = String(engine.seed);
+  }
 
-      function toggleRunning() { running = !running; accumulator = 0; updateControls(); renderAll(); saveWorld(false); }
-      $('#play-button').addEventListener('click', toggleRunning);
-      $('#step-button').addEventListener('click', () => { running = false; simulate(); updateControls(); renderAll(); saveWorld(false); });
-      $$('.speed-button').forEach(button => button.addEventListener('click', () => {
-        speed = Number(button.dataset.speed);
-        $$('.speed-button').forEach(b => b.classList.toggle('active', b === button));
-      }));
-      function perturb(at) {
-        spawnSignal({ x: at ? at.x : undefined, y: at ? at.y : undefined, novel: true, manual: true, near: true });
-        renderAll(); saveWorld(false);
+  engine.setHooks({
+    onLog: () => renderLog(),
+    onIdentity: () => renderIdentity(),
+    onRender: () => renderAll(),
+    onAutosave: (notify) => saveWorld(notify),
+    onControls: () => updateControls(),
+    onWorldReset: () => {
+      accumulator = 0;
+      inspectedTarget = null;
+      $('#empty-state').classList.remove('hidden');
+      syncSeedUI();
+    },
+    onSnapshotRestored: () => {
+      accumulator = 0;
+      previousTime = performance.now();
+      inspectedTarget = null;
+      syncSeedUI();
+      $('#empty-state').classList.toggle('hidden', engine.totalEvents > 0 || engine.artifacts.length > 0);
+      $$('.speed-button').forEach((button) => button.classList.toggle('active', Number(button.dataset.speed) === engine.speed));
+      $$('.log-mode').forEach((button) => button.classList.toggle('active', button.dataset.logmode === engine.logMode));
+    },
+    onOntologyImported: () => {
+      inspectedTarget = null;
+    }
+  });
+
+  function frame(now) {
+    const elapsed = Math.min(80, now - previousTime);
+    previousTime = now;
+    if (engine.running) {
+      accumulator += elapsed * engine.speed;
+      const tickDuration = 1000 / 12;
+      let safety = 0;
+      while (accumulator >= tickDuration && safety < 30) {
+        engine.simulate();
+        accumulator -= tickDuration;
+        safety++;
       }
-      $('#perturb-button').addEventListener('click', () => perturb());
-      canvas.addEventListener('click', event => {
-        const rect = canvas.getBoundingClientRect();
-        perturb({ x: event.clientX - rect.left, y: event.clientY - rect.top });
-      });
-      function replaceWorld(newSeed) {
-        if (agent && agent.interactions > 0 && !confirm('Replace the current world and its autosave? Download a snapshot first if you want to keep it.')) return;
-        resetWorld(newSeed);
+    }
+    renderWorld();
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- Controls & Desktop / Iframe Mode ----------
+  let desktopMode = 'lab';
+  let desktopPinned = true;
+
+  function applyDesktopMode(next) {
+    desktopMode = next.mode === 'companion' ? 'companion' : 'lab';
+    desktopPinned = next.pinned !== false;
+    document.body.classList.toggle('companion-mode', desktopMode === 'companion');
+    $('#companion-pin').classList.toggle('active', desktopPinned);
+    $('#companion-pin').textContent = desktopPinned ? 'Pinned' : 'Pin';
+    $('#companion-pin').setAttribute('aria-pressed', String(desktopPinned));
+    $('#companion-button').textContent = desktopMode === 'companion' ? 'Lab view' : 'Companion';
+    setTimeout(() => { resizeCanvas(); renderAll(); saveWorld(false); }, 120);
+  }
+
+  async function requestMode(nextMode) {
+    if (window.nulDesktop?.setMode) applyDesktopMode(await window.nulDesktop.setMode(nextMode));
+    else applyDesktopMode({ mode: nextMode, pinned: desktopPinned });
+  }
+
+  if (window.nulDesktop?.isDesktop) {
+    document.body.classList.add('desktop-runtime');
+    window.nulDesktop.onModeChanged(applyDesktopMode);
+  } else {
+    try {
+      const params = new URLSearchParams(window.location?.search || '');
+      if (params.get('mode') === 'companion') {
+        applyDesktopMode({ mode: 'companion', pinned: desktopPinned });
       }
-      $('#reset-button').addEventListener('click', () => replaceWorld(false));
-      $('#new-world-button').addEventListener('click', () => replaceWorld(true));
-      $$('.tab').forEach(button => button.addEventListener('click', () => {
-        activeTab = button.dataset.tab;
-        $$('.tab').forEach(b => b.classList.toggle('active', b === button));
-        $$('.tab-pane').forEach(pane => pane.hidden = pane.id !== `pane-${activeTab}`);
-        if (activeTab === 'lexicon') renderLexicon();
-        if (activeTab === 'laws') renderLaws();
-      }));
-      $$('.log-mode').forEach(button => button.addEventListener('click', () => {
-        logMode = button.dataset.logmode;
-        $$('.log-mode').forEach(b => b.classList.toggle('active', b === button));
-        renderLog();
-      }));
-      const dialog = $('#method-dialog');
-      $('#method-button').addEventListener('click', () => dialog.showModal());
-      $('#close-method').addEventListener('click', () => dialog.close());
-      dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
-      $('#export-button').addEventListener('click', () => {
-        const data = {
-          experiment: `NUL v${APP_VERSION} / bootstrap 0.1`,
-          appVersion: APP_VERSION,
-          ruleset: RULESET_VERSION,
-          architecture: 'Non-LLM symbolic artificial life; seeded rules + vector similarity + episodic memory',
-          seed, tick, observerNote: 'Names and categories below were generated during this run. Observer metadata is not supplied to the agent.',
-          agent: {
-            selfSymbol: agent.selfName, energy: agent.energy, currentIntent: agent.goal,
-            concepts: agent.concepts, beliefs: agent.beliefs, artifacts: agent.artifacts,
-            episodicMemory: agent.memories, generatedOperators: agent.operators
-          },
-          unclassifiedEvents: signals.filter(s => !s.conceptId).map(s => ({ id: s.id, born: s.born, features: s.features }))
-        };
-        downloadJSON(data, `nul-ontology-${seed}-t${tick}.json`, 'Ontology exported as JSON.');
-      });
-      const saveDialog = $('#save-dialog');
-      $('#save-button').addEventListener('click', () => { updateSaveUI(); saveDialog.showModal(); });
-      $('#close-save').addEventListener('click', () => saveDialog.close());
-      saveDialog.addEventListener('click', event => { if (event.target === saveDialog) saveDialog.close(); });
-      $('#save-now-button').addEventListener('click', () => { saveWorld(true); updateSaveUI(); });
-      $('#restore-button').addEventListener('click', () => {
-        try {
-          const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-          restoreSnapshot(data);
-          $('#save-indicator').textContent = `Restored autosave · T+${pad(tick)}`;
-          saveDialog.close(); showToast(`Autosave restored at T+${pad(tick)}.`);
-        } catch (error) { showToast('The autosave could not be restored.'); updateSaveUI(); }
-      });
-      $('#download-snapshot-button').addEventListener('click', downloadSnapshot);
-      $('#import-snapshot-button').addEventListener('click', () => $('#import-file').click());
-      $('#import-file').addEventListener('change', async event => {
-        const file = event.target.files[0];
-        if (!file) return;
-        try {
-          if (file.size > 12 * 1024 * 1024) throw new Error('Snapshot is too large.');
-          const data = JSON.parse(await file.text());
-          restoreSnapshot(data);
-          saveWorld(false);
-          $('#save-indicator').textContent = `Imported snapshot · T+${pad(tick)}`;
-          saveDialog.close(); showToast(`World snapshot restored at T+${pad(tick)}.`);
-        } catch (error) { showToast(error.message || 'The snapshot could not be imported.'); }
-        event.target.value = '';
-      });
-      window.addEventListener('pagehide', () => saveWorld(false));
-      document.addEventListener('visibilitychange', () => { if (document.hidden) saveWorld(false); });
-      document.addEventListener('keydown', event => {
-        if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.code === 'KeyC' && !dialog.open && !saveDialog.open) {
-          event.preventDefault(); requestMode(desktopMode === 'companion' ? 'lab' : 'companion'); return;
-        }
-        if (dialog.open || saveDialog.open || ['INPUT','TEXTAREA','BUTTON'].includes(document.activeElement.tagName)) return;
-        if (event.code === 'Space') { event.preventDefault(); toggleRunning(); }
-        if (event.key.toLowerCase() === 'n') perturb();
-      });
-      ['#brand-version', '#controls-version', '#footer-version'].forEach(selector => {
-        const el = $(selector);
-        if (el) el.textContent = `v${APP_VERSION}`;
-      });
-      const companionTitle = $('#companion-version-title');
-      if (companionTitle) companionTitle.title = `NUL v${APP_VERSION} · ${RULESET_VERSION}`;
-      new ResizeObserver(() => resizeCanvas()).observe(wrap);
-      resizeCanvas();
-      let restored = false;
+    } catch {}
+  }
+
+  $('#companion-button').addEventListener('click', () => requestMode(desktopMode === 'companion' ? 'lab' : 'companion'));
+  $('#companion-expand').addEventListener('click', () => requestMode('lab'));
+  $('#companion-pin').addEventListener('click', async () => {
+    if (window.nulDesktop?.setPinned) applyDesktopMode(await window.nulDesktop.setPinned(!desktopPinned));
+  });
+  $('#companion-hide').addEventListener('click', () => window.nulDesktop?.windowControl('hide'));
+  $('#window-minimize').addEventListener('click', () => window.nulDesktop?.windowControl('minimize'));
+  $('#window-maximize').addEventListener('click', () => window.nulDesktop?.windowControl('maximize'));
+  $('#window-hide').addEventListener('click', () => window.nulDesktop?.windowControl('hide'));
+
+  function toggleRunning() {
+    engine.running = !engine.running;
+    accumulator = 0;
+    updateControls();
+    renderAll();
+    saveWorld(false);
+  }
+
+  $('#play-button').addEventListener('click', toggleRunning);
+  $('#step-button').addEventListener('click', () => {
+    engine.running = false;
+    engine.simulate();
+    updateControls();
+    renderAll();
+    saveWorld(false);
+  });
+
+  $$('.speed-button').forEach((button) => button.addEventListener('click', () => {
+    engine.speed = Number(button.dataset.speed);
+    $$('.speed-button').forEach((b) => b.classList.toggle('active', b === button));
+  }));
+
+  function triggerPerturb(at) {
+    engine.perturb(at);
+    $('#empty-state').classList.add('hidden');
+  }
+
+  $('#perturb-button').addEventListener('click', () => triggerPerturb());
+  $('#inspector-close').addEventListener('click', () => clearInspection());
+
+  canvas.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const hit = findEntityAt(event.clientX - rect.left, event.clientY - rect.top);
+    canvas.style.cursor = hit && !event.shiftKey ? 'pointer' : 'crosshair';
+  });
+
+  canvas.addEventListener('click', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    if (!event.shiftKey && inspectAt(x, y)) return;
+    triggerPerturb({ x, y });
+  });
+
+  function replaceWorld(newSeed, explicitSeed = null) {
+    if (engine.agent && engine.agent.interactions > 0 && !confirm('Replace the current world and its autosave? Download a snapshot first if you want to keep it.')) {
+      return false;
+    }
+    engine.resetWorld(newSeed, explicitSeed);
+    return true;
+  }
+
+  $('#reset-button').addEventListener('click', () => replaceWorld(false));
+  $('#new-world-button').addEventListener('click', () => replaceWorld(true));
+
+  $$('.tab').forEach((button) => button.addEventListener('click', () => {
+    activeTab = button.dataset.tab;
+    $$('.tab').forEach((b) => b.classList.toggle('active', b === button));
+    $$('.tab-pane').forEach((pane) => { pane.hidden = pane.id !== `pane-${activeTab}`; });
+    if (activeTab === 'lexicon') renderLexicon();
+    if (activeTab === 'laws') renderLaws();
+  }));
+
+  $$('.log-mode').forEach((button) => button.addEventListener('click', () => {
+    engine.logMode = button.dataset.logmode;
+    $$('.log-mode').forEach((b) => b.classList.toggle('active', b === button));
+    renderLog();
+  }));
+
+  const dialog = $('#method-dialog');
+  $('#method-button').addEventListener('click', () => dialog.showModal());
+  $('#close-method').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+
+  const saveDialog = $('#save-dialog');
+  function openSaveDialog(focusSeed = false) {
+    updateSaveUI();
+    const seedInput = $('#seed-input');
+    if (seedInput) seedInput.value = String(engine.seed);
+    saveDialog.showModal();
+    if (focusSeed && seedInput) {
+      seedInput.focus();
+      seedInput.select();
+    }
+  }
+
+  $('#save-button').addEventListener('click', () => openSaveDialog(false));
+  $('#seed-badge').addEventListener('click', () => openSaveDialog(true));
+  $('#close-save').addEventListener('click', () => saveDialog.close());
+  saveDialog.addEventListener('click', (event) => { if (event.target === saveDialog) saveDialog.close(); });
+
+  $('#export-button').addEventListener('click', downloadOntology);
+  const saveExportOntologyBtn = $('#save-export-ontology-button');
+  if (saveExportOntologyBtn) saveExportOntologyBtn.addEventListener('click', downloadOntology);
+
+  const importOntologyInput = $('#import-ontology-file');
+  const triggerOntologyFilePicker = () => { if (importOntologyInput) importOntologyInput.click(); };
+  const importOntologyBtn = $('#import-ontology-button');
+  if (importOntologyBtn) importOntologyBtn.addEventListener('click', triggerOntologyFilePicker);
+  const saveImportOntologyBtn = $('#save-import-ontology-button');
+  if (saveImportOntologyBtn) saveImportOntologyBtn.addEventListener('click', triggerOntologyFilePicker);
+
+  if (importOntologyInput) {
+    importOntologyInput.addEventListener('change', async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) restored = restoreSnapshot(JSON.parse(raw));
-      } catch (error) { restored = false; }
-      if (!restored) resetWorld(true);
-      else {
-        $('#save-indicator').textContent = `Restored autosave · T+${pad(tick)}`;
-        setTimeout(() => showToast(`Welcome back. World restored at T+${pad(tick)}.`), 250);
+        if (file.size > 8 * 1024 * 1024) throw new Error('Ontology file is too large.');
+        const data = JSON.parse(await file.text());
+        const summary = engine.importOntology(data);
+        $('#save-indicator').textContent = `Imported ontology · T+${pad(engine.tick)}`;
+        if (saveDialog.open) saveDialog.close();
+        showToast(`Imported ontology (${summary.concepts} concepts, ${summary.beliefs} beliefs).`);
+      } catch (error) {
+        showToast(error.message || 'The ontology could not be imported.');
       }
-      updateSaveUI(); requestAnimationFrame(frame);
-    })();
+      event.target.value = '';
+    });
+  }
+
+  $('#apply-seed-button').addEventListener('click', () => {
+    const parsed = Number.parseInt($('#seed-input').value, 10);
+    if (!Number.isInteger(parsed) || parsed < 1 || parsed > 2147483647) {
+      showToast('Enter an integer seed between 1 and 2147483647.');
+      return;
+    }
+    if (replaceWorld(true, parsed)) {
+      saveDialog.close();
+      showToast(`Started deterministic world with seed ${parsed}.`);
+    }
+  });
+
+  $('#seed-input').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      $('#apply-seed-button').click();
+    }
+  });
+
+  $('#copy-seed-button').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(String(engine.seed));
+      showToast(`Copied seed ${engine.seed} to clipboard.`);
+    } catch {
+      $('#seed-input').select();
+      showToast(`Seed: ${engine.seed}`);
+    }
+  });
+
+  $('#save-now-button').addEventListener('click', () => { saveWorld(true); updateSaveUI(); });
+  $('#restore-button').addEventListener('click', () => {
+    try {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      engine.restoreSnapshot(data);
+      $('#save-indicator').textContent = `Restored autosave · T+${pad(engine.tick)}`;
+      saveDialog.close();
+      showToast(`Autosave restored at T+${pad(engine.tick)}.`);
+    } catch {
+      showToast('The autosave could not be restored.');
+      updateSaveUI();
+    }
+  });
+
+  $('#download-snapshot-button').addEventListener('click', downloadSnapshot);
+  $('#import-snapshot-button').addEventListener('click', () => $('#import-file').click());
+  $('#import-file').addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    try {
+      if (file.size > 12 * 1024 * 1024) throw new Error('Snapshot is too large.');
+      const data = JSON.parse(await file.text());
+      engine.restoreSnapshot(data);
+      saveWorld(false);
+      $('#save-indicator').textContent = `Imported snapshot · T+${pad(engine.tick)}`;
+      saveDialog.close();
+      showToast(`World snapshot restored at T+${pad(engine.tick)}.`);
+    } catch (error) {
+      showToast(error.message || 'The snapshot could not be imported.');
+    }
+    event.target.value = '';
+  });
+
+  window.addEventListener('pagehide', () => saveWorld(false));
+  document.addEventListener('visibilitychange', () => { if (document.hidden) saveWorld(false); });
+  document.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.code === 'KeyC' && !dialog.open && !saveDialog.open) {
+      event.preventDefault();
+      requestMode(desktopMode === 'companion' ? 'lab' : 'companion');
+      return;
+    }
+    if (dialog.open || saveDialog.open || ['INPUT', 'TEXTAREA', 'BUTTON'].includes(document.activeElement.tagName)) return;
+    if (event.code === 'Escape' && inspectedTarget) { clearInspection(); return; }
+    if (event.code === 'Space') { event.preventDefault(); toggleRunning(); }
+    if (event.key.toLowerCase() === 'n') triggerPerturb();
+  });
+
+  ['#brand-version', '#controls-version', '#footer-version'].forEach((selector) => {
+    const el = $(selector);
+    if (el) el.textContent = `v${APP_VERSION}`;
+  });
+  const companionTitle = $('#companion-version-title');
+  if (companionTitle) companionTitle.title = `NUL v${APP_VERSION} · ${RULESET_VERSION}`;
+
+  new ResizeObserver(() => resizeCanvas()).observe(wrap);
+  resizeCanvas();
+
+  let restored = false;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) restored = engine.restoreSnapshot(JSON.parse(raw));
+  } catch {
+    restored = false;
+  }
+  if (!restored) engine.resetWorld(true);
+  else {
+    $('#save-indicator').textContent = `Restored autosave · T+${pad(engine.tick)}`;
+    setTimeout(() => showToast(`Welcome back. World restored at T+${pad(engine.tick)}.`), 250);
+  }
+  updateSaveUI();
+
+  if (window.__NUL_ENABLE_TEST_HOOK__) {
+    window.__NUL_LAB__ = {
+      step: () => engine.simulate(),
+      steps: (count) => engine.steps(count),
+      resetWorld: (newSeed = true, explicitSeed = null) => engine.resetWorld(newSeed, explicitSeed),
+      perturb: (at) => triggerPerturb(at),
+      inspectAt: (x, y) => inspectAt(x, y),
+      clearInspection: () => clearInspection(),
+      createSnapshot: () => engine.createSnapshot(),
+      restoreSnapshot: (data) => engine.restoreSnapshot(data),
+      validSnapshot: (data) => engine.validSnapshot(data),
+      exportOntology: () => engine.exportOntology(),
+      validateOntology: (data) => engine.validateOntology(data),
+      validOntology: (data) => engine.validOntology(data),
+      importOntology: (data) => engine.importOntology(data),
+      saveWorld: (notify = false) => saveWorld(notify),
+      requestMode: (mode) => requestMode(mode),
+      getDesktopMode: () => desktopMode,
+      setViewport: (w, h) => {
+        wrap._mockWidth = w;
+        wrap._mockHeight = h;
+        resizeCanvas();
+      },
+      getState: () => ({
+        ...engine.getState(),
+        inspectedTarget,
+        desktopMode
+      }),
+      constants: engine.constants
+    };
+  }
+
+  requestAnimationFrame(frame);
+})();
   </script>
 </body>
 </html>

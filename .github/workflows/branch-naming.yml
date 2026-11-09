@@ -6,7 +6,9 @@ on:
   push:
     branches-ignore:
       - main
+      - Main
       - Initial-reference
+      - v1
     tags:
       - "v*"
 

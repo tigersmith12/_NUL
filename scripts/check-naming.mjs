@@ -18,17 +18,18 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { syncStandaloneHtml } from './sync-standalone-html.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 export const WORK_TYPES = ['feat', 'fix', 'perf', 'refactor', 'docs', 'test', 'build', 'chore', 'exp'];
 export const PR_TYPES = [...WORK_TYPES, 'release'];
-export const TRUNK_BRANCHES = new Set(['main', 'Initial-reference']);
+export const TRUNK_BRANCHES = new Set(['main', 'Main', 'Initial-reference']);
 
 const SEMVER_STRICT_RE = /^(\d+)\.(\d+)\.(\d+)$/;
 const DISPLAY_VERSION_RE = /^v?(\d+)\.(\d{2,})\.(\d{3,})$/;
 
-const LINE_BRANCH_RE = /^v(\d+)\.(\d{2,})$/;
+const LINE_BRANCH_RE = /^v(\d+)(?:\.(\d{2,}))?$/;
 const WORK_BRANCH_RE = new RegExp(
   `^(${WORK_TYPES.join('|')})\\/v(\\d+)\\.(\\d{2,})\\.(xxx|\\d{3,})-([a-z0-9]+(?:-[a-z0-9]+)*)$`
 );
@@ -124,15 +125,18 @@ export function validateVersionSync(errors, rootDir = ROOT) {
     }
   }
 
+  const enginePath = path.join(rootDir, 'src', 'engine.js');
   const htmlPath = path.join(rootDir, 'index.html');
   const html = fs.readFileSync(htmlPath, 'utf8');
+  const versionSource = fs.existsSync(enginePath) ? fs.readFileSync(enginePath, 'utf8') : html;
+  const versionSourceLabel = fs.existsSync(enginePath) ? 'src/engine.js' : 'index.html';
 
-  const constMatch = html.match(/const\s+APP_VERSION\s*=\s*['"]([^'"]+)['"]/);
+  const constMatch = versionSource.match(/const\s+APP_VERSION\s*=\s*['"]([^'"]+)['"]/);
   if (!constMatch) {
-    errors.push('index.html is missing `const APP_VERSION = "..."`.');
+    errors.push(`${versionSourceLabel} is missing \`const APP_VERSION = "..."\`.`);
   } else if (constMatch[1] !== parsed.display) {
     errors.push(
-      `Version mismatch: package.json "${parsed.semver}" expects APP_VERSION="${parsed.display}" in index.html, found "${constMatch[1]}".`
+      `Version mismatch: package.json "${parsed.semver}" expects APP_VERSION="${parsed.display}" in ${versionSourceLabel}, found "${constMatch[1]}".`
     );
   }
 
@@ -158,14 +162,14 @@ export function classifyBranch(branchName) {
   const lineMatch = branchName.match(LINE_BRANCH_RE);
   if (lineMatch) {
     const major = Number(lineMatch[1]);
-    const minor = Number(lineMatch[2]);
+    const minor = lineMatch[2] !== undefined ? Number(lineMatch[2]) : null;
     return {
       valid: true,
       kind: 'version-line',
       branch: branchName,
       major,
       minor,
-      line: formatLineVersion(major, minor)
+      line: minor !== null ? formatLineVersion(major, minor) : `v${major}`
     };
   }
 
@@ -374,6 +378,16 @@ export function writeRepoVersion(targetVersion, rootDir = ROOT) {
     fs.writeFileSync(lockPath, JSON.stringify(lock, null, 2) + '\n');
   }
 
+  const enginePath = path.join(rootDir, 'src', 'engine.js');
+  if (fs.existsSync(enginePath)) {
+    let engineCode = fs.readFileSync(enginePath, 'utf8');
+    engineCode = engineCode.replace(
+      /const\s+APP_VERSION\s*=\s*['"][^'"]+['"]/,
+      `const APP_VERSION = '${parsed.display}'`
+    );
+    fs.writeFileSync(enginePath, engineCode);
+  }
+
   const htmlPath = path.join(rootDir, 'index.html');
   let html = fs.readFileSync(htmlPath, 'utf8');
   html = html.replace(
@@ -391,6 +405,14 @@ export function writeRepoVersion(targetVersion, rootDir = ROOT) {
     `$1v${parsed.display}$2`
   );
   fs.writeFileSync(htmlPath, html);
+
+  if (
+    fs.existsSync(path.join(rootDir, 'src', 'styles.css')) &&
+    fs.existsSync(path.join(rootDir, 'src', 'engine.js')) &&
+    fs.existsSync(path.join(rootDir, 'src', 'app.js'))
+  ) {
+    syncStandaloneHtml(rootDir);
+  }
 
   return parsed;
 }

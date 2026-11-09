@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, screen, dialog } = require('electron');
+const { execFileSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
@@ -11,11 +12,173 @@ if (lowMemory) {
   app.disableHardwareAcceleration();
   app.commandLine.appendSwitch('disable-background-networking');
   app.commandLine.appendSwitch('disable-component-update');
-  app.commandLine.appendSwitch('disable-features', 'MediaRouter,OptimizationHints,Translate');
+  app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
+  app.commandLine.appendSwitch('disk-cache-size', '1048576');
+  app.commandLine.appendSwitch('renderer-process-limit', '1');
+  app.commandLine.appendSwitch('js-flags', '--max-old-space-size=64 --optimize-for-size');
+  app.commandLine.appendSwitch('disable-features', 'MediaRouter,OptimizationHints,Translate,SpellcheckServiceInit,BackForwardCache');
 }
 
-const singleInstance = app.requestSingleInstanceLock();
-if (!singleInstance) app.quit();
+const CURRENT_VERSION = app.getVersion();
+const instanceMarkerPath = () => path.join(app.getPath('userData'), 'running-instance.json');
+
+function sleepSync(ms) {
+  try {
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+  } catch {
+    const end = Date.now() + ms;
+    while (Date.now() < end) { /* spin fallback */ }
+  }
+}
+
+function isPidAlive(pid) {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function readRunningInstance() {
+  try {
+    return JSON.parse(fs.readFileSync(instanceMarkerPath(), 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function writeRunningInstance() {
+  try {
+    fs.mkdirSync(path.dirname(instanceMarkerPath()), { recursive: true });
+    fs.writeFileSync(instanceMarkerPath(), JSON.stringify({
+      version: CURRENT_VERSION,
+      pid: process.pid,
+      startedAt: new Date().toISOString()
+    }, null, 2));
+  } catch {}
+}
+
+function clearRunningInstance() {
+  try {
+    const current = readRunningInstance();
+    if (!current || current.pid === process.pid) {
+      fs.unlinkSync(instanceMarkerPath());
+    }
+  } catch {}
+}
+
+/**
+ * Terminates stale background tray instances from an older release (e.g. v0.1.2 hidden in
+ * the Windows system tray) so launching a newer portable/installed build starts the new
+ * version instead of waking the old tray process via `requestSingleInstanceLock()`.
+ */
+function terminateStaleCompanionProcesses(recordedPid) {
+  const selfPid = process.pid;
+  const parentPid = process.ppid;
+
+  if (Number.isInteger(recordedPid) && recordedPid > 0 && recordedPid !== selfPid && recordedPid !== parentPid) {
+    try { process.kill(recordedPid, 'SIGTERM'); } catch {}
+  }
+
+  if (process.platform === 'win32') {
+    let killedViaCim = false;
+    try {
+      const psScript = [
+        `$self = ${selfPid}; $parent = ${parentPid};`,
+        `Get-CimInstance Win32_Process -Filter "Name = 'nul-companion.exe'" |`,
+        `Where-Object { $_.ProcessId -ne $self -and $_.ProcessId -ne $parent -and $_.ParentProcessId -ne $self } |`,
+        `ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }`
+      ].join(' ');
+      execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-Command', psScript], {
+        stdio: 'ignore',
+        timeout: 4000,
+        windowsHide: true
+      });
+      killedViaCim = true;
+    } catch {}
+
+    if (!killedViaCim) {
+      try {
+        const csv = execFileSync('tasklist.exe', ['/FO', 'CSV', '/NH', '/FI', 'IMAGENAME eq nul-companion.exe'], {
+          encoding: 'utf8',
+          stdio: ['ignore', 'pipe', 'ignore'],
+          timeout: 3000,
+          windowsHide: true
+        });
+        for (const line of csv.split(/\r?\n/)) {
+          const match = line.match(/^"[^"]+","(\d+)"/);
+          if (!match) continue;
+          const pid = Number.parseInt(match[1], 10);
+          if (pid > 0 && pid !== selfPid && pid !== parentPid) {
+            try {
+              execFileSync('taskkill.exe', ['/F', '/PID', String(pid)], {
+                stdio: 'ignore',
+                timeout: 2000,
+                windowsHide: true
+              });
+            } catch {}
+          }
+        }
+      } catch {}
+    }
+  } else {
+    try {
+      const out = execFileSync('ps', ['-eo', 'pid=,ppid=,comm='], {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+        timeout: 2000
+      });
+      for (const line of out.split('\n')) {
+        const m = line.trim().match(/^(\d+)\s+(\d+)\s+(.+)$/);
+        if (!m) continue;
+        const pid = Number.parseInt(m[1], 10);
+        const ppid = Number.parseInt(m[2], 10);
+        const comm = m[3].trim();
+        if (
+          (comm === 'nul-companion' || comm === 'NUL Companion') &&
+          pid !== selfPid &&
+          pid !== parentPid &&
+          ppid !== selfPid
+        ) {
+          try { process.kill(pid, 'SIGTERM'); } catch {}
+        }
+      }
+    } catch {}
+  }
+}
+
+function acquireVersionedSingleInstanceLock() {
+  const existing = readRunningInstance();
+  const sameVersionAlive = existing && existing.version === CURRENT_VERSION && isPidAlive(existing.pid);
+
+  // If no marker exists (e.g. v0.1.2 hidden in tray) or version differs, close stale tray process BEFORE
+  // calling requestSingleInstanceLock so we never wake up an older version's window.
+  if (!sameVersionAlive) {
+    terminateStaleCompanionProcesses(existing?.pid);
+  }
+
+  let acquired = app.requestSingleInstanceLock({ version: CURRENT_VERSION, pid: process.pid });
+  if (!acquired && !sameVersionAlive) {
+    for (let attempt = 0; attempt < 20 && !acquired; attempt++) {
+      sleepSync(100);
+      terminateStaleCompanionProcesses(existing?.pid);
+      acquired = app.requestSingleInstanceLock({ version: CURRENT_VERSION, pid: process.pid });
+    }
+  }
+
+  if (acquired) {
+    writeRunningInstance();
+  }
+  return acquired;
+}
+
+const singleInstance = acquireVersionedSingleInstanceLock();
+if (!singleInstance) {
+  app.quit();
+  process.exit(0);
+}
 
 let mainWindow = null;
 let tray = null;
@@ -120,6 +283,8 @@ function showWindow() {
 function rebuildTrayMenu() {
   if (!tray || tray.isDestroyed()) return;
   tray.setContextMenu(Menu.buildFromTemplate([
+    { label: `NUL Companion v${CURRENT_VERSION}`, enabled: false },
+    { type: 'separator' },
     { label: 'Show NUL', click: showWindow },
     { label: 'Full lab', type: 'radio', checked: mode === 'lab', click: () => { showWindow(); applyMode('lab'); } },
     { label: 'Desktop companion', type: 'radio', checked: mode === 'companion', click: () => { showWindow(); applyMode('companion'); } },
@@ -137,7 +302,7 @@ function createTray() {
   try {
     const image = nativeImage.createFromPath(path.join(__dirname, '..', 'assets', 'icon.png')).resize({ width: 18, height: 18 });
     tray = new Tray(image);
-    tray.setToolTip('NUL — autonomous desktop companion');
+    tray.setToolTip(`NUL Companion v${CURRENT_VERSION} — autonomous desktop companion`);
     tray.on('click', showWindow);
     rebuildTrayMenu();
   } catch (error) { console.warn('Tray unavailable:', error.message); }
@@ -150,6 +315,7 @@ function createWindow() {
   const initial = boundedRectangle(state.labBounds, 1360, 940, 860, 620);
   mainWindow = new BrowserWindow({
     ...initial,
+    title: `NUL Companion v${CURRENT_VERSION}`,
     minWidth: 860,
     minHeight: 620,
     frame: false,
@@ -162,7 +328,8 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: true
+      sandbox: true,
+      spellcheck: false
     }
   });
 
@@ -216,7 +383,16 @@ app.whenReady().then(() => {
   createTray();
   app.on('activate', showWindow);
 });
-app.on('second-instance', showWindow);
+app.on('second-instance', (_event, _argv, _cwd, additionalData) => {
+  if (additionalData && additionalData.version && additionalData.version !== CURRENT_VERSION) {
+    quitting = true;
+    clearRunningInstance();
+    app.releaseSingleInstanceLock();
+    app.quit();
+    return;
+  }
+  showWindow();
+});
 app.on('before-quit', () => {
   quitting = true;
   if (stateTimer) {
@@ -231,4 +407,7 @@ app.on('before-quit', () => {
     } catch {}
   }
 });
-app.on('will-quit', () => { if (tray && !tray.isDestroyed()) tray.destroy(); });
+app.on('will-quit', () => {
+  clearRunningInstance();
+  if (tray && !tray.isDestroyed()) tray.destroy();
+});
