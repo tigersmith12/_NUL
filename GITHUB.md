@@ -48,10 +48,10 @@ NUL tracks three distinct version numbers, and maps the padded display version c
 
 | Identifier | Current Value | Where It Lives | Purpose |
 | --- | --- | --- | --- |
-| **App / PR version** | `v0.01.003` (`0.1.3` in `package.json`) | `src/engine.js` (`APP_VERSION = '0.01.003'`), `index.html` (header, controls, footer), `package.json` (`"0.1.3"`), PR titles, Git tags | Tracks the `<M>.<MM>.<PPP>` release line and sequential PR number (`0.1.3` ↔ `v0.01.003` keeps `npm`/`electron-builder` SemVer valid without leading-zero errors) |
-| **Simulation ruleset** | `BOOTSTRAP/0.1` | `src/engine.js` (`RULESET_VERSION`), `index.html` (controls bar, footer), ontology exports | Changes **only** when deterministic world/agent simulation mechanics change |
-| **Snapshot schema** | `1` (`nul-resumable-world`) | `src/engine.js` (`SAVE_VERSION = 1`, `STORAGE_KEY = 'nul.world.autosave.v1'`) | Changes **only** on breaking saved-world JSON schema updates |
-| **Ontology schema** | `1` (`nul-ontology`) | `src/engine.js` (`ONTOLOGY_FORMAT = 'nul-ontology'`, `ONTOLOGY_VERSION = 1`) | Portable agent-mind JSON schema for `Export ontology` / `Import ontology` (backward-compatible with `v0.01.002` exports) |
+| **App / PR version** | `v0.02.001` (`0.2.1` in `package.json`) | `src/engine.js` (`APP_VERSION = '0.02.001'`), `index.html` (header, controls, footer), `package.json` (`"0.2.1"`), PR titles, Git tags | Tracks the `<M>.<MM>.<PPP>` release line and sequential PR number (`0.2.1` ↔ `v0.02.001` keeps `npm`/`electron-builder` SemVer valid without leading-zero errors) |
+| **Simulation ruleset** | `SUBSTRATE/0.2` | `src/engine.js` (`RULESET_VERSION`), `index.html` (controls bar, footer), ontology exports | Changes **only** when deterministic world/agent simulation mechanics change (`v0.01.003` finalized `BOOTSTRAP/0.1`) |
+| **Snapshot schema** | `2` (`nul-resumable-world`) | `src/engine.js` (`SAVE_VERSION = 2`, `STORAGE_KEY = 'nul.world.autosave.v2'`) | Lossless IEEE-754 base64 `Float32Array` medium + agent state schema |
+| **Ontology schema** | `2` (`nul-ontology`) | `src/engine.js` (`ONTOLOGY_FORMAT = 'nul-ontology'`, `ONTOLOGY_VERSION = 2`) | Portable agent-mind JSON schema (`concepts`, `beliefs`, `macros`, `operators`; backward-compatible with `v1` & `v0.01.002` exports) |
 
 ---
 

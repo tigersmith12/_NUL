@@ -1,15 +1,14 @@
 #!/usr/bin/env node
 /**
  * NUL Single-Process Terminal Companion (< 50 MB total RAM)
- * Imports the pure DOM-free `src/engine.js` core directly in a single Node process
- * with zero Chromium/VM/DOM overhead, reading and writing portable `nul-resumable-world`
- * v1 JSON snapshots and `nul-ontology` v1 files interchangeable with Browser & Electron.
+ * Imports the pure DOM-free `src/engine.js` (SUBSTRATE/0.2) core directly in a single
+ * Node process with zero Chromium/VM/DOM overhead, reading and writing lossless
+ * `nul-resumable-world` v2 JSON snapshots and `nul-ontology` v1/v2 files.
  *
  * Usage:
  *   npm run start:tui
  *   node scripts/companion-tui.mjs --save ./my-world.json
- *   node scripts/companion-tui.mjs --once --ticks 600 --seed 424242
- *   node scripts/companion-tui.mjs --once --seed 999 --import-ontology ./mind.json --ticks 300
+ *   node scripts/companion-tui.mjs --once --ticks 600 --seed 424242 --ontology-mode none
  */
 
 import fs from 'node:fs';
@@ -20,7 +19,8 @@ import NULCore from '../src/engine.js';
 
 function parseArgs(argv) {
   const opts = {
-    savePath: path.join(os.homedir(), '.nul-companion-world.json'),
+    savePath: path.join(os.homedir(), '.nul-companion-world-v2.json'),
+    ontologyMode: 'emergent',
     importOntology: null,
     exportOntology: null,
     seed: null,
@@ -30,6 +30,7 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--save' && argv[i + 1]) opts.savePath = path.resolve(argv[++i]);
+    else if (a === '--ontology-mode' && argv[i + 1]) opts.ontologyMode = argv[++i];
     else if (a === '--import-ontology' && argv[i + 1]) opts.importOntology = path.resolve(argv[++i]);
     else if (a === '--export-ontology' && argv[i + 1]) opts.exportOntology = path.resolve(argv[++i]);
     else if (a === '--seed' && argv[i + 1]) opts.seed = Number.parseInt(argv[++i], 10);
@@ -40,7 +41,7 @@ function parseArgs(argv) {
 }
 
 function renderAsciiBox(snapshot, savePath, paused, speed) {
-  const cols = 44;
+  const cols = 46;
   const rows = 13;
   const grid = Array.from({ length: rows }, () => Array(cols).fill(' '));
   const sx = cols / snapshot.world.width;
@@ -51,29 +52,33 @@ function renderAsciiBox(snapshot, savePath, paused, speed) {
     grid[gy][gx] = ch;
   };
 
-  for (const s of snapshot.signals) place(s.x, s.y, s.conceptId ? '◦' : '·');
+  const lociList = snapshot.loci || snapshot.signals || [];
+  for (const s of lociList) place(s.x, s.y, s.conceptId ? '◦' : (s.sculpted > 0.22 ? '▫' : '·'));
+  for (const m of (snapshot.agent.marks || [])) place(m.x, m.y, '×');
   for (const a of snapshot.artifacts) place(a.x, a.y, '✦');
   place(snapshot.agent.x, snapshot.agent.y, '◉');
 
   const memMb = (process.memoryUsage().rss / (1024 * 1024)).toFixed(1);
-  const selfLabel = snapshot.agent.selfName || 'unnamed';
+  const ontMode = snapshot.agent.ontologyMode || 'emergent';
+  const selfLabel = ontMode === 'none' ? 'ontology-free' : (snapshot.agent.selfName || 'pre-symbolic');
   const energyPct = Math.round(snapshot.agent.energy * 100);
   const intent = snapshot.agent.goal ? snapshot.agent.goal.raw : '·';
   const recentLog = snapshot.logs[snapshot.logs.length - 1];
+  const macrosCount = (snapshot.agent.macros || []).length;
 
   const lines = [
     `┌${'─'.repeat(cols)}┐`,
-    `│ NUL v${snapshot.appVersion || NULCore.APP_VERSION} · T+${String(snapshot.tick).padStart(5, '0')} · ${paused ? 'PAUSED' : `${speed}x`}`.padEnd(cols + 1) + '│',
-    `│ Agent: ${selfLabel} · Energy ${energyPct}% · RAM ${memMb} MB`.padEnd(cols + 1) + '│',
+    `│ NUL v${snapshot.appVersion || NULCore.APP_VERSION} · T+${String(snapshot.tick).padStart(5, '0')} · ${paused ? 'PAUSED' : `${speed}x`} · ${ontMode}`.padEnd(cols + 1) + '│',
+    `│ Agent: ${selfLabel} · Viab ${energyPct}% · RAM ${memMb} MB`.padEnd(cols + 1) + '│',
     `├${'─'.repeat(cols)}┤`,
     ...grid.map((row) => `│${row.join('')}│`),
     `├${'─'.repeat(cols)}┤`,
-    `│ Concepts ${snapshot.agent.concepts.length}/8 · Beliefs ${snapshot.agent.beliefs.length} · Artifacts ${snapshot.artifacts.length}/24`.padEnd(cols + 1) + '│',
+    `│ Concepts ${snapshot.agent.concepts.length}/8 · Ops ${macrosCount}/8 · Structures ${snapshot.artifacts.length}/24`.padEnd(cols + 1) + '│',
     `│ Intent : ${intent.slice(0, cols - 10)}`.padEnd(cols + 1) + '│',
     `│ Stream : ${(recentLog ? recentLog.raw : '·').slice(0, cols - 10)}`.padEnd(cols + 1) + '│',
     `└${'─'.repeat(cols)}┘`,
     `Save: ${savePath}`,
-    `Keys: [Space] pause  [N] perturb  [1/2/4/8] speed  [S] save  [O] ontology  [Q] quit`
+    `Keys: [Space] pause  [N] perturb  [M] ontology-mode  [1/2/4/8] speed  [S] save  [O] ontology  [Q] quit`
   ];
   return lines.join('\n');
 }
@@ -104,7 +109,7 @@ function main() {
 
   let restored = false;
   if (opts.seed && Number.isInteger(opts.seed)) {
-    engine.resetWorld(true, opts.seed);
+    engine.resetWorld(true, opts.seed, { ontologyMode: opts.ontologyMode });
   } else if (fs.existsSync(opts.savePath)) {
     try {
       const data = JSON.parse(fs.readFileSync(opts.savePath, 'utf8'));
@@ -113,7 +118,7 @@ function main() {
       restored = false;
     }
   }
-  if (!restored && !opts.seed) engine.resetWorld(true);
+  if (!restored && !opts.seed) engine.resetWorld(true, null, { ontologyMode: opts.ontologyMode });
 
   if (opts.importOntology) {
     const rawOnt = JSON.parse(fs.readFileSync(opts.importOntology, 'utf8'));
@@ -144,6 +149,10 @@ function main() {
       }
       if (key.name === 'space') paused = !paused;
       if (key.name === 'n') engine.perturb();
+      if (key.name === 'm') {
+        const nextMode = engine.agent.ontologyMode === 'none' ? 'emergent' : 'none';
+        engine.setOntologyMode(nextMode);
+      }
       if (key.name === 's') saveSnapshotFile(engine, opts.savePath);
       if (key.name === 'o') {
         const ontPath = opts.exportOntology || opts.savePath.replace(/\.json$/i, '') + '.ontology.json';

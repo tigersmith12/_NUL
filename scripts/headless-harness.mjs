@@ -10,6 +10,7 @@ import vm from 'node:vm';
 import crypto from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
+import NULCore from '../src/engine.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -142,6 +143,12 @@ export function createHeadlessLab(options = {}) {
   const logModes = ['dual', 'agent', 'observer'].map(m =>
     makeElement(`logmode-${m}`, 'BUTTON', { logmode: m }, { width, height })
   );
+  const lensModes = ['combined', 'agent', 'medium'].map(l =>
+    makeElement(`lens-${l}`, 'BUTTON', { lens: l }, { width, height })
+  );
+  const ontModes = ['emergent', 'none', 'imported'].map(m =>
+    makeElement(`ontmode-${m}`, 'BUTTON', { ontmode: m }, { width, height })
+  );
   const tabs = ['mind', 'lexicon', 'laws'].map(t =>
     makeElement(`tab-${t}`, 'BUTTON', { tab: t }, { width, height })
   );
@@ -187,6 +194,8 @@ export function createHeadlessLab(options = {}) {
     querySelectorAll(selector) {
       if (selector === '.speed-button') return speedButtons;
       if (selector === '.log-mode') return logModes;
+      if (selector === '.lens-mode') return lensModes;
+      if (selector === '.ont-mode') return ontModes;
       if (selector === '.tab') return tabs;
       if (selector === '.tab-pane') return tabPanes;
       return [];
@@ -210,6 +219,7 @@ export function createHeadlessLab(options = {}) {
     ResizeObserver: class { observe() {} disconnect() {} },
     Path2D: class { constructor() {} },
     Blob,
+    structuredClone,
     URL: { createObjectURL: () => 'blob:nul', revokeObjectURL: () => {} },
     URLSearchParams,
     getComputedStyle: () => ({ getPropertyValue: () => 'monospace' }),
@@ -218,17 +228,14 @@ export function createHeadlessLab(options = {}) {
     clearTimeout: () => {},
     confirm: () => confirmResult,
     addEventListener() {},
-    Math, Number, String, Boolean, Array, Object, Set, Map, JSON, Date, Error, RegExp, Uint32Array, Infinity, NaN,
-    parseInt, parseFloat, isFinite
+    NULCore
   };
   windowObj.window = windowObj;
   windowObj.globalThis = windowObj;
 
   const context = vm.createContext(windowObj);
-  const enginePath = path.join(ROOT, 'src', 'engine.js');
   const appPath = path.join(ROOT, 'src', 'app.js');
-  if (fs.existsSync(enginePath) && fs.existsSync(appPath)) {
-    new vm.Script(fs.readFileSync(enginePath, 'utf8'), { filename: 'src/engine.js' }).runInContext(context);
+  if (fs.existsSync(appPath)) {
     new vm.Script(fs.readFileSync(appPath, 'utf8'), { filename: 'src/app.js' }).runInContext(context);
   } else {
     const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
