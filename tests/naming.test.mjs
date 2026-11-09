@@ -39,6 +39,7 @@ test('version formatting maps SemVer <-> zero-padded v<M>.<MM>.<PPP>', () => {
 test('branch classifier accepts v<M>.<MM>.xxx working branches, v<M>.<MM> line branches, trunk, and arena/*', () => {
   const validBranches = [
     'main',
+    'Main',
     'Initial-reference',
     'v1',
     'v2',
