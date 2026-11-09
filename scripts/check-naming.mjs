@@ -24,7 +24,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 export const WORK_TYPES = ['feat', 'fix', 'perf', 'refactor', 'docs', 'test', 'build', 'chore', 'exp'];
 export const PR_TYPES = [...WORK_TYPES, 'release'];
-export const TRUNK_BRANCHES = new Set(['main', 'Initial-reference']);
+export const TRUNK_BRANCHES = new Set(['main', 'Main', 'Initial-reference']);
 
 const SEMVER_STRICT_RE = /^(\d+)\.(\d+)\.(\d+)$/;
 const DISPLAY_VERSION_RE = /^v?(\d+)\.(\d{2,})\.(\d{3,})$/;
