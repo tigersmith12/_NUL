@@ -15,9 +15,10 @@ test('exportOntology -> importOntology transplants mind into a fresh world witho
 
   const exported = JSON.parse(JSON.stringify(donor.lab.exportOntology()));
   assert.equal(exported.format, 'nul-ontology');
-  assert.equal(exported.version, 1);
+  assert.equal(exported.version, 2);
   assert.equal(donor.lab.validOntology(exported), true);
   assert.ok(exported.agent.concepts.length > 0);
+  assert.ok(exported.agent.macros.length > 0);
   assert.ok(exported.agent.selfSymbol);
 
   const recipient = createHeadlessLab({ width: 800, height: 520 });

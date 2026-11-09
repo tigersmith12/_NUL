@@ -130,6 +130,6 @@ jobs:
           else
             gh release create "$TAG_NAME" dist/*.exe dist/*.AppImage dist/*.dmg dist/*.zip dist/*.html dist/SHA256SUMS.txt \
               --target "${{ github.sha }}" \
-              --title "NUL $TAG_NAME — Final v0.01 Release (Win / Linux / macOS + Standalone HTML)" \
+              --title "NUL $TAG_NAME — Standalone Desktop Companion (Win / Linux / macOS + Standalone HTML)" \
               --notes "Offline, non-LLM symbolic artificial-life lab & desktop companion ($TAG_NAME). Includes standalone single-file HTML (NUL-Standalone-v${APP_VER}.html), Windows (.exe portable + NSIS installer), Linux (.AppImage), macOS (.dmg + .zip), and SHA256SUMS.txt. Automatically closes any older background tray instance on launch. Recipients do not need Node, npm, or internet access."
           fi

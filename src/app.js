@@ -1,7 +1,8 @@
 /**
- * NUL Browser & Desktop Companion UI Controller
- * Connects `NULCore` (`src/engine.js`) to Canvas 2D rendering, sticky Lab/Companion
- * layouts, local storage autosave, portable snapshots, and portable ontology import/export.
+ * NUL Browser & Desktop Companion UI Controller (v0.02.001 · SUBSTRATE/0.2)
+ * Connects `NULCore` (`src/engine.js`) to multi-lens Canvas 2D rendering
+ * (`Combined` / `Agent` / `Medium`), ontology mode controls (`Emergent` / `None` / `Imported`),
+ * inspectable causal cycle diagnostics, local storage autosave, and portable snapshots/ontologies.
  */
 (() => {
   'use strict';
@@ -13,6 +14,9 @@
     APP_VERSION,
     RULESET_VERSION,
     STORAGE_KEY,
+    GRID_W,
+    GRID_H,
+    CHANNELS,
     clamp,
     pad,
     esc,
@@ -86,6 +90,10 @@
     $('#play-button').textContent = engine.running ? 'Pause' : 'Resume';
     $('#run-label').textContent = engine.running ? 'Running' : 'Suspended';
     $('#run-state').classList.toggle('paused', !engine.running);
+    $$('.lens-mode').forEach((btn) => btn.classList.toggle('active', btn.dataset.lens === engine.canvasLens));
+    if (engine.agent) {
+      $$('.ont-mode').forEach((btn) => btn.classList.toggle('active', btn.dataset.ontmode === engine.agent.ontologyMode));
+    }
   }
 
   function saveWorld(notify = false) {
@@ -114,7 +122,7 @@
       const data = JSON.parse(raw);
       if (!engine.validSnapshot(data)) throw new Error('Invalid save');
       const when = new Date(data.savedAt).toLocaleString();
-      $('#save-summary').innerHTML = `<strong>T+${pad(data.tick)}</strong> · seed ${esc(data.seed)}<br>${esc(data.agent.concepts.length)} concepts · ${esc(data.artifacts.length)} artifacts<br>Saved ${esc(when)}`;
+      $('#save-summary').innerHTML = `<strong>T+${pad(data.tick)}</strong> · seed ${esc(data.seed)} · ontology: ${esc(data.agent.ontologyMode || 'emergent')}<br>${esc(data.agent.concepts.length)} concepts · ${esc((data.agent.macros || []).length)} operators · ${esc(data.artifacts.length)} structures<br>Saved ${esc(when)}`;
     } catch {
       restoreButton.disabled = true;
       $('#save-summary').textContent = 'Browser storage is unavailable or the autosave is invalid. Portable snapshots still work.';
@@ -157,7 +165,7 @@
     );
   }
 
-  // ---------- Observer rendering ----------
+  // ---------- Multi-Lens Canvas Rendering (Zero Pre-Drawn Observer Grid) ----------
   function drawGlyphCanvas(glyph, x, y, size, color, alpha = 1) {
     const safe = safeGlyph(glyph);
     if (!safe) return;
@@ -178,73 +186,172 @@
     ctx.restore();
   }
 
-  function drawBackground() {
-    const { width, height, agent } = engine;
-    ctx.fillStyle = '#0d0f0c';
-    ctx.fillRect(0, 0, width, height);
-    const gradient = ctx.createRadialGradient(
-      agent ? agent.x : width / 2,
-      agent ? agent.y : height / 2,
-      0,
-      width / 2,
-      height / 2,
-      Math.max(width, height) * 0.7
-    );
-    gradient.addColorStop(0, 'rgba(47,56,35,.10)');
-    gradient.addColorStop(1, 'rgba(7,9,6,0)');
-    ctx.fillStyle = gradient;
+  function drawSubstrateMedium(lens) {
+    const { width, height, field, imprint } = engine;
+    ctx.fillStyle = lens === 'agent' ? '#080a07' : '#0b0e0a';
     ctx.fillRect(0, 0, width, height);
 
-    ctx.strokeStyle = 'rgba(128,143,104,.035)';
-    ctx.lineWidth = 1;
-    const spacing = 80;
-    for (let x = spacing; x < width; x += spacing) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
-    }
-    for (let y = spacing; y < height; y += spacing) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+    const cellW = width / GRID_W;
+    const cellH = height / GRID_H;
+
+    for (let gy = 0; gy < GRID_H; gy++) {
+      const py = gy * cellH;
+      const row = gy * GRID_W;
+      for (let gx = 0; gx < GRID_W; gx++) {
+        const cell = row + gx;
+        const imp = imprint[cell];
+        const base = cell * CHANNELS;
+        const u0 = field[base];
+        const u1 = field[base + 1];
+        const u2 = field[base + 2];
+        const u3 = field[base + 3];
+
+        if (lens === 'agent') {
+          // Purely what the agent itself has physically imprinted/sculpted on the canvas!
+          if (imp < 0.035) continue;
+          const slowTone = clamp((u2 + u3 + 2) * 0.25, 0, 1);
+          const rCol = Math.round(145 + slowTone * 82);
+          const gCol = Math.round(175 + (1 - slowTone) * 55);
+          const bCol = Math.round(88 + slowTone * 24);
+          ctx.fillStyle = `rgba(${rCol},${gCol},${bCol},${(imp * 0.34).toFixed(3)})`;
+          ctx.fillRect(gx * cellW, py, cellW + 0.6, cellH + 0.6);
+          continue;
+        }
+
+        const fastAmp = Math.sqrt((u0 * u0 + u1 * u1) * 0.5);
+        const slowAmp = Math.sqrt((u2 * u2 + u3 * u3) * 0.5);
+        const total = fastAmp * 0.6 + slowAmp * 0.75 + imp * 0.5;
+        if (total < (lens === 'medium' ? 0.05 : 0.085)) continue;
+
+        const alphaScale = lens === 'medium' ? 0.38 : 0.16;
+        const rCol = Math.round(78 + slowAmp * 145 + imp * 40);
+        const gCol = Math.round(108 + fastAmp * 118 + imp * 35);
+        const bCol = Math.round(72 + Math.max(0, -u0) * 85);
+        const alpha = clamp(total * alphaScale, 0, 0.42);
+        ctx.fillStyle = `rgba(${rCol},${gCol},${bCol},${alpha.toFixed(3)})`;
+        ctx.fillRect(gx * cellW, py, cellW + 0.6, cellH + 0.6);
+
+        // In raw Medium lens, also render subtle fast-channel vector ticks
+        if (lens === 'medium' && fastAmp > 0.16 && (gx + gy) % 2 === 0) {
+          const cx = (gx + 0.5) * cellW;
+          const cy = py + 0.5 * cellH;
+          ctx.strokeStyle = 'rgba(198,224,148,.28)';
+          ctx.lineWidth = 0.75;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + u0 * cellW * 0.55, cy + u1 * cellH * 0.55);
+          ctx.stroke();
+        }
+      }
     }
   }
 
-  function drawSignal(signal) {
-    const c = signal.conceptId ? engine.conceptById(signal.conceptId) : null;
-    const pulse = (Math.sin(engine.tick * 0.075 + signal.phase) + 1) / 2;
-    const size = 2.6 + signal.features[1] * 3.4;
-    const alpha = signal.touched ? clamp((signal.life - engine.tick) / 32) : 0.55 + pulse * 0.35;
+  function drawSegmentedLocus(locus) {
+    const c = locus.conceptId ? engine.conceptById(locus.conceptId) : null;
+    const pulse = (Math.sin(engine.tick * 0.065 + (locus.phase || 0)) + 1) * 0.5;
+    const contour = Array.isArray(locus.contour) && locus.contour.length === 8 ? locus.contour : [18, 18, 18, 18, 18, 18, 18, 18];
+    const isSculpted = (locus.sculpted || 0) > 0.22;
+
     ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.strokeStyle = c ? '#b5ca79' : '#89957a';
-    ctx.fillStyle = c ? '#d6fa72' : '#a6b198';
-    ctx.lineWidth = 0.8;
-    if (c) {
-      drawGlyphCanvas(c.glyph, signal.x, signal.y, 20 + signal.features[0] * 7, '#a9c466', alpha * 0.7);
-    } else {
-      ctx.beginPath(); ctx.arc(signal.x, signal.y, 6 + pulse * 3, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(signal.x, signal.y, size * 0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = clamp(0.38 + locus.salience * 0.55, 0.25, 0.9);
+    ctx.strokeStyle = c ? '#b7cf78' : (isSculpted ? '#d8b46a' : '#859277');
+    ctx.fillStyle = c ? 'rgba(183,207,120,.06)' : (isSculpted ? 'rgba(216,180,106,.05)' : 'rgba(133,146,119,.035)');
+    ctx.lineWidth = c || isSculpted ? 1.0 : 0.75;
+
+    // Draw agent-segmented 8-direction organic contour polygon
+    ctx.beginPath();
+    for (let k = 0; k < 8; k++) {
+      const angle = (k / 8) * Math.PI * 2;
+      const rad = contour[k] + pulse * 2.2;
+      const px = locus.x + Math.cos(angle) * rad;
+      const py = locus.y + Math.sin(angle) * rad;
+      if (k === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
     }
-    if (signal.id === engine.agent.targetId && !signal.touched) {
-      ctx.globalAlpha = 0.4;
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    if (c) {
+      drawGlyphCanvas(c.glyph, locus.x, locus.y, 19 + locus.salience * 6, '#b7cf78', 0.8);
+    } else {
+      ctx.fillStyle = isSculpted ? '#e0b96c' : '#a6b198';
+      ctx.beginPath();
+      ctx.arc(locus.x, locus.y, 2.1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    if (locus.id === engine.agent.targetId) {
+      ctx.globalAlpha = 0.45;
       ctx.setLineDash([2, 4]);
-      ctx.beginPath(); ctx.arc(signal.x, signal.y, 18 + pulse * 3, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(locus.x, locus.y, 24 + pulse * 3, 0, Math.PI * 2);
+      ctx.stroke();
       ctx.setLineDash([]);
     }
     ctx.restore();
   }
 
-  function drawArtifact(artifact) {
-    const pulse = Math.sin(engine.tick * 0.025 + artifact.phase) * 3;
+  function drawStigmergicMarks() {
+    const marks = engine.agent.marks || [];
+    if (!marks.length) return;
     ctx.save();
-    ctx.strokeStyle = 'rgba(224,185,108,.17)';
-    ctx.lineWidth = 0.8;
-    ctx.beginPath(); ctx.arc(artifact.x, artifact.y, 28 + pulse, 0, Math.PI * 2); ctx.stroke();
-    ctx.setLineDash([2, 5]);
-    ctx.beginPath(); ctx.arc(artifact.x, artifact.y, 20 - pulse * 0.2, 0, Math.PI * 2); ctx.stroke();
+    for (const m of marks) {
+      const col = m.valence > 0.08 ? 'rgba(214,250,114,.42)' : m.valence < -0.08 ? 'rgba(231,132,112,.42)' : 'rgba(202,180,125,.36)';
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 0.9;
+      const dx = (m.vec?.[0] || 0) * 9;
+      const dy = (m.vec?.[1] || 0) * 9;
+      ctx.beginPath();
+      ctx.arc(m.x, m.y, 4.2, 0, Math.PI * 2);
+      ctx.moveTo(m.x - dx, m.y - dy);
+      ctx.lineTo(m.x + dx, m.y + dy);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawSculptedBridges() {
+    const arts = engine.artifacts;
+    if (arts.length < 2) return;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(224,185,108,.14)';
+    ctx.lineWidth = 0.85;
+    ctx.setLineDash([3, 5]);
+    for (let i = 0; i < arts.length; i++) {
+      for (let j = i + 1; j < arts.length; j++) {
+        const d = Math.hypot(arts[i].x - arts[j].x, arts[i].y - arts[j].y);
+        if (d < 155) {
+          ctx.beginPath();
+          ctx.moveTo(arts[i].x, arts[i].y);
+          ctx.lineTo(arts[j].x, arts[j].y);
+          ctx.stroke();
+        }
+      }
+    }
     ctx.setLineDash([]);
-    drawGlyphCanvas(artifact.glyph, artifact.x, artifact.y, 27, '#e0b96c', 0.88);
-    ctx.fillStyle = 'rgba(202,180,125,.65)';
+    ctx.restore();
+  }
+
+  function drawArtifact(artifact) {
+    const pulse = Math.sin(engine.tick * 0.025 + artifact.phase) * 2.8;
+    const strength = artifact.strength || 0.65;
+    ctx.save();
+    ctx.strokeStyle = `rgba(224,185,108,${(0.14 + strength * 0.16).toFixed(3)})`;
+    ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    ctx.arc(artifact.x, artifact.y, 25 + pulse, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([2, 5]);
+    ctx.beginPath();
+    ctx.arc(artifact.x, artifact.y, 18 - pulse * 0.2, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    drawGlyphCanvas(artifact.glyph, artifact.x, artifact.y, 25, '#e0b96c', 0.9);
+    ctx.fillStyle = 'rgba(202,180,125,.68)';
     ctx.font = '9px ' + monoFont;
     ctx.textAlign = 'center';
-    ctx.fillText(artifact.name, artifact.x, artifact.y + 43);
+    ctx.fillText(artifact.name, artifact.x, artifact.y + 40);
     ctx.restore();
   }
 
@@ -252,9 +359,9 @@
     const agent = engine.agent;
     if (agent.trail.length > 1) {
       ctx.save();
-      ctx.lineWidth = 0.7;
+      ctx.lineWidth = 0.8;
       for (let i = 1; i < agent.trail.length; i++) {
-        ctx.strokeStyle = `rgba(188,214,116,${(i / agent.trail.length) * 0.13})`;
+        ctx.strokeStyle = `rgba(188,214,116,${(i / agent.trail.length) * 0.15})`;
         ctx.beginPath();
         ctx.moveTo(agent.trail[i - 1][0], agent.trail[i - 1][1]);
         ctx.lineTo(agent.trail[i][0], agent.trail[i][1]);
@@ -262,48 +369,67 @@
       }
       ctx.restore();
     }
-    ctx.save();
-    ctx.strokeStyle = 'rgba(170,193,115,.075)';
-    ctx.lineWidth = 0.7;
-    ctx.setLineDash([2, 7]);
-    ctx.beginPath(); ctx.arc(agent.x, agent.y, agent.senseRange, 0, Math.PI * 2); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.restore();
 
-    const target = engine.signalById(agent.targetId);
-    if (target) {
+    if (engine.canvasLens !== 'medium') {
       ctx.save();
-      ctx.strokeStyle = 'rgba(190,213,126,.10)';
-      ctx.setLineDash([2, 6]);
-      ctx.beginPath(); ctx.moveTo(agent.x, agent.y); ctx.lineTo(target.x, target.y); ctx.stroke();
+      ctx.strokeStyle = 'rgba(170,193,115,.075)';
+      ctx.lineWidth = 0.7;
+      ctx.setLineDash([2, 7]);
+      ctx.beginPath();
+      ctx.arc(agent.x, agent.y, agent.senseRange, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
       ctx.restore();
     }
+
+    const target = engine.locusById(agent.targetId);
+    if (target && engine.canvasLens !== 'medium') {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(190,213,126,.13)';
+      ctx.setLineDash([2, 6]);
+      ctx.beginPath();
+      ctx.moveTo(agent.x, agent.y);
+      ctx.lineTo(target.x, target.y);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     const glow = ctx.createRadialGradient(agent.x, agent.y, 0, agent.x, agent.y, 28);
-    glow.addColorStop(0, 'rgba(214,250,114,.24)');
+    glow.addColorStop(0, 'rgba(214,250,114,.25)');
     glow.addColorStop(1, 'rgba(214,250,114,0)');
     ctx.fillStyle = glow;
-    ctx.beginPath(); ctx.arc(agent.x, agent.y, 28, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath();
+    ctx.arc(agent.x, agent.y, 28, 0, Math.PI * 2);
+    ctx.fill();
 
     ctx.save();
     ctx.translate(agent.x, agent.y);
     ctx.rotate(engine.tick * 0.006);
     ctx.strokeStyle = '#d6fa72';
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(0, 0, 10, -0.4, 1.8); ctx.stroke();
-    ctx.beginPath(); ctx.arc(0, 0, 10, 2.7, 4.8); ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, 10, -0.4, 1.8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, 10, 2.7, 4.8);
+    ctx.stroke();
     ctx.restore();
 
     ctx.fillStyle = '#e7ffc0';
-    ctx.beginPath(); ctx.arc(agent.x, agent.y, 2.5, 0, Math.PI * 2); ctx.fill();
-    if (agent.selfName) {
-      ctx.fillStyle = 'rgba(210,229,170,.7)';
+    ctx.beginPath();
+    ctx.arc(agent.x, agent.y, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    const label = agent.ontologyMode === 'none' ? null : agent.selfName;
+    if (label) {
+      ctx.fillStyle = 'rgba(210,229,170,.72)';
       ctx.font = '9px ' + monoFont;
       ctx.textAlign = 'center';
-      ctx.fillText(agent.selfName, agent.x, agent.y - 20);
+      ctx.fillText(label, agent.x, agent.y - 20);
     }
   }
 
-  // ---------- Observer inspection (pure readout; never touches PRNG or agent state) ----------
+  // ---------- Observer Inspection (Zero PRNG or State Perturbation) ----------
   function findEntityAt(x, y) {
     const agent = engine.agent;
     if (!agent) return null;
@@ -312,11 +438,17 @@
     let bestDist = Infinity;
     for (const artifact of engine.artifacts) {
       const d = Math.hypot(artifact.x - x, artifact.y - y);
-      if (d <= 29 && d < bestDist) { bestDist = d; best = { kind: 'artifact', id: artifact.id, entity: artifact }; }
+      if (d <= 29 && d < bestDist) {
+        bestDist = d;
+        best = { kind: 'artifact', id: artifact.id, entity: artifact };
+      }
     }
-    for (const signal of engine.signals) {
-      const d = Math.hypot(signal.x - x, signal.y - y);
-      if (d <= 21 && d < bestDist) { bestDist = d; best = { kind: 'signal', id: signal.id, entity: signal }; }
+    for (const locus of engine.loci) {
+      const d = Math.hypot(locus.x - x, locus.y - y);
+      if (d <= 26 && d < bestDist) {
+        bestDist = d;
+        best = { kind: 'signal', id: locus.id, entity: locus };
+      }
     }
     return best;
   }
@@ -330,7 +462,7 @@
       return item ? { kind: 'artifact', entity: item } : null;
     }
     if (inspectedTarget.kind === 'signal') {
-      const item = engine.signals.find((s) => s.id === inspectedTarget.id);
+      const item = engine.loci.find((s) => s.id === inspectedTarget.id);
       return item ? { kind: 'signal', entity: item } : null;
     }
     return null;
@@ -357,24 +489,31 @@
     const defaultSvg = '<svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="5" stroke="currentColor"/></svg>';
     if (kind === 'agent') {
       $('#inspector-glyph').innerHTML = agent.selfGlyph ? glyphSVG(agent.selfGlyph) : defaultSvg;
-      $('#inspector-title').textContent = agent.selfName || 'unnamed locus';
-      $('#inspector-kicker').textContent = 'Persistent embodied agent';
-      $('#inspector-meta').innerHTML = `Energy ${Math.round(agent.energy * 100)}% · ${agent.interactions} contacts<br>${agent.concepts.length} concepts · ${agent.beliefs.length} beliefs · ${engine.artifacts.length} active creations`;
+      $('#inspector-title').textContent = agent.ontologyMode === 'none'
+        ? 'ontology-free locus'
+        : (agent.selfName || 'pre-symbolic locus');
+      $('#inspector-kicker').textContent = `Embodied agent · ontology: ${agent.ontologyMode}`;
+      $('#inspector-meta').innerHTML = `Viability ${Math.round(agent.energy * 100)}% · ${agent.interactions} cycles · ${(agent.macros || []).length} operators<br>${agent.concepts.length} concepts · ${agent.beliefs.length} beliefs · ${engine.artifacts.length} sculpted structures`;
     } else if (kind === 'artifact') {
       const parents = entity.parents.map(engine.conceptById).filter(Boolean).map((c) => c.name).join(` ${agent.operators.join} `);
+      const macro = entity.macroId ? `μ${pad(entity.macroId, 2)}` : 'raw coupling';
       const vec = entity.features.map((v) => v.toFixed(2)).join(', ');
       $('#inspector-glyph').innerHTML = glyphSVG(entity.glyph) || defaultSvg;
       $('#inspector-title').textContent = entity.name;
-      $('#inspector-kicker').textContent = `Authored artifact #${pad(entity.id, 2)}`;
-      $('#inspector-meta').innerHTML = `Combined: ${esc(parents || '—')} · born T+${pad(entity.born)}<br>Vector [${esc(vec)}]`;
+      $('#inspector-kicker').textContent = `Sculpted structure #${pad(entity.id, 2)} · via ${macro}`;
+      $('#inspector-meta').innerHTML = `Context: ${esc(parents || 'ontology-free imprint')} · born T+${pad(entity.born)}<br>Medium state [${esc(vec)}]`;
     } else if (kind === 'signal') {
       const c = entity.conceptId ? engine.conceptById(entity.conceptId) : null;
       const vec = entity.features.map((v) => v.toFixed(2)).join(', ');
+      const deltaStr = Array.isArray(entity.causalDelta)
+        ? entity.causalDelta.map((v) => (v >= 0 ? `+${v.toFixed(2)}` : v.toFixed(2))).join(', ')
+        : 'unprobed';
       $('#inspector-glyph').innerHTML = c ? glyphSVG(c.glyph) : defaultSvg;
-      $('#inspector-title').textContent = c ? c.name : 'unclassified sensation';
-      $('#inspector-kicker').textContent = c ? `Assigned to symbol #${pad(c.id, 2)}` : `Unlabelled event #${pad(entity.id, 2)}`;
-      const valenceInfo = c ? `learned valence ${c.valence >= 0 ? '+' : ''}${c.valence.toFixed(2)}` : 'not yet perceived within sense range';
-      $('#inspector-meta').innerHTML = `${esc(valenceInfo)}<br>Raw 4D vector [${esc(vec)}]`;
+      $('#inspector-title').textContent = c ? c.name : `segmented locus #${pad(entity.id, 2)}`;
+      $('#inspector-kicker').textContent = c
+        ? `Compressed into symbol #${pad(c.id, 2)}`
+        : `Agent-segmented boundary · sculpted ${Math.round((entity.sculpted || 0) * 100)}%`;
+      $('#inspector-meta').innerHTML = `Medium [${esc(vec)}]<br>Observed Δ [${esc(deltaStr)}]`;
     }
   }
 
@@ -388,16 +527,26 @@
 
   function renderWorld() {
     if (!engine.agent) return;
-    drawBackground();
+    const lens = engine.canvasLens;
+    drawSubstrateMedium(lens);
+
     for (const ripple of engine.ripples) {
       const progress = ripple.age / ripple.max;
       const colors = { positive: '214,250,114', negative: '231,132,112', artifact: '232,189,114', concept: '190,218,124', event: '135,148,119' };
       ctx.strokeStyle = `rgba(${colors[ripple.color] || colors.event},${(1 - progress) * 0.35})`;
       ctx.lineWidth = 0.8;
-      ctx.beginPath(); ctx.arc(ripple.x, ripple.y, 5 + progress * ripple.max, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(ripple.x, ripple.y, 5 + progress * ripple.max, 0, Math.PI * 2);
+      ctx.stroke();
     }
-    engine.signals.forEach(drawSignal);
-    engine.artifacts.forEach(drawArtifact);
+
+    if (lens !== 'medium') {
+      drawSculptedBridges();
+      drawStigmergicMarks();
+      engine.loci.forEach(drawSegmentedLocus);
+      engine.artifacts.forEach(drawArtifact);
+    }
+
     for (const p of engine.particles) {
       const colors = { positive: '#d6fa72', negative: '#e78470', artifact: '#e8bd72', concept: '#b8d37a' };
       ctx.globalAlpha = 1 - p.age / p.max;
@@ -406,14 +555,15 @@
     }
     ctx.globalAlpha = 1;
     drawAgent();
+
     const inspectedEntity = resolveInspectedEntity();
     if (inspectedEntity) {
       ctx.save();
-      ctx.strokeStyle = inspectedEntity.kind === 'artifact' ? 'rgba(232,189,114,.75)' : 'rgba(214,250,114,.75)';
+      ctx.strokeStyle = inspectedEntity.kind === 'artifact' ? 'rgba(232,189,114,.78)' : 'rgba(214,250,114,.78)';
       ctx.lineWidth = 1.1;
       ctx.setLineDash([3, 3]);
       ctx.beginPath();
-      ctx.arc(inspectedEntity.entity.x, inspectedEntity.entity.y, inspectedEntity.kind === 'artifact' ? 33 : 23, 0, Math.PI * 2);
+      ctx.arc(inspectedEntity.entity.x, inspectedEntity.entity.y, inspectedEntity.kind === 'artifact' ? 31 : 25, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
     }
@@ -421,71 +571,127 @@
 
   function renderIdentity() {
     const agent = engine.agent;
+    const defaultSvg = '<svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="3" stroke="currentColor"/><circle cx="14" cy="14" r="10" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="2 3"/></svg>';
+
+    if (agent.ontologyMode === 'none') {
+      $('#identity-name').textContent = 'ontology-free';
+      $('#companion-agent-name').textContent = `ontology-free · ${(agent.macros || []).length} ops`;
+      $('#identity-sub').textContent = `Sub-symbolic causal mode · ${agent.causalTraces.length} delta traces`;
+      $('#identity-glyph').innerHTML = defaultSvg;
+      return;
+    }
+
     $('#identity-name').textContent = agent.selfName || 'unnamed';
-    $('#companion-agent-name').textContent = agent.selfName ? `${agent.selfName} · ${agent.concepts.length} concepts` : 'learning to notice';
-    $('#identity-sub').textContent = agent.selfName ? `Self-symbol authored at T+${pad(agent.selfBorn)}` : 'No self-symbol has formed';
-    $('#identity-glyph').innerHTML = agent.selfGlyph
-      ? glyphSVG(agent.selfGlyph)
-      : '<svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="3" stroke="currentColor"/><circle cx="14" cy="14" r="10" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="2 3"/></svg>';
+    $('#companion-agent-name').textContent = agent.selfName
+      ? `${agent.selfName} · ${agent.concepts.length} concepts`
+      : `pre-symbolic · ${(agent.macros || []).length} ops`;
+    $('#identity-sub').textContent = agent.selfName
+      ? `Self-symbol authored at T+${pad(agent.selfBorn)} (${agent.ontologyMode})`
+      : `Pre-symbolic · ${agent.causalTraces.length}/12 causal traces before compression`;
+    $('#identity-glyph').innerHTML = agent.selfGlyph ? glyphSVG(agent.selfGlyph) : defaultSvg;
+  }
+
+  function renderCausalCycle() {
+    const cyc = engine.agent.lastCycle;
+    const driveEl = $('#causal-drive');
+    if (!driveEl) return;
+    if (!cyc) {
+      driveEl.textContent = 'drive: sampling medium';
+      $('#causal-acc').textContent = 'acc —';
+      $('#causal-meta').textContent = 'Executing initial 8-tick motor coupling episode.';
+      $('#causal-deltas').innerHTML = 'pred Δ [ · ]<br>real Δ [ · ]';
+      return;
+    }
+    const fmt = (arr) => arr.map((v) => (v >= 0 ? `+${v.toFixed(2)}` : v.toFixed(2))).join(', ');
+    driveEl.textContent = `${cyc.drive} → ${cyc.proposalLabel}`;
+    $('#causal-acc').textContent = `acc ${Math.round(cyc.evaluation.accuracy * 100)}% · fit ${Math.round(cyc.evaluation.overall * 100)}%`;
+    $('#causal-meta').textContent = `${cyc.purposeSummary}. ${cyc.criticNote}.`;
+    $('#causal-deltas').innerHTML = `pred Δ [${esc(fmt(cyc.predictedDelta))}]<br>real Δ [${esc(fmt(cyc.actualDelta))}]`;
   }
 
   function renderMemories() {
     const recent = engine.agent.memories.slice(-5).reverse();
     $('#memory-list').innerHTML = recent.length
       ? recent.map((m) => {
-          const c = engine.conceptById(m.conceptId);
-          return `<div class="memory"><span class="memory-dot ${m.effect > 0.025 ? 'positive' : m.effect < -0.02 ? 'negative' : ''}"></span><span class="memory-name">${esc(c ? c.name : '?')}</span><span class="memory-meta">${m.effect >= 0 ? '+' : ''}${m.effect.toFixed(2)} · T+${pad(m.tick)}</span></div>`;
+          const c = m.conceptId ? engine.conceptById(m.conceptId) : null;
+          const label = c ? c.name : (m.label || 'Δ-cycle');
+          const accBadge = Number.isFinite(m.accuracy) ? ` · acc ${Math.round(m.accuracy * 100)}%` : '';
+          return `<div class="memory"><span class="memory-dot ${m.effect > 0.015 ? 'positive' : m.effect < -0.015 ? 'negative' : ''}"></span><span class="memory-name">${esc(label)}</span><span class="memory-meta">${m.effect >= 0 ? '+' : ''}${m.effect.toFixed(2)}${accBadge} · T+${pad(m.tick)}</span></div>`;
         }).join('')
       : '<div class="empty-panel">No episodes have been stored.</div>';
   }
 
   function renderLexicon() {
-    const concepts = engine.agent.concepts;
+    const agent = engine.agent;
+    if (agent.ontologyMode === 'none') {
+      $('#concept-list').innerHTML = '<div class="empty-panel"><svg viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="9" stroke="currentColor" stroke-dasharray="2 3"/></svg><br>Ontology mode is <strong>None</strong>.<br>The agent defines contours, operators, and canvas structures purely via continuous causal deltas without coining words.</div>';
+      return;
+    }
+    const concepts = agent.concepts;
     $('#concept-list').innerHTML = concepts.length
       ? concepts.map((c) => {
           const sign = c.valence > 0.04 ? 'positive' : c.valence < -0.04 ? 'negative' : '';
-          return `<article class="concept-card"><div class="concept-top">${glyphSVG(c.glyph, 'concept-glyph')}<div><div class="concept-name">${esc(c.name)}</div><div class="concept-id">SELF-AUTHORED SYMBOL ${pad(c.id, 2)}</div></div><div class="concept-valence ${sign}">${c.valence >= 0 ? '+' : ''}${c.valence.toFixed(2)}</div></div><div class="concept-bottom"><span>${c.seen} sensations · ${c.contacts} contacts</span><span>born T+${pad(c.born)}</span></div></article>`;
+          const deltaPreview = Array.isArray(c.causalPrototype)
+            ? `Δ[${c.causalPrototype.map((v) => (v >= 0 ? `+${v.toFixed(1)}` : v.toFixed(1))).join(',')}]`
+            : `${c.contacts} contacts`;
+          return `<article class="concept-card"><div class="concept-top">${glyphSVG(c.glyph, 'concept-glyph')}<div><div class="concept-name">${esc(c.name)}</div><div class="concept-id">CAUSAL SYMBOL ${pad(c.id, 2)} · ${esc(deltaPreview)}</div></div><div class="concept-valence ${sign}">${c.valence >= 0 ? '+' : ''}${c.valence.toFixed(2)}</div></div><div class="concept-bottom"><span>${c.seen} traces · ${c.contacts} cycles</span><span>born T+${pad(c.born)}</span></div></article>`;
         }).join('')
-      : '<div class="empty-panel"><svg viewBox="0 0 28 28" fill="none"><path d="M5 7h18M5 14h12M5 21h16" stroke="currentColor"/></svg><br>The symbol table is empty.<br>No word has been necessary yet.</div>';
+      : `<div class="empty-panel"><svg viewBox="0 0 28 28" fill="none"><path d="M5 7h18M5 14h12M5 21h16" stroke="currentColor"/></svg><br>Pre-symbolic phase (${agent.causalTraces.length}/12 causal traces).<br>Symbols emerge only when recurring causal deltas require compression.</div>`;
   }
 
   function renderLaws() {
     const agent = engine.agent;
-    $('#law-list').innerHTML = agent.beliefs.length
-      ? agent.beliefs.map((b) => {
-          const from = engine.conceptById(b.fromId);
-          const to = engine.conceptById(b.toId);
-          if (!from || !to) return '';
-          return `<article class="law-card"><div class="law-raw">${esc(from.name)} ${esc(agent.operators.sequence)} ${esc(to.name)}</div><div class="law-translation">“${esc(from.name)}” preceded “${esc(to.name)}” in ${b.count} remembered transitions.</div><div class="law-confidence"><span>${Math.round(b.confidence * 100)}%</span><div class="bar"><i style="width:${b.confidence * 100}%"></i></div><span>fallible</span></div></article>`;
-        }).join('')
-      : '<div class="empty-panel">No sequence has repeated enough<br>to become a belief.</div>';
+    const macroEl = $('#macro-list');
+    if (macroEl) {
+      const macros = agent.macros || [];
+      macroEl.innerHTML = macros.length
+        ? macros.map((m) => {
+            const cVec = m.gesture.coupling.map((v) => (v >= 0 ? `+${v.toFixed(1)}` : v.toFixed(1))).join(', ');
+            const dVec = m.meanDelta.map((v) => (v >= 0 ? `+${v.toFixed(2)}` : v.toFixed(2))).join(', ');
+            return `<article class="macro-card"><div><div class="macro-code">${esc(m.code || `μ${pad(m.id, 2)}`)}</div><div class="macro-vec">motor [${esc(cVec)}] ↦ Δ[${esc(dVec)}]</div></div><div class="macro-rel">${Math.round(m.reliability * 100)}% rel<br>${m.trials} trials</div></article>`;
+          }).join('')
+        : '<div class="empty-panel">No repeatable motor gesture has crystallized into a macro-operator yet.</div>';
+    }
+
+    $('#law-list').innerHTML = agent.ontologyMode === 'none'
+      ? '<div class="empty-panel">Linguistic beliefs are disabled in Ontology-Free mode.<br>Planning uses raw delta traces &amp; motor operators above.</div>'
+      : (agent.beliefs.length
+          ? agent.beliefs.map((b) => {
+              const from = engine.conceptById(b.fromId);
+              const to = engine.conceptById(b.toId);
+              if (!from || !to) return '';
+              const falsNote = b.falsifications ? ` · ${b.falsifications} falsifications` : '';
+              return `<article class="law-card"><div class="law-raw">${esc(from.name)} ${esc(agent.operators.sequence)} ${esc(to.name)}</div><div class="law-translation">“${esc(from.name)}” preceded “${esc(to.name)}” in ${b.count} causal cycles${esc(falsNote)}.</div><div class="law-confidence"><span>${Math.round(b.confidence * 100)}%</span><div class="bar"><i style="width:${b.confidence * 100}%"></i></div><span>critic-tested</span></div></article>`;
+            }).join('')
+          : '<div class="empty-panel">No causal transition has stabilized enough<br>to become a symbolic belief.</div>');
 
     $('#artifact-list').innerHTML = engine.artifacts.length
       ? engine.artifacts.map((a) => {
           const parents = a.parents.map(engine.conceptById).filter(Boolean).map((c) => c.name).join(` ${agent.operators.join} `);
-          return `<article class="artifact-card">${glyphSVG(a.glyph)}<div><div class="artifact-name">${esc(a.name)}</div><div class="artifact-parents">${esc(parents)} · born T+${pad(a.born)}</div></div></article>`;
+          const via = a.macroId ? `μ${pad(a.macroId, 2)}` : 'raw coupling';
+          return `<article class="artifact-card">${glyphSVG(a.glyph)}<div><div class="artifact-name">${esc(a.name)}</div><div class="artifact-parents">${esc(parents || via)} · born T+${pad(a.born)}</div></div></article>`;
         }).join('')
-      : '<div class="empty-panel">The agent has not yet combined<br>any of its own concepts.</div>';
+      : '<div class="empty-panel">The agent has not yet sculpted a persistent<br>slow-channel structure on the canvas.</div>';
   }
 
   function renderAll() {
     const agent = engine.agent;
     if (!agent) return;
-    $('#empty-state').classList.toggle('hidden', engine.totalEvents > 0 || engine.artifacts.length > 0);
+    $('#empty-state').classList.toggle('hidden', engine.loci.length > 0 || engine.artifacts.length > 0 || engine.tick > 15);
     $('#world-time').textContent = pad(engine.tick);
-    $('#event-count').textContent = pad(engine.totalEvents, 2);
+    $('#event-count').textContent = pad(engine.loci.length, 2);
     $('#stat-concepts').textContent = agent.concepts.length;
     $('#stat-memories').textContent = agent.memories.length;
     $('#stat-laws').textContent = agent.beliefs.length;
     const totalCreated = agent.totalArtifactsCreated || engine.artifacts.length;
     $('#stat-artifacts').textContent = totalCreated;
     $('#stat-artifacts').title = totalCreated > engine.artifacts.length
-      ? `${engine.artifacts.length} active in world (capped at ${Core.MAX_ARTIFACTS}) · ${totalCreated} authored total`
-      : `${engine.artifacts.length} active in world`;
+      ? `${engine.artifacts.length} active on canvas (capped at ${Core.MAX_ARTIFACTS}) · ${totalCreated} sculpted total`
+      : `${engine.artifacts.length} active on canvas`;
     $('#lexicon-count').textContent = agent.concepts.length;
-    $('#world-count').textContent = agent.beliefs.length + engine.artifacts.length;
+    $('#world-count').textContent = (agent.macros ? agent.macros.length : 0) + agent.beliefs.length + engine.artifacts.length;
     $('#intent-raw').textContent = agent.goal ? agent.goal.raw : '·';
-    $('#intent-description').textContent = agent.goal ? agent.goal.description : 'No preference has formed. The agent is only capable of noticing.';
+    $('#intent-description').textContent = agent.goal ? agent.goal.description : 'Sampling local 4-channel gradients before forming first purpose seed.';
     $('#energy-value').textContent = Math.round(agent.energy * 100) + '%';
     $('#energy-bar').style.width = agent.energy * 100 + '%';
     $('#novelty-value').textContent = Math.round(agent.novelty * 100) + '%';
@@ -493,7 +699,12 @@
     const coh = engine.coherence();
     $('#coherence-value').textContent = Math.round(coh * 100) + '%';
     $('#coherence-bar').style.width = coh * 100 + '%';
+
+    $$('.ont-mode').forEach((btn) => btn.classList.toggle('active', btn.dataset.ontmode === agent.ontologyMode));
+    $$('.lens-mode').forEach((btn) => btn.classList.toggle('active', btn.dataset.lens === engine.canvasLens));
+
     renderIdentity();
+    renderCausalCycle();
     renderMemories();
     renderInspector();
     if (activeTab === 'lexicon') renderLexicon();
@@ -523,9 +734,10 @@
       previousTime = performance.now();
       inspectedTarget = null;
       syncSeedUI();
-      $('#empty-state').classList.toggle('hidden', engine.totalEvents > 0 || engine.artifacts.length > 0);
+      $('#empty-state').classList.toggle('hidden', engine.loci.length > 0 || engine.artifacts.length > 0 || engine.tick > 15);
       $$('.speed-button').forEach((button) => button.classList.toggle('active', Number(button.dataset.speed) === engine.speed));
       $$('.log-mode').forEach((button) => button.classList.toggle('active', button.dataset.logmode === engine.logMode));
+      $$('.lens-mode').forEach((button) => button.classList.toggle('active', button.dataset.lens === engine.canvasLens));
     },
     onOntologyImported: () => {
       inspectedTarget = null;
@@ -611,6 +823,20 @@
   $$('.speed-button').forEach((button) => button.addEventListener('click', () => {
     engine.speed = Number(button.dataset.speed);
     $$('.speed-button').forEach((b) => b.classList.toggle('active', b === button));
+  }));
+
+  $$('.lens-mode').forEach((button) => button.addEventListener('click', () => {
+    engine.setCanvasLens(button.dataset.lens);
+    saveWorld(false);
+  }));
+
+  $$('.ont-mode').forEach((button) => button.addEventListener('click', () => {
+    const mode = button.dataset.ontmode;
+    if (mode === 'none' && engine.agent?.concepts.length > 0 && !confirm('Switch to strictly Ontology-Free mode? Existing words and beliefs in this run will be cleared so agency runs purely on continuous causal deltas.')) {
+      return;
+    }
+    engine.setOntologyMode(mode);
+    showToast(`Ontology mode: ${mode}.`);
   }));
 
   function triggerPerturb(at) {
@@ -773,6 +999,7 @@
     event.target.value = '';
   });
 
+  const lensOrder = ['combined', 'agent', 'medium'];
   window.addEventListener('pagehide', () => saveWorld(false));
   document.addEventListener('visibilitychange', () => { if (document.hidden) saveWorld(false); });
   document.addEventListener('keydown', (event) => {
@@ -785,6 +1012,11 @@
     if (event.code === 'Escape' && inspectedTarget) { clearInspection(); return; }
     if (event.code === 'Space') { event.preventDefault(); toggleRunning(); }
     if (event.key.toLowerCase() === 'n') triggerPerturb();
+    if (event.key.toLowerCase() === 'l') {
+      const nextLens = lensOrder[(lensOrder.indexOf(engine.canvasLens) + 1) % lensOrder.length];
+      engine.setCanvasLens(nextLens);
+      showToast(`Canvas lens: ${nextLens}.`);
+    }
   });
 
   ['#brand-version', '#controls-version', '#footer-version'].forEach((selector) => {
@@ -815,10 +1047,13 @@
     window.__NUL_LAB__ = {
       step: () => engine.simulate(),
       steps: (count) => engine.steps(count),
-      resetWorld: (newSeed = true, explicitSeed = null) => engine.resetWorld(newSeed, explicitSeed),
+      resetWorld: (newSeed = true, explicitSeed = null, opts = {}) => engine.resetWorld(newSeed, explicitSeed, opts),
       perturb: (at) => triggerPerturb(at),
       inspectAt: (x, y) => inspectAt(x, y),
       clearInspection: () => clearInspection(),
+      setCanvasLens: (lens) => engine.setCanvasLens(lens),
+      setOntologyMode: (mode) => engine.setOntologyMode(mode),
+      sampleFieldAt: (x, y) => engine.sampleFieldAt(x, y),
       createSnapshot: () => engine.createSnapshot(),
       restoreSnapshot: (data) => engine.restoreSnapshot(data),
       validSnapshot: (data) => engine.validSnapshot(data),
